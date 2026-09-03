@@ -27,7 +27,7 @@ export default function WidgetFramePage() {
       id: 'm-welcome',
       sender: 'bot',
       text: 'Hello! I am LogiFlow, your 24/7 Autonomous Logistics Dispatcher. How can I assist with your freight operations today?',
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      time: 'Just now'
     }
   ]);
   const [input, setInput] = useState('');
@@ -468,7 +468,7 @@ export default function WidgetFramePage() {
                   </div>
                 )}
 
-                <span style={{ fontSize: 9.5, color: '#78716C', alignSelf: isBot ? 'flex-start' : 'flex-end', padding: '0 4px' }}>
+                <span suppressHydrationWarning style={{ fontSize: 9.5, color: '#78716C', alignSelf: isBot ? 'flex-start' : 'flex-end', padding: '0 4px' }}>
                   {m.time}
                 </span>
               </div>

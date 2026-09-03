@@ -34,6 +34,11 @@ export default function LandingPage() {
     };
   }, [fleetSize, avgDistanceKm, deadheadPercent, phoneHoursWeek]);
 
+  // Deterministic number formatter (avoids server/client locale hydration mismatch)
+  const formatNumber = (num: number): string => {
+    return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -386,20 +391,20 @@ export default function LandingPage() {
                 <div style={{ fontSize: 11.5, fontWeight: 700, color: '#ef4444', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 6 }}>
                   Monthly Capital Drainage
                 </div>
-                <div style={{ fontSize: 'clamp(26px, 3.5vw, 40px)', fontWeight: 800, color: '#f87171', fontFamily: 'var(--font-mono, monospace)', lineHeight: 1.1 }}>
-                  ₹{calculations.totalLossMonthly.toLocaleString()}
+                <div suppressHydrationWarning style={{ fontSize: 'clamp(26px, 3.5vw, 40px)', fontWeight: 800, color: '#f87171', fontFamily: 'var(--font-mono, monospace)', lineHeight: 1.1 }}>
+                  ₹{formatNumber(calculations.totalLossMonthly)}
                   <span style={{ fontSize: 13, color: '#A8A29E', fontWeight: 500, marginLeft: 6 }}>/ month</span>
                 </div>
-                <div style={{ fontSize: 11, color: '#78716C', marginTop: 4 }}>
-                  Includes ~₹{calculations.fuelLossMonthly.toLocaleString()} in empty diesel burn + ₹{calculations.laborLossMonthly.toLocaleString()} staff tracking dwell.
+                <div suppressHydrationWarning style={{ fontSize: 11, color: '#78716C', marginTop: 4 }}>
+                  Includes ~₹{formatNumber(calculations.fuelLossMonthly)} in empty diesel burn + ₹{formatNumber(calculations.laborLossMonthly)} staff tracking dwell.
                 </div>
 
                 <div style={{ marginTop: 24, padding: '16px 18px', background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 12 }}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: '#10b981', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: 4 }}>
                     Recoverable Margin with LogiFlow AI
                   </div>
-                  <div style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 800, color: '#10b981', fontFamily: 'var(--font-mono, monospace)', lineHeight: 1 }}>
-                    ₹{calculations.annualSavingsPotential.toLocaleString()}
+                  <div suppressHydrationWarning style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 800, color: '#10b981', fontFamily: 'var(--font-mono, monospace)', lineHeight: 1 }}>
+                    ₹{formatNumber(calculations.annualSavingsPotential)}
                     <span style={{ fontSize: 13, color: '#D6D3D1', fontWeight: 600, marginLeft: 6 }}>/ year</span>
                   </div>
                   <div style={{ fontSize: 11.5, color: '#A8A29E', marginTop: 8, lineHeight: 1.4 }}>
