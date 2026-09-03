@@ -48,7 +48,7 @@ export class FleetService {
     if (driver.status === 'Off Duty' || driver.status === 'Rest Period') {
       flags.push('Mandatory driver rest hours in progress.');
     }
-    if (driver.safetyScore < 90) {
+    if (driver.safetyScore !== undefined && driver.safetyScore < 90) {
       flags.push(`Driver safety score (${driver.safetyScore}%) is below company threshold (90%).`);
     }
 

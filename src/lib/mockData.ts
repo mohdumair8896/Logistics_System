@@ -28,8 +28,10 @@ export interface Driver {
   phone: string;
   licenseNo: string;
   licenseExpiry: string;
+  licenseType?: string;
+  safetyScore?: number;
   vehicleId: string | null;
-  status: 'Available' | 'On Trip' | 'Off Duty';
+  status: 'Available' | 'On Trip' | 'Off Duty' | 'Rest Period';
   trips: number;
   rating: number;
   documentVerified: boolean;
@@ -100,7 +102,7 @@ export interface Trip {
   speedKmH?: number;
   fuelPercent?: number;
   cargoTemp?: string;
-  geofenceStatus?: 'Inside Corridor' | 'Deviated' | 'Arrived';
+  geofenceStatus?: 'Inside Corridor' | 'Deviated' | 'Arrived' | 'Docked Inside Facility' | 'Inside Corridor (NH-19)' | string;
   checkpoints?: Waypoint[];
 }
 
