@@ -108,11 +108,11 @@ export default function DriversPage() {
                   <tr
                     key={d.id}
                     onClick={() => setSelected(d.id)}
-                    style={{ background: isSelected ? 'rgba(59,130,246,0.12)' : '' }}
+                    style={{ background: isSelected ? 'rgba(245,158,11,0.14)' : '' }}
                   >
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <div style={{ width: 30, height: 30, background: 'linear-gradient(135deg, #2a5c9a, #3b82f6)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 11, fontWeight: 800 }}>
+                        <div style={{ width: 30, height: 30, background: 'linear-gradient(135deg, #F59E0B, #D97706)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1C1917', fontSize: 11, fontWeight: 800 }}>
                           {d.name.split(' ').map(n => n[0]).join('')}
                         </div>
                         <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{d.name}</span>
@@ -120,7 +120,7 @@ export default function DriversPage() {
                     </td>
                     <td className="mono" style={{ fontSize: 12 }}>{d.phone}</td>
                     <td>
-                      <span className="mono" style={{ fontSize: 12, color: veh ? '#60a5fa' : 'var(--text-muted)' }}>
+                      <span className="mono" style={{ fontSize: 12, color: veh ? 'var(--accent)' : 'var(--text-muted)' }}>
                         {veh ? veh.vehicleNo : 'Unassigned'}
                       </span>
                     </td>
@@ -140,7 +140,7 @@ export default function DriversPage() {
             <div className="card">
               {/* Profile Header */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 18 }}>
-                <div style={{ width: 56, height: 56, background: 'linear-gradient(135deg, #2a5c9a, #3b82f6)', border: '1px solid rgba(59,130,246,0.4)', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 20, fontWeight: 800 }}>
+                <div style={{ width: 56, height: 56, background: 'linear-gradient(135deg, #F59E0B, #D97706)', border: '1px solid rgba(245,158,11,0.4)', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1C1917', fontSize: 20, fontWeight: 800, boxShadow: '0 0 16px rgba(245,158,11,0.25)' }}>
                   {selectedDriver.name.split(' ').map(n => n[0]).join('')}
                 </div>
                 <div>

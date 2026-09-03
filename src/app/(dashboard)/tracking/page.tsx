@@ -93,7 +93,7 @@ export default function TrackingPage() {
   const displayCheckpoints = trip?.checkpoints && trip.checkpoints.length > 0 ? trip.checkpoints : defaultCheckpoints;
 
   return (
-    <div className="animate-slide-in">
+    <div className="tracking-theme animate-slide-in">
       <div className="page-header">
         <div>
           <div className="page-title" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>

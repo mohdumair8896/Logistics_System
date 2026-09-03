@@ -158,8 +158,8 @@ export default function VehiclesPage() {
               {/* Header */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ width: 46, height: 46, background: 'linear-gradient(135deg, #2a5c9a, #1a2b3c)', border: '1px solid rgba(59,130,246,0.3)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Truck size={24} color="#60a5fa" />
+                  <div style={{ width: 46, height: 46, background: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(217,119,6,0.08))', border: '1px solid rgba(245,158,11,0.35)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Truck size={24} color="var(--accent)" />
                   </div>
                   <div>
                     <div className="mono" style={{ fontWeight: 800, fontSize: 17, color: 'var(--text-primary)' }}>
@@ -236,7 +236,7 @@ export default function VehiclesPage() {
                 {assignedDriver ? (
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div style={{ width: 34, height: 34, background: 'linear-gradient(135deg, #2a5c9a, #3b82f6)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 800, fontSize: 12 }}>
+                      <div style={{ width: 34, height: 34, background: 'linear-gradient(135deg, #F59E0B, #D97706)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1C1917', fontWeight: 800, fontSize: 12 }}>
                         {assignedDriver.name.split(' ').map(n => n[0]).join('')}
                       </div>
                       <div>

@@ -4,7 +4,7 @@ import { Palette, Type, Sliders, Check, Moon, Sun, Layers, Sparkles } from 'luci
 
 export default function DesignSystemPage() {
   const [themeMode, setThemeMode] = useState<'dark' | 'light'>('dark');
-  const [seedColor, setSeedColor] = useState('#2A5C9A');
+  const [seedColor, setSeedColor] = useState('#F59E0B');
   const [applied, setApplied] = useState(false);
 
   const colors = [
@@ -36,7 +36,7 @@ export default function DesignSystemPage() {
           {/* Colors Card */}
           <div className="card">
             <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-primary)', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Palette size={16} color="#38bdf8" /> Core Color Palette Tokens
+              <Palette size={16} color="var(--accent)" /> Core Color Palette Tokens
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -45,7 +45,7 @@ export default function DesignSystemPage() {
                   <div style={{ width: 42, height: 42, borderRadius: 8, background: c.hex, boxShadow: `0 0 12px ${c.hex}40`, flexShrink: 0 }} />
                   <div>
                     <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--text-primary)' }}>{c.name}</div>
-                    <div className="mono" style={{ fontSize: 11, color: '#60a5fa', marginTop: 1 }}>{c.hex}</div>
+                    <div className="mono" style={{ fontSize: 11, color: 'var(--accent)', marginTop: 1 }}>{c.hex}</div>
                     <div style={{ fontSize: 10.5, color: 'var(--text-muted)', marginTop: 2 }}>{c.role}</div>
                   </div>
                 </div>
@@ -56,7 +56,7 @@ export default function DesignSystemPage() {
           {/* Typography Tokens */}
           <div className="card">
             <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-primary)', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Type size={16} color="#38bdf8" /> Typography Hierarchy (Inter & JetBrains Mono)
+              <Type size={16} color="var(--accent)" /> Typography Hierarchy (Inter & JetBrains Mono)
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -70,7 +70,7 @@ export default function DesignSystemPage() {
               </div>
               <div style={{ padding: 12, background: 'var(--bg-tertiary)', borderRadius: 8, border: '1px solid var(--border)' }}>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>Code & Numbers — JetBrains Mono</div>
-                <div className="mono" style={{ fontSize: 15, fontWeight: 700, color: '#60a5fa' }}>ORD-1001 • UP32 AB 1234 • 7,500 KG</div>
+                <div className="mono" style={{ fontSize: 15, fontWeight: 700, color: 'var(--accent)' }}>ORD-1001 • UP32 AB 1234 • 7,500 KG</div>
               </div>
             </div>
           </div>
@@ -79,9 +79,9 @@ export default function DesignSystemPage() {
         {/* Right Column: Interactive Theme Editor & UI Components */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {/* Live Theme Editor (Stitch Screen 1) */}
-          <div className="card" style={{ background: 'linear-gradient(135deg, rgba(42,92,154,0.15), var(--bg-card))', border: '1px solid rgba(59,130,246,0.3)' }}>
+          <div className="card" style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.12), var(--bg-card))', border: '1px solid rgba(245,158,11,0.3)' }}>
             <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-primary)', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Sliders size={16} color="#38bdf8" /> Live Theme & Brand Customizer
+              <Sliders size={16} color="var(--accent)" /> Live Theme & Brand Customizer
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>

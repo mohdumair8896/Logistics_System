@@ -69,12 +69,12 @@ export default function InvoicesPage() {
                     padding: '14px 16px',
                     borderBottom: '1px solid var(--border)',
                     cursor: 'pointer',
-                    background: isSelected ? 'rgba(59,130,246,0.12)' : 'transparent',
-                    borderLeft: isSelected ? '3px solid #3b82f6' : '3px solid transparent'
+                    background: isSelected ? 'rgba(245,158,11,0.14)' : 'transparent',
+                    borderLeft: isSelected ? '3px solid var(--accent)' : '3px solid transparent'
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span className="mono" style={{ fontWeight: 800, color: '#60a5fa', fontSize: 12.5 }}>{i.id}</span>
+                    <span className="mono" style={{ fontWeight: 800, color: 'var(--accent)', fontSize: 12.5 }}>{i.id}</span>
                     <span className={`badge ${statusColor[i.status] || 'badge-gray'}`}>{i.status}</span>
                   </div>
                   <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 13, marginTop: 4 }}>{cust?.name}</div>
@@ -120,13 +120,13 @@ export default function InvoicesPage() {
                 }}
               >
                 {/* Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #2a5c9a', paddingBottom: 16, marginBottom: 20 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #D97706', paddingBottom: 16, marginBottom: 20 }}>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <div style={{ width: 32, height: 32, background: '#2a5c9a', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+                      <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg, #F59E0B, #D97706)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1C1917' }}>
                         <Building2 size={18} />
                       </div>
-                      <div style={{ fontSize: 20, fontWeight: 800, color: '#2a5c9a' }}>Precision Logistics LMS</div>
+                      <div style={{ fontSize: 20, fontWeight: 800, color: '#D97706' }}>Precision Logistics LMS</div>
                     </div>
                     <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 4 }}>
                       Central Logistics Hub, Lucknow, UP • GSTIN: 09AAACP1234F1Z9
@@ -134,7 +134,7 @@ export default function InvoicesPage() {
                   </div>
 
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: 18, fontWeight: 800, color: '#2a5c9a', fontFamily: 'monospace' }}>{inv.id}</div>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: '#D97706', fontFamily: 'monospace' }}>{inv.id}</div>
                     <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 2 }}>Issue Date: {inv.createdAt}</div>
                     <div style={{ fontSize: 11.5, color: '#64748b' }}>Dispatch Order: {inv.orderId}</div>
                   </div>
@@ -209,7 +209,7 @@ export default function InvoicesPage() {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '2px solid #0f172a', paddingTop: 8, marginTop: 4 }}>
                     <span style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>TOTAL PAYABLE</span>
-                    <span style={{ fontSize: 18, fontWeight: 800, color: '#2a5c9a', fontFamily: 'monospace' }}>
+                    <span style={{ fontSize: 18, fontWeight: 800, color: '#D97706', fontFamily: 'monospace' }}>
                       ₹{inv.total.toLocaleString()}
                     </span>
                   </div>

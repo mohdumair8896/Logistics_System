@@ -35,7 +35,7 @@ export default function DriverChatModal({ driverId, onClose }: Props) {
         {/* Header */}
         <div style={{ background: 'var(--bg-tertiary)', padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ width: 40, height: 40, background: 'linear-gradient(135deg, #2a5c9a, #3b82f6)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 800 }}>
+            <div style={{ width: 40, height: 40, background: 'linear-gradient(135deg, #F59E0B, #D97706)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1C1917', fontWeight: 800 }}>
               {driver?.name.split(' ').map(n => n[0]).join('') || 'D'}
             </div>
             <div>
@@ -80,9 +80,10 @@ export default function DriverChatModal({ driverId, onClose }: Props) {
                     borderRadius: 12,
                     borderBottomRightRadius: isDispatcher ? 2 : 12,
                     borderBottomLeftRadius: isDispatcher ? 12 : 2,
-                    background: isDispatcher ? 'linear-gradient(135deg, #2a5c9a, #1d4ed8)' : 'var(--bg-card)',
-                    color: isDispatcher ? 'white' : 'var(--text-primary)',
-                    border: isDispatcher ? '1px solid rgba(59,130,246,0.3)' : '1px solid var(--border)',
+                    background: isDispatcher ? 'linear-gradient(135deg, #F59E0B, #D97706)' : 'var(--bg-card)',
+                    color: isDispatcher ? '#1C1917' : 'var(--text-primary)',
+                    fontWeight: isDispatcher ? 600 : 400,
+                    border: isDispatcher ? '1px solid rgba(245,158,11,0.3)' : '1px solid var(--border)',
                     fontSize: 13,
                     lineHeight: 1.4
                   }}>
@@ -90,7 +91,7 @@ export default function DriverChatModal({ driverId, onClose }: Props) {
                   </div>
                   <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 3, display: 'flex', alignItems: 'center', gap: 4 }}>
                     {msg.time}
-                    {isDispatcher && <CheckCheck size={12} color="#60a5fa" />}
+                    {isDispatcher && <CheckCheck size={12} color="var(--accent)" />}
                   </div>
                 </div>
               );

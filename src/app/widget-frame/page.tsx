@@ -2,9 +2,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useStore } from '@/lib/store';
 import {
-  Send, Bot, User, Truck, ShieldAlert, Sparkles, Navigation,
-  Clock, MapPin, Calculator, Phone, CheckCircle2, ChevronRight,
-  RefreshCw, AlertTriangle, X, Minimize2, ExternalLink
+  Send, Bot, Truck, CheckCircle2, ChevronRight,
+  RefreshCw, AlertTriangle, Radio, Phone, Sparkles
 } from 'lucide-react';
 
 interface MessageCard {
@@ -32,17 +31,33 @@ export default function WidgetFramePage() {
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [inputFocused, setInputFocused] = useState(false);
+  const chatScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Notify host page via postMessage
     if (typeof window !== 'undefined' && window.parent !== window) {
       window.parent.postMessage({ type: 'LF_READY' }, '*');
     }
   }, []);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Smooth auto-scroll internal chat container only — never trigger parent window scrolling
+    const scrollBottom = () => {
+      if (chatScrollRef.current) {
+        const el = chatScrollRef.current;
+        el.scrollTo({
+          top: el.scrollHeight + 100,
+          behavior: 'smooth'
+        });
+      }
+    };
+    scrollBottom();
+    const t1 = setTimeout(scrollBottom, 60);
+    const t2 = setTimeout(scrollBottom, 220);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
   }, [messages, isTyping]);
 
   const handleSend = async (userText?: string) => {
@@ -55,11 +70,10 @@ export default function WidgetFramePage() {
     setInput('');
     setIsTyping(true);
 
-    // Call internal triage / API engine
     setTimeout(() => {
       processInboundQuery(query, time);
       setIsTyping(false);
-    }, 700);
+    }, 600);
   };
 
   const processInboundQuery = (query: string, time: string) => {
@@ -232,21 +246,22 @@ export default function WidgetFramePage() {
       height: '100vh',
       display: 'flex',
       flexDirection: 'column',
-      background: 'var(--bg-primary, #0C0A09)',
-      color: 'var(--text-primary, #FAFAF9)',
-      fontFamily: 'var(--font-inter, sans-serif)',
-      border: '1px solid rgba(245,158,11,0.25)',
+      background: '#F8FAFC',
+      color: '#0F172A',
+      fontFamily: "'Inter', 'Geist', system-ui, -apple-system, sans-serif",
       overflow: 'hidden'
     }}>
-      {/* Widget Header */}
+      {/* Widget Header — DentaFlow Navy Style */}
       <div style={{
-        padding: '12px 16px',
-        background: 'linear-gradient(135deg, #1C1917, #292524)',
-        borderBottom: '1px solid rgba(245,158,11,0.2)',
+        padding: '12px 18px',
+        background: '#0F172A',
+        borderBottom: '1px solid #1E293B',
+        boxShadow: '0 4px 16px rgba(15, 23, 42, 0.15)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        flexShrink: 0
+        flexShrink: 0,
+        zIndex: 10
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{
@@ -257,28 +272,51 @@ export default function WidgetFramePage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 0 14px rgba(245,158,11,0.4)',
-            color: '#1C1917'
+            color: '#FFFFFF',
+            boxShadow: '0 2px 8px rgba(245, 158, 11, 0.35)',
+            flexShrink: 0
           }}>
-            <Bot size={20} />
+            <Truck size={18} />
           </div>
           <div>
-            <div style={{ fontSize: 13.5, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ fontSize: 13.5, fontWeight: 800, color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: 7, letterSpacing: '-0.01em' }}>
               <span>LogiFlow AI</span>
-              <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 10, background: 'rgba(16,185,129,0.15)', color: '#10b981', border: '1px solid rgba(16,185,129,0.3)', fontWeight: 800 }}>
+              <span style={{
+                fontSize: 9.5,
+                padding: '1px 7px',
+                borderRadius: 9999,
+                background: '#ECFDF5',
+                color: '#047857',
+                fontWeight: 700,
+                border: '1px solid rgba(167,243,208,0.7)',
+                letterSpacing: '0.2px'
+              }}>
                 24/7 COPILOT
               </span>
             </div>
-            <div style={{ fontSize: 10.5, color: '#A8A29E', marginTop: 1 }}>
+            <div style={{ fontSize: 10.5, color: '#94A3B8', marginTop: 1.5 }}>
               Autonomous Dispatch & Tracking Assistant
             </div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <button
             onClick={() => setMessages([messages[0]])}
-            style={{ background: 'transparent', border: 'none', color: '#A8A29E', cursor: 'pointer', padding: 4 }}
+            style={{
+              background: 'rgba(255,255,255,0.08)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              borderRadius: 8,
+              color: '#94A3B8',
+              cursor: 'pointer',
+              padding: '6px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'background 0.15s, color 0.15s'
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.15)'; e.currentTarget.style.color = '#FFFFFF'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = '#94A3B8'; }}
             title="Reset conversation"
           >
             <RefreshCw size={13} />
@@ -286,15 +324,20 @@ export default function WidgetFramePage() {
         </div>
       </div>
 
-      {/* Messages Scroll Area */}
-      <div style={{
-        flex: 1,
-        overflowY: 'auto',
-        padding: 14,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 12
-      }}>
+      {/* Messages Scroll Area — Clean Light Theme */}
+      <div
+        ref={chatScrollRef}
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: '18px 16px 20px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 14,
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none'
+        }}
+      >
         {messages.map(m => {
           const isBot = m.sender === 'bot';
           return (
@@ -302,40 +345,42 @@ export default function WidgetFramePage() {
               key={m.id}
               style={{
                 display: 'flex',
-                gap: 8,
+                gap: 9,
                 alignSelf: isBot ? 'flex-start' : 'flex-end',
-                maxWidth: '88%'
+                maxWidth: isBot ? '92%' : '82%'
               }}
             >
               {isBot && (
                 <div style={{
-                  width: 26,
-                  height: 26,
+                  width: 28,
+                  height: 28,
                   borderRadius: 8,
-                  background: 'rgba(245,158,11,0.15)',
-                  border: '1px solid rgba(245,158,11,0.3)',
+                  background: '#EEF2F8',
+                  border: '1px solid #E2E8F0',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#F59E0B',
+                  color: '#059669',
                   flexShrink: 0,
                   marginTop: 2
                 }}>
-                  <Truck size={14} />
+                  <Bot size={15} />
                 </div>
               )}
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, width: '100%' }}>
                 <div style={{
-                  padding: '10px 14px',
-                  borderRadius: 14,
-                  fontSize: 12.5,
-                  lineHeight: 1.45,
-                  background: isBot ? '#1C1917' : 'linear-gradient(135deg, #F59E0B, #D97706)',
-                  color: isBot ? '#FAFAF9' : '#1C1917',
-                  border: isBot ? '1px solid #292524' : 'none',
-                  fontWeight: isBot ? 400 : 600,
-                  boxShadow: isBot ? 'none' : '0 4px 12px rgba(245,158,11,0.25)'
+                  padding: '11px 15px',
+                  borderRadius: isBot ? '16px 16px 16px 4px' : '16px 16px 4px 16px',
+                  fontSize: 13,
+                  lineHeight: 1.5,
+                  background: isBot ? '#FFFFFF' : '#0F172A',
+                  color: isBot ? '#0F172A' : '#FFFFFF',
+                  border: isBot ? '1px solid #E2E8F0' : 'none',
+                  fontWeight: isBot ? 450 : 500,
+                  boxShadow: isBot
+                    ? '0 1px 4px rgba(15,23,42,0.04), 0 2px 8px rgba(15,23,42,0.02)'
+                    : '0 2px 8px rgba(15,23,42,0.18)'
                 }}>
                   {m.text}
                 </div>
@@ -343,71 +388,83 @@ export default function WidgetFramePage() {
                 {/* Inline Rich Cards */}
                 {m.card?.type === 'tracking' && (
                   <div style={{
-                    background: '#141210',
-                    border: '1px solid rgba(0,212,255,0.3)',
-                    borderRadius: 12,
-                    padding: 12,
-                    fontSize: 11.5
+                    background: '#FFFFFF',
+                    border: '1px solid #E2E8F0',
+                    borderRadius: 14,
+                    padding: '13px 15px',
+                    fontSize: 12,
+                    boxShadow: '0 2px 10px rgba(15,23,42,0.05)'
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                      <span style={{ fontWeight: 700, color: '#00D4FF' }}>Live Corridor GPS: {m.card.data.orderId}</span>
-                      <span style={{ color: '#10b981', fontWeight: 700, fontSize: 10 }}>● {m.card.data.status}</span>
+                      <span style={{ fontWeight: 700, color: '#0284C7', display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <Radio size={14} color="#0284C7" /> Live GPS: {m.card.data.orderId}
+                      </span>
+                      <span style={{ color: '#059669', fontWeight: 700, fontSize: 10.5, background: '#ECFDF5', padding: '2px 8px', borderRadius: 9999, border: '1px solid #A7F3D0' }}>
+                        ● {m.card.data.status}
+                      </span>
                     </div>
-                    <div style={{ color: '#D6D3D1', marginBottom: 4 }}>
-                      {m.card.data.origin} → {m.card.data.destination}
+                    <div style={{ color: '#475569', marginBottom: 6, fontWeight: 500 }}>
+                      {m.card.data.origin} ➔ {m.card.data.destination}
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#A8A29E', fontSize: 10.5, marginBottom: 6 }}>
-                      <span>Truck: <strong style={{ color: '#FAFAF9' }}>{m.card.data.vehicleNo}</strong></span>
-                      <span>Speed: <strong style={{ color: '#FAFAF9' }}>{m.card.data.speedKmH} km/h</strong></span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748B', fontSize: 11, marginBottom: 8 }}>
+                      <span>Truck: <strong style={{ color: '#0F172A' }}>{m.card.data.vehicleNo}</strong></span>
+                      <span>Speed: <strong style={{ color: '#0F172A' }}>{m.card.data.speedKmH} km/h</strong></span>
                     </div>
-                    <div style={{ width: '100%', height: 4, background: '#292524', borderRadius: 2, overflow: 'hidden' }}>
-                      <div style={{ width: `${m.card.data.progress}%`, height: '100%', background: '#00D4FF' }} />
+                    <div style={{ width: '100%', height: 5, background: '#E2E8F0', borderRadius: 3, overflow: 'hidden' }}>
+                      <div style={{ width: `${m.card.data.progress}%`, height: '100%', background: '#0284C7', borderRadius: 3 }} />
                     </div>
                   </div>
                 )}
 
                 {m.card?.type === 'quote' && (
                   <div style={{
-                    background: '#141210',
-                    border: '1px solid rgba(245,158,11,0.35)',
-                    borderRadius: 12,
-                    padding: 12,
-                    fontSize: 11.5
+                    background: '#FFFFFF',
+                    border: '1px solid #E2E8F0',
+                    borderRadius: 14,
+                    padding: '14px 16px',
+                    fontSize: 12,
+                    boxShadow: '0 2px 10px rgba(15,23,42,0.05)'
                   }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, color: '#F59E0B', marginBottom: 8 }}>
-                      <span>Instant Spot Tariff</span>
-                      <span>{m.card.data.weight}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, color: '#0F172A', marginBottom: 8 }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                        <Sparkles size={14} color="#059669" /> Instant Spot Tariff
+                      </span>
+                      <span style={{ color: '#059669', fontFamily: "'JetBrains Mono', monospace" }}>{m.card.data.weight}</span>
                     </div>
-                    <div style={{ fontSize: 11, color: '#A8A29E', marginBottom: 6 }}>{m.card.data.corridor}</div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#D6D3D1', fontSize: 11, marginBottom: 3 }}>
+                    <div style={{ fontSize: 11.5, color: '#64748B', marginBottom: 8 }}>{m.card.data.corridor}</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#475569', fontSize: 11.5, marginBottom: 4 }}>
                       <span>Freight Base:</span>
-                      <span>{m.card.data.baseRate}</span>
+                      <span style={{ fontFamily: "'JetBrains Mono', monospace" }}>{m.card.data.baseRate}</span>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#D6D3D1', fontSize: 11, marginBottom: 6 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#475569', fontSize: 11.5, marginBottom: 8 }}>
                       <span>GST (18% IGST):</span>
-                      <span>{m.card.data.gst}</span>
+                      <span style={{ fontFamily: "'JetBrains Mono', monospace" }}>{m.card.data.gst}</span>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, color: '#10b981', borderTop: '1px solid #292524', paddingTop: 6, marginBottom: 8 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, color: '#059669', borderTop: '1px solid #E2E8F0', paddingTop: 8, marginBottom: 10, fontSize: 13 }}>
                       <span>Net Total:</span>
-                      <span>{m.card.data.total}</span>
+                      <span style={{ fontFamily: "'JetBrains Mono', monospace" }}>{m.card.data.total}</span>
                     </div>
                     <button
                       onClick={handleBookNowFromQuote}
                       style={{
                         width: '100%',
-                        padding: '6px 10px',
-                        background: 'linear-gradient(135deg, #F59E0B, #D97706)',
+                        padding: '8px 12px',
+                        background: '#0F172A',
                         border: 'none',
-                        borderRadius: 6,
-                        color: '#1C1917',
+                        borderRadius: 8,
+                        color: '#FFFFFF',
                         fontWeight: 700,
-                        fontSize: 11,
+                        fontSize: 11.5,
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        gap: 6
+                        gap: 6,
+                        boxShadow: '0 2px 6px rgba(15,23,42,0.15)',
+                        transition: 'background 0.15s'
                       }}
+                      onMouseEnter={e => (e.currentTarget.style.background = '#1E293B')}
+                      onMouseLeave={e => (e.currentTarget.style.background = '#0F172A')}
                     >
                       Book This Capacity Slot <ChevronRight size={13} />
                     </button>
@@ -416,13 +473,13 @@ export default function WidgetFramePage() {
 
                 {m.card?.type === 'emergency' && (
                   <div style={{
-                    background: 'rgba(239,68,68,0.1)',
-                    border: '1px solid rgba(239,68,68,0.4)',
-                    borderRadius: 12,
-                    padding: 12,
-                    fontSize: 11.5
+                    background: '#FEF2F2',
+                    border: '1px solid #FECACA',
+                    borderRadius: 14,
+                    padding: '13px 15px',
+                    fontSize: 12
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#f87171', fontWeight: 700, marginBottom: 6 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#DC2626', fontWeight: 700, marginBottom: 8 }}>
                       <AlertTriangle size={15} /> Direct Operations SOS Line
                     </div>
                     <a
@@ -432,19 +489,20 @@ export default function WidgetFramePage() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: 8,
-                        background: '#ef4444',
-                        color: 'white',
-                        padding: '7px 12px',
+                        background: '#DC2626',
+                        color: '#FFFFFF',
+                        padding: '8px 14px',
                         borderRadius: 8,
                         textDecoration: 'none',
                         fontWeight: 700,
                         fontSize: 12,
-                        marginBottom: 6
+                        marginBottom: 8,
+                        boxShadow: '0 2px 6px rgba(220,38,38,0.25)'
                       }}
                     >
-                      <Phone size={14} /> Call 1800-PRE-LMS (Ext 9)
+                      <Phone size={14} /> Call Hotline: {m.card.data.hotline}
                     </a>
-                    <div style={{ fontSize: 10.5, color: '#fca5a5' }}>
+                    <div style={{ fontSize: 11, color: '#7F1D1D', lineHeight: 1.4 }}>
                       {m.card.data.etaResponse}
                     </div>
                   </div>
@@ -452,23 +510,29 @@ export default function WidgetFramePage() {
 
                 {m.card?.type === 'booking_confirm' && (
                   <div style={{
-                    background: 'rgba(16,185,129,0.1)',
-                    border: '1px solid rgba(16,185,129,0.3)',
-                    borderRadius: 12,
-                    padding: 12,
-                    fontSize: 11.5
+                    background: '#ECFDF5',
+                    border: '1px solid #A7F3D0',
+                    borderRadius: 14,
+                    padding: '13px 15px',
+                    fontSize: 12
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#10b981', fontWeight: 700, marginBottom: 6 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#047857', fontWeight: 700, marginBottom: 6 }}>
                       <CheckCircle2 size={15} /> Lead Registered: {m.card.data.leadId}
                     </div>
-                    <div style={{ color: '#D6D3D1', fontSize: 11 }}>{m.card.data.corridor}</div>
-                    <div style={{ color: '#A8A29E', fontSize: 10.5, marginTop: 4 }}>
+                    <div style={{ color: '#065F46', fontSize: 11.5 }}>{m.card.data.corridor}</div>
+                    <div style={{ color: '#047857', fontSize: 11, marginTop: 4 }}>
                       Status: Queued for fleet recommendation & trailer pairing.
                     </div>
                   </div>
                 )}
 
-                <span suppressHydrationWarning style={{ fontSize: 9.5, color: '#78716C', alignSelf: isBot ? 'flex-start' : 'flex-end', padding: '0 4px' }}>
+                <span suppressHydrationWarning style={{
+                  fontSize: 10,
+                  color: '#94A3B8',
+                  alignSelf: isBot ? 'flex-start' : 'flex-end',
+                  padding: '0 4px',
+                  letterSpacing: '0.2px'
+                }}>
                   {m.time}
                 </span>
               </div>
@@ -477,107 +541,76 @@ export default function WidgetFramePage() {
         })}
 
         {isTyping && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#F59E0B', fontSize: 11.5 }}>
-            <div style={{ width: 14, height: 14, border: '2px solid rgba(245,158,11,0.3)', borderTopColor: '#F59E0B', borderRadius: '50%' }} className="animate-spin" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#059669', fontSize: 12, paddingLeft: 38 }}>
+            <div style={{ width: 14, height: 14, border: '2px solid rgba(5,150,105,0.3)', borderTopColor: '#059669', borderRadius: '50%' }} className="animate-spin" />
             <span>LogiFlow is retrieving telematics...</span>
           </div>
         )}
-        <div ref={messagesEndRef} />
+        <div style={{ height: 14, flexShrink: 0 }} />
       </div>
 
-      {/* Quick Action Chips */}
+      {/* Quick Action Chips — Clean Light Pills */}
       <div style={{
-        padding: '6px 12px',
-        background: '#141210',
-        borderTop: '1px solid #292524',
+        padding: '8px 14px',
+        background: '#FFFFFF',
+        borderTop: '1px solid #E2E8F0',
         display: 'flex',
-        gap: 6,
+        gap: 8,
         overflowX: 'auto',
         whiteSpace: 'nowrap',
-        flexShrink: 0
+        flexShrink: 0,
+        scrollbarWidth: 'none'
       }}>
-        <button
-          onClick={() => handleSend('Where is shipment ORD-1001?')}
-          style={{
-            background: '#1C1917',
-            border: '1px solid #292524',
-            borderRadius: 14,
-            padding: '4px 9px',
-            fontSize: 10.5,
-            color: '#D6D3D1',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 4
-          }}
-        >
-          📦 Track ORD-1001
-        </button>
-        <button
-          onClick={() => handleSend('Get spot freight quote for 8000 kg Lucknow to Delhi')}
-          style={{
-            background: '#1C1917',
-            border: '1px solid #292524',
-            borderRadius: 14,
-            padding: '4px 9px',
-            fontSize: 10.5,
-            color: '#D6D3D1',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 4
-          }}
-        >
-          ⚡ Spot Quote
-        </button>
-        <button
-          onClick={() => handleSend('I need to book a 5000kg freight shipment')}
-          style={{
-            background: '#1C1917',
-            border: '1px solid #292524',
-            borderRadius: 14,
-            padding: '4px 9px',
-            fontSize: 10.5,
-            color: '#D6D3D1',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 4
-          }}
-        >
-          📋 Book Freight
-        </button>
-        <button
-          onClick={() => handleSend('Emergency: truck breakdown on Highway NH-27')}
-          style={{
-            background: 'rgba(239,68,68,0.15)',
-            border: '1px solid rgba(239,68,68,0.3)',
-            borderRadius: 14,
-            padding: '4px 9px',
-            fontSize: 10.5,
-            color: '#fca5a5',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 4
-          }}
-        >
-          🚨 Roadside SOS
-        </button>
+        {[
+          { label: '📦 Track ORD-1001', msg: 'Where is shipment ORD-1001?' },
+          { label: '⚡ Spot Quote', msg: 'Get spot freight quote for 8000 kg Lucknow to Delhi' },
+          { label: '📋 Book Freight', msg: 'I need to book a 5000kg freight shipment' },
+          { label: '🚨 Roadside SOS', msg: 'Emergency: truck breakdown on Highway NH-27', danger: true },
+        ].map(c => (
+          <button
+            key={c.label}
+            onClick={() => handleSend(c.msg)}
+            style={{
+              background: c.danger ? '#FEF2F2' : '#F1F5F9',
+              border: `1px solid ${c.danger ? '#FECACA' : '#E2E8F0'}`,
+              borderRadius: 20,
+              padding: '5px 11px',
+              fontSize: 11,
+              fontWeight: 600,
+              color: c.danger ? '#DC2626' : '#334155',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+              flexShrink: 0,
+              transition: 'all 0.15s'
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = c.danger ? '#FEE2E2' : '#E2E8F0';
+              e.currentTarget.style.transform = 'translateY(-1px)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = c.danger ? '#FEF2F2' : '#F1F5F9';
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
+          >
+            {c.label}
+          </button>
+        ))}
       </div>
 
-      {/* Input Form */}
+      {/* Input Form — Clean Rounded Input Bar */}
       <form
         onSubmit={e => {
           e.preventDefault();
           handleSend();
         }}
         style={{
-          padding: '10px 12px',
-          background: '#1C1917',
-          borderTop: '1px solid rgba(245,158,11,0.2)',
+          padding: '11px 14px',
+          background: '#FFFFFF',
+          borderTop: '1px solid #E2E8F0',
           display: 'flex',
-          gap: 8,
+          gap: 9,
           alignItems: 'center',
           flexShrink: 0
         }}
@@ -585,36 +618,47 @@ export default function WidgetFramePage() {
         <input
           type="text"
           value={input}
+          onFocus={() => setInputFocused(true)}
+          onBlur={() => setInputFocused(false)}
           onChange={e => setInput(e.target.value)}
           placeholder="Ask LogiFlow (e.g. Track ORD-1001, quote, emergency)..."
           style={{
             flex: 1,
-            background: '#141210',
-            border: '1px solid #292524',
-            borderRadius: 8,
-            padding: '8px 12px',
-            fontSize: 12,
-            color: '#FAFAF9',
+            background: '#F8FAFC',
+            border: `1.5px solid ${inputFocused ? '#059669' : '#E2E8F0'}`,
+            borderRadius: 10,
+            padding: '9px 14px',
+            fontSize: 12.5,
+            color: '#0F172A',
             outline: 'none',
-            fontFamily: 'inherit'
+            fontFamily: 'inherit',
+            boxShadow: inputFocused ? '0 0 0 3px rgba(5,150,105,0.12)' : 'none',
+            transition: 'border-color 0.15s, box-shadow 0.15s'
           }}
         />
         <button
           type="submit"
           disabled={!input.trim()}
           style={{
-            width: 34,
-            height: 34,
-            borderRadius: 8,
-            background: input.trim() ? 'linear-gradient(135deg, #F59E0B, #D97706)' : '#292524',
+            width: 36,
+            height: 36,
+            borderRadius: 10,
+            background: input.trim() ? '#0F172A' : '#F1F5F9',
             border: 'none',
-            color: input.trim() ? '#1C1917' : '#78716C',
+            color: input.trim() ? '#FFFFFF' : '#94A3B8',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             cursor: input.trim() ? 'pointer' : 'default',
             transition: 'all 0.15s',
-            flexShrink: 0
+            flexShrink: 0,
+            boxShadow: input.trim() ? '0 2px 8px rgba(15,23,42,0.2)' : 'none'
+          }}
+          onMouseEnter={e => {
+            if (input.trim()) e.currentTarget.style.background = '#1E293B';
+          }}
+          onMouseLeave={e => {
+            if (input.trim()) e.currentTarget.style.background = '#0F172A';
           }}
         >
           <Send size={15} />

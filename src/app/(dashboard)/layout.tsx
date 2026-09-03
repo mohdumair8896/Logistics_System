@@ -45,7 +45,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <ToastProvider>
-      <div className={`app-layout${isTrackingPage ? ' tracking-theme' : ''}`}>
+      <div className="app-layout">
         {/* Mobile Drawer Backdrop */}
         <div
           className={`mobile-sidebar-backdrop ${isMobileSidebarOpen ? 'active' : ''}`}

@@ -447,9 +447,9 @@ export default function Header({ title, subtitle, onToggleMobileMenu }: HeaderPr
             <div className="user-avatar">
               {currentUser?.avatar || 'PL'}
             </div>
-            <div className="hide-mobile" style={{ fontSize: 12, lineHeight: 1.2 }}>
-              <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{currentUser?.name || 'Dispatch Admin'}</div>
-              <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{currentUser?.role || 'Operations Hub'}</div>
+            <div className="hide-mobile" style={{ display: 'flex', flexDirection: 'column', whiteSpace: 'nowrap' }}>
+              <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 12.5, lineHeight: 1.2 }}>{currentUser?.name || 'Dispatch Admin'}</div>
+              <div style={{ fontSize: 10.5, color: 'var(--text-muted)', lineHeight: 1.2, marginTop: 2 }}>{currentUser?.role || 'Operations Hub'}</div>
             </div>
           </div>
 
