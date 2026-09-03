@@ -46,7 +46,7 @@ export default function InvoicesPage() {
         </div>
       </div>
 
-      <div className="grid-2" style={{ gridTemplateColumns: '320px 1fr', gap: 20 }}>
+      <div className="responsive-split-2">
         {/* Invoice List Sidebar */}
         <div className="card" style={{ padding: 0, overflow: 'hidden', height: 'fit-content' }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', fontWeight: 700, fontSize: 13, color: 'var(--text-secondary)' }}>
@@ -113,9 +113,10 @@ export default function InvoicesPage() {
                   background: 'white',
                   color: '#111827',
                   borderRadius: 12,
-                  padding: 32,
+                  padding: 'clamp(14px, 3.5vw, 32px)',
                   border: '1px solid #e2e8f0',
-                  boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+                  overflowX: 'auto'
                 }}
               >
                 {/* Header */}
@@ -157,24 +158,26 @@ export default function InvoicesPage() {
                 </div>
 
                 {/* Items Manifest Table */}
-                <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 16 }}>
-                  <thead>
-                    <tr style={{ background: '#f1f5f9' }}>
-                      <th style={{ padding: '8px 12px', textAlign: 'left', fontSize: 11, color: '#475569', borderBottom: '1px solid #cbd5e1' }}>Item Description</th>
-                      <th style={{ padding: '8px 12px', textAlign: 'right', fontSize: 11, color: '#475569', borderBottom: '1px solid #cbd5e1' }}>Payload Quantity</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {order?.items.map((item, idx) => (
-                      <tr key={idx} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                        <td style={{ padding: '8px 12px', fontSize: 12.5, color: '#1e293b' }}>{getProductName(item.productId)}</td>
-                        <td style={{ padding: '8px 12px', fontSize: 12.5, textAlign: 'right', fontFamily: 'monospace', fontWeight: 600, color: '#1e293b' }}>
-                          {item.quantity.toLocaleString()} kg
-                        </td>
+                <div className="table-container">
+                  <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 16 }}>
+                    <thead>
+                      <tr style={{ background: '#f1f5f9' }}>
+                        <th style={{ padding: '8px 12px', textAlign: 'left', fontSize: 11, color: '#475569', borderBottom: '1px solid #cbd5e1' }}>Item Description</th>
+                        <th style={{ padding: '8px 12px', textAlign: 'right', fontSize: 11, color: '#475569', borderBottom: '1px solid #cbd5e1' }}>Payload Quantity</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {order?.items.map((item, idx) => (
+                        <tr key={idx} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ padding: '8px 12px', fontSize: 12.5, color: '#1e293b' }}>{getProductName(item.productId)}</td>
+                          <td style={{ padding: '8px 12px', fontSize: 12.5, textAlign: 'right', fontFamily: 'monospace', fontWeight: 600, color: '#1e293b' }}>
+                            {item.quantity.toLocaleString()} kg
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
 
                 {/* Billing Cost Breakdown */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12.5, borderTop: '1px solid #e2e8f0', paddingTop: 12 }}>

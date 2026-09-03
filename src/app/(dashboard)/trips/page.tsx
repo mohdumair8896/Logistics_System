@@ -95,36 +95,38 @@ export default function TripsPage() {
       <div>
         <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.5px' }}>All Trips</div>
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <table className="data-table">
-            <thead>
-              <tr><th>Trip ID</th><th>Order</th><th>Route</th><th>Vehicle</th><th>Driver</th><th>Load</th><th>Status</th><th></th></tr>
-            </thead>
-            <tbody>
-              {[...trips].reverse().map(trip => {
-                const vehicle = vehicles.find(v => v.id === trip.vehicleId);
-                const driver = drivers.find(d => d.id === trip.driverId);
-                return (
-                  <tr key={trip.id}>
-                    <td><span style={{ fontWeight: 700, fontFamily: 'JetBrains Mono', fontSize: 12, color: 'var(--accent)' }}>{trip.id}</span></td>
-                    <td><span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{trip.orderId}</span></td>
-                    <td style={{ fontSize: 12 }}>{trip.origin} → {trip.destination}</td>
-                    <td><span style={{ fontSize: 12, fontFamily: 'JetBrains Mono' }}>{vehicle?.vehicleNo || '—'}</span></td>
-                    <td style={{ fontSize: 12 }}>{driver?.name || '—'}</td>
-                    <td><span className="mono" style={{ fontSize: 12 }}>{trip.load.toLocaleString()} kg</span></td>
-                    <td><span className={`badge ${statusColor[trip.status] || 'badge-gray'}`}>{trip.status}</span></td>
-                    <td>
-                      {trip.status === 'In Transit' && (
-                        <Link href="/tracking" className="btn btn-sm btn-ghost">Track</Link>
-                      )}
-                      {trip.status === 'Delivered' && (
-                        <Link href="/delivery" className="btn btn-sm btn-ghost">POD</Link>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <div className="table-container">
+            <table className="data-table">
+              <thead>
+                <tr><th>Trip ID</th><th>Order</th><th>Route</th><th>Vehicle</th><th>Driver</th><th>Load</th><th>Status</th><th></th></tr>
+              </thead>
+              <tbody>
+                {[...trips].reverse().map(trip => {
+                  const vehicle = vehicles.find(v => v.id === trip.vehicleId);
+                  const driver = drivers.find(d => d.id === trip.driverId);
+                  return (
+                    <tr key={trip.id}>
+                      <td><span style={{ fontWeight: 700, fontFamily: 'JetBrains Mono', fontSize: 12, color: 'var(--accent)' }}>{trip.id}</span></td>
+                      <td><span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{trip.orderId}</span></td>
+                      <td style={{ fontSize: 12 }}>{trip.origin} → {trip.destination}</td>
+                      <td><span style={{ fontSize: 12, fontFamily: 'JetBrains Mono' }}>{vehicle?.vehicleNo || '—'}</span></td>
+                      <td style={{ fontSize: 12 }}>{driver?.name || '—'}</td>
+                      <td><span className="mono" style={{ fontSize: 12 }}>{trip.load.toLocaleString()} kg</span></td>
+                      <td><span className={`badge ${statusColor[trip.status] || 'badge-gray'}`}>{trip.status}</span></td>
+                      <td>
+                        {trip.status === 'In Transit' && (
+                          <Link href="/tracking" className="btn btn-sm btn-ghost">Track</Link>
+                        )}
+                        {trip.status === 'Delivered' && (
+                          <Link href="/delivery" className="btn btn-sm btn-ghost">POD</Link>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

@@ -6,9 +6,11 @@ import {
   Info, AlertTriangle, ShieldCheck, Clock, User, CheckCircle2, ShieldAlert
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/ui/Toast';
 
 export default function AllocationPage() {
   const { orders, vehicles, drivers, customers, allocateVehicle } = useStore();
+  const { toast } = useToast();
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [allocated, setAllocated] = useState(false);
   const [allocatedVehNo, setAllocatedVehNo] = useState('');
@@ -68,13 +70,18 @@ export default function AllocationPage() {
     const veh = vehicles.find(v => v.id === vehicleId);
     setAllocatedVehNo(veh?.vehicleNo || vehicleId);
     allocateVehicle(activeOrder.id, vehicleId, driverId, overrideReason);
+    toast(
+      'Fleet Asset Dispatched & Assigned',
+      `Order ${activeOrder.id} successfully paired with ${veh?.vehicleNo || vehicleId}. Transferred to Bay Staging.`,
+      'success'
+    );
     setAllocated(true);
     setOverrideModal(null);
     setTimeout(() => {
       setAllocated(false);
       setSelectedOrder(null);
       router.push('/warehouse');
-    }, 1800);
+    }, 1500);
   };
 
   return (
@@ -86,7 +93,7 @@ export default function AllocationPage() {
         </div>
       </div>
 
-      <div className="grid-2" style={{ gridTemplateColumns: '320px 1fr', gap: 20 }}>
+      <div className="responsive-split-2">
         {/* Left Column: Pending Orders Queue */}
         <div className="card" style={{ padding: 0, overflow: 'hidden', height: 'fit-content' }}>
           <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', fontWeight: 700, fontSize: 13, color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -111,8 +118,8 @@ export default function AllocationPage() {
                     padding: '14px 16px',
                     borderBottom: '1px solid var(--border)',
                     cursor: 'pointer',
-                    background: isSelected ? 'rgba(59,130,246,0.12)' : 'transparent',
-                    borderLeft: isSelected ? '3px solid #3b82f6' : '3px solid transparent',
+                    background: isSelected ? 'var(--accent-glow)' : 'transparent',
+                    borderLeft: isSelected ? '3px solid var(--accent)' : '3px solid transparent',
                     transition: 'all 0.15s'
                   }}
                 >

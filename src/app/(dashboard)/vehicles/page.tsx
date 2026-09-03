@@ -70,7 +70,7 @@ export default function VehiclesPage() {
         </button>
       </div>
 
-      <div className="grid-2" style={{ gridTemplateColumns: '1.2fr 1fr', gap: 20 }}>
+      <div className="responsive-split-12-1">
         {/* Left Column: Vehicle List Table with Search & Filters (Stitch Screen 4) */}
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
           {/* Top Search & Filter Bar */}
@@ -108,7 +108,8 @@ export default function VehiclesPage() {
             </div>
           </div>
 
-          <table className="data-table">
+          <div className="table-container">
+            <table className="data-table">
             <thead>
               <tr>
                 <th>Vehicle No.</th>
@@ -147,6 +148,7 @@ export default function VehiclesPage() {
               })}
             </tbody>
           </table>
+          </div>
         </div>
 
         {/* Right Column: Vehicle Dossier & Activity Log (Stitch Screen 4) */}

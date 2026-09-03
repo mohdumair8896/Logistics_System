@@ -8,12 +8,12 @@ export default function DesignSystemPage() {
   const [applied, setApplied] = useState(false);
 
   const colors = [
-    { name: 'Primary Blue', hex: '#2A5C9A', role: 'Main Actions & Brand Identity', text: '#fff' },
-    { name: 'Secondary Slate', hex: '#1A2B3C', role: 'Background Cards & Navigation', text: '#fff' },
-    { name: 'Tertiary Emerald', hex: '#2D8A4E', role: 'Success, Verified & Complete', text: '#fff' },
-    { name: 'Neutral Slate', hex: '#64748B', role: 'Borders, Metadata & Secondary Text', text: '#fff' },
-    { name: 'Accent Amber', hex: '#F59E0B', role: 'Alerts, Warnings & Pending SLA', text: '#111' },
-    { name: 'Signal Red', hex: '#EF4444', role: 'Errors, Maintenance & Delays', text: '#fff' },
+    { name: 'Primary Amber', hex: '#F59E0B', role: 'Main Actions & Brand Identity (Amber Industrial)', text: '#111' },
+    { name: 'Secondary Charcoal', hex: '#1C1917', role: 'Background Cards & Navigation', text: '#fff' },
+    { name: 'Tertiary Emerald', hex: '#10B981', role: 'Success, Verified & Complete', text: '#fff' },
+    { name: 'Midnight Cyan', hex: '#00D4FF', role: 'Live Telematics & Tracking HUD (Midnight Command)', text: '#111' },
+    { name: 'Signal Orange', hex: '#F97316', role: 'Pending SLA, In-Transit Warnings', text: '#111' },
+    { name: 'Alert Rose', hex: '#F43F5E', role: 'Critical Errors, Maintenance & Delays', text: '#fff' },
   ];
 
   const handleApply = () => {

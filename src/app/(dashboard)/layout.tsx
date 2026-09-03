@@ -4,7 +4,6 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useStore } from '@/lib/store';
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
-import DemoTourBar from '@/components/layout/DemoTourBar';
 
 const pageTitles: Record<string, { title: string; subtitle: string }> = {
   '/dashboard': { title: 'Fleet Operations Dashboard', subtitle: 'Live logistics intelligence & hub status' },
@@ -19,11 +18,14 @@ const pageTitles: Record<string, { title: string; subtitle: string }> = {
   '/invoices': { title: 'Automated GST Billing & Invoicing', subtitle: 'Freight settlement & tax invoice generation' },
 };
 
+import { ToastProvider } from '@/components/ui/Toast';
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const isLoggedIn = useStore(s => s.isLoggedIn);
   const [mounted, setMounted] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -31,18 +33,40 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     if (mounted && !isLoggedIn) router.replace('/login');
   }, [isLoggedIn, router, mounted]);
 
+  // Close mobile drawer when route changes
+  useEffect(() => {
+    setIsMobileSidebarOpen(false);
+  }, [pathname]);
+
   if (!mounted || !isLoggedIn) return null;
 
   const info = pageTitles[pathname] || { title: 'Precision Logistics System', subtitle: 'Logistics Management' };
+  const isTrackingPage = pathname === '/tracking';
 
   return (
-    <div className="app-layout">
-      <Sidebar />
-      <div className="main-content">
-        <Header title={info.title} subtitle={info.subtitle} />
-        <DemoTourBar />
-        <main className="page-content">{children}</main>
+    <ToastProvider>
+      <div className={`app-layout${isTrackingPage ? ' tracking-theme' : ''}`}>
+        {/* Mobile Drawer Backdrop */}
+        <div
+          className={`mobile-sidebar-backdrop ${isMobileSidebarOpen ? 'active' : ''}`}
+          onClick={() => setIsMobileSidebarOpen(false)}
+        />
+
+        {/* Sidebar with Drawer Support */}
+        <Sidebar
+          isOpen={isMobileSidebarOpen}
+          onClose={() => setIsMobileSidebarOpen(false)}
+        />
+
+        <div className="main-content">
+          <Header
+            title={info.title}
+            subtitle={info.subtitle}
+            onToggleMobileMenu={() => setIsMobileSidebarOpen(prev => !prev)}
+          />
+          <main className="page-content">{children}</main>
+        </div>
       </div>
-    </div>
+    </ToastProvider>
   );
 }

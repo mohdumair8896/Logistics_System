@@ -107,7 +107,7 @@ export default function DeliveryPage() {
         </div>
       </div>
 
-      <div className="grid-2" style={{ gridTemplateColumns: '320px 1fr', gap: 20 }}>
+      <div className="responsive-split-2">
         {/* Left Column: Arrived Trips Queue */}
         <div className="card" style={{ padding: 0, overflow: 'hidden', height: 'fit-content' }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', fontWeight: 700, fontSize: 13, color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

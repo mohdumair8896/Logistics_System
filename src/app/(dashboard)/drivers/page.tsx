@@ -70,7 +70,7 @@ export default function DriversPage() {
         </button>
       </div>
 
-      <div className="grid-2" style={{ gridTemplateColumns: '1.2fr 1fr', gap: 20 }}>
+      <div className="responsive-split-12-1">
         {/* Left Column: Active Drivers Table (Stitch Screen 5) */}
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -89,7 +89,8 @@ export default function DriversPage() {
             </div>
           </div>
 
-          <table className="data-table">
+          <div className="table-container">
+            <table className="data-table">
             <thead>
               <tr>
                 <th>Driver Name</th>
@@ -130,6 +131,7 @@ export default function DriversPage() {
               })}
             </tbody>
           </table>
+          </div>
         </div>
 
         {/* Right Column: Driver Profile Dossier (Stitch Screen 5) */}

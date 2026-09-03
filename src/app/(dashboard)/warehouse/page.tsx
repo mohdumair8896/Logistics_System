@@ -6,9 +6,11 @@ import {
   QrCode, Check, ShieldCheck, ArrowRight, Gauge, Layers
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/ui/Toast';
 
 export default function WarehousePage() {
   const { orders, products, inventory, vehicles, drivers, customers, confirmLoading, addTrip, scanOrderItem } = useStore();
+  const { toast } = useToast();
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [loadingBay, setLoadingBay] = useState('Bay 4 - North Dispatch');
   const [safetyChecks, setSafetyChecks] = useState({
@@ -37,16 +39,18 @@ export default function WarehousePage() {
     activeOrder.items.forEach(item => {
       scanOrderItem(activeOrder.id, item.productId);
     });
+    toast('Cargo Manifest Verified', `${activeOrder.items.length} pallet batches barcode scanned and cleared for loading.`, 'success');
   };
 
   const handleConfirmLoading = () => {
     if (!activeOrder) return;
     confirmLoading(activeOrder.id, loadingBay);
     const tripId = addTrip(activeOrder.id);
+    toast('Transit Dispatched', `Loading bay cleared. Corridor trip ${tripId} initiated on live GPS tracking.`, 'success');
     setLoaded(true);
     setTimeout(() => {
       router.push('/trips');
-    }, 1800);
+    }, 1500);
   };
 
   return (
@@ -86,7 +90,7 @@ export default function WarehousePage() {
         </div>
       </div>
 
-      <div className="grid-2" style={{ gridTemplateColumns: '320px 1fr', gap: 20 }}>
+      <div className="responsive-split-2">
         {/* Left Column: Orders Ready for Loading */}
         <div className="card" style={{ padding: 0, overflow: 'hidden', height: 'fit-content' }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', fontWeight: 700, fontSize: 13, color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

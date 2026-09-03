@@ -1,15 +1,22 @@
 'use client';
 import { useState } from 'react';
 import { useStore } from '@/lib/store';
-import { ShoppingCart, Plus, X, Trash2, ArrowRight, Download, Search, Filter, Clock, MapPin } from 'lucide-react';
+import {
+  ShoppingCart, Plus, X, Trash2, ArrowRight, Download, Search,
+  Filter, Clock, MapPin, ArrowUpDown, ArrowUp, ArrowDown
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/ui/Toast';
 
 export default function OrdersPage() {
   const { orders, customers, products, addOrder } = useStore();
   const router = useRouter();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<'All' | 'Pending' | 'Allocated' | 'In Transit' | 'Delivered'>('All');
   const [search, setSearch] = useState('');
   const [showCreate, setShowCreate] = useState(false);
+  const [sortField, setSortField] = useState<'id' | 'destination' | 'weight' | 'status'>('id');
+  const [sortAsc, setSortAsc] = useState(true);
 
   const [form, setForm] = useState({
     customerId: 'C001',
@@ -33,15 +40,33 @@ export default function OrdersPage() {
 
   const totalWeight = form.items.reduce((s, i) => s + (i.quantity || 0), 0);
 
-  const filteredOrders = orders.filter(o => {
-    const matchesTab = activeTab === 'All' || o.status === activeTab;
-    const cust = customers.find(c => c.id === o.customerId);
-    const matchesSearch = !search ||
-      o.id.toLowerCase().includes(search.toLowerCase()) ||
-      o.destination.toLowerCase().includes(search.toLowerCase()) ||
-      (cust?.name || '').toLowerCase().includes(search.toLowerCase());
-    return matchesTab && matchesSearch;
-  });
+  const handleSort = (field: 'id' | 'destination' | 'weight' | 'status') => {
+    if (sortField === field) {
+      setSortAsc(!sortAsc);
+    } else {
+      setSortField(field);
+      setSortAsc(true);
+    }
+  };
+
+  const filteredOrders = orders
+    .filter(o => {
+      const matchesTab = activeTab === 'All' || o.status === activeTab;
+      const cust = customers.find(c => c.id === o.customerId);
+      const matchesSearch = !search ||
+        o.id.toLowerCase().includes(search.toLowerCase()) ||
+        o.destination.toLowerCase().includes(search.toLowerCase()) ||
+        (cust?.name || '').toLowerCase().includes(search.toLowerCase());
+      return matchesTab && matchesSearch;
+    })
+    .sort((a, b) => {
+      let comparison = 0;
+      if (sortField === 'id') comparison = a.id.localeCompare(b.id);
+      if (sortField === 'destination') comparison = a.destination.localeCompare(b.destination);
+      if (sortField === 'weight') comparison = a.totalWeight - b.totalWeight;
+      if (sortField === 'status') comparison = a.status.localeCompare(b.status);
+      return sortAsc ? comparison : -comparison;
+    });
 
   const handleAdd = () => {
     if (!form.destination) return;
@@ -52,9 +77,9 @@ export default function OrdersPage() {
       vehicleId: null,
       driverId: null
     });
+    toast('Order Dispatched to Queue', `Shipment ${id} generated. Ready for fleet allocation.`, 'success');
     setShowCreate(false);
-    // Jump straight to allocation if needed
-    router.push('/allocation');
+    setTimeout(() => router.push('/allocation'), 600);
   };
 
   const handleExportCSV = () => {
@@ -69,6 +94,7 @@ export default function OrdersPage() {
     a.href = url;
     a.download = `Precision_Orders_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
+    toast('Manifest Downloaded', 'Orders CSV exported successfully.', 'info');
   };
 
   const addItem = () => setForm(f => ({ ...f, items: [...f.items, { productId: 'P001', quantity: 0 }] }));
@@ -110,8 +136,8 @@ export default function OrdersPage() {
                   padding: '6px 12px',
                   borderRadius: 6,
                   border: 'none',
-                  background: active ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
-                  color: active ? '#60a5fa' : 'var(--text-secondary)',
+                  background: active ? 'var(--accent-glow)' : 'transparent',
+                  color: active ? 'var(--accent)' : 'var(--text-secondary)',
                   fontWeight: active ? 700 : 500,
                   fontSize: 12.5,
                   cursor: 'pointer',
@@ -125,8 +151,8 @@ export default function OrdersPage() {
                   fontSize: 10.5,
                   padding: '1px 5px',
                   borderRadius: 8,
-                  background: active ? '#3b82f6' : 'var(--bg-tertiary)',
-                  color: active ? 'white' : 'var(--text-muted)',
+                  background: active ? 'var(--accent)' : 'var(--bg-tertiary)',
+                  color: active ? '#1C1917' : 'var(--text-muted)',
                   fontWeight: 700
                 }}>
                   {count}
@@ -151,15 +177,36 @@ export default function OrdersPage() {
 
       {/* Orders Table */}
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-        <table className="data-table">
+        <div className="table-container">
+          <table className="data-table">
           <thead>
             <tr>
-              <th>Order ID</th>
+              <th onClick={() => handleSort('id')} style={{ cursor: 'pointer', userSelect: 'none' }} aria-sort={sortField === 'id' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span>Order ID</span>
+                  {sortField === 'id' ? (sortAsc ? <ArrowUp size={12} color="var(--accent)" /> : <ArrowDown size={12} color="var(--accent)" />) : <ArrowUpDown size={11} color="var(--text-muted)" />}
+                </div>
+              </th>
               <th>Customer</th>
-              <th>Route Corridor</th>
-              <th>Weight</th>
+              <th onClick={() => handleSort('destination')} style={{ cursor: 'pointer', userSelect: 'none' }} aria-sort={sortField === 'destination' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span>Route Corridor</span>
+                  {sortField === 'destination' ? (sortAsc ? <ArrowUp size={12} color="var(--accent)" /> : <ArrowDown size={12} color="var(--accent)" />) : <ArrowUpDown size={11} color="var(--text-muted)" />}
+                </div>
+              </th>
+              <th onClick={() => handleSort('weight')} style={{ cursor: 'pointer', userSelect: 'none' }} aria-sort={sortField === 'weight' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span>Weight</span>
+                  {sortField === 'weight' ? (sortAsc ? <ArrowUp size={12} color="var(--accent)" /> : <ArrowDown size={12} color="var(--accent)" />) : <ArrowUpDown size={11} color="var(--text-muted)" />}
+                </div>
+              </th>
               <th>SLA / Deadline</th>
-              <th>Status</th>
+              <th onClick={() => handleSort('status')} style={{ cursor: 'pointer', userSelect: 'none' }} aria-sort={sortField === 'status' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span>Status</span>
+                  {sortField === 'status' ? (sortAsc ? <ArrowUp size={12} color="var(--accent)" /> : <ArrowDown size={12} color="var(--accent)" />) : <ArrowUpDown size={11} color="var(--text-muted)" />}
+                </div>
+              </th>
               <th style={{ textAlign: 'right' }}>Workflow Action</th>
             </tr>
           </thead>
@@ -236,6 +283,7 @@ export default function OrdersPage() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Create Order Modal */}
