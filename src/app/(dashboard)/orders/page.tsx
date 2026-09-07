@@ -1,17 +1,19 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
 import { useStore } from '@/lib/store';
+import { initialCustomers as customers, initialProducts as products } from '@/lib/mockData';
+import type { Customer, Product } from '@/lib/store';
 import {
   ShoppingCart, Plus, X, Trash2, ArrowRight, Download, Search,
   Clock, ArrowUpDown, ArrowUp, ArrowDown
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/components/ui/Toast';
+import { toast } from 'sonner';
 
 export default function OrdersPage() {
-  const { orders, customers, products, addOrder } = useStore();
+  const { orders, addOrder } = useStore();
   const router = useRouter();
-  const { toast } = useToast();
+
   const [activeTab, setActiveTab] = useState<'All' | 'Pending' | 'Allocated' | 'In Transit' | 'Delivered'>('All');
   const [search, setSearch] = useState('');
   const [showCreate, setShowCreate] = useState(false);
@@ -55,7 +57,7 @@ export default function OrdersPage() {
   const filteredOrders = orders
     .filter(o => {
       const matchesTab = activeTab === 'All' || o.status === activeTab;
-      const cust = customers.find(c => c.id === o.customerId);
+      const cust = customers.find((c: Customer) => c.id === o.customerId);
       const matchesSearch = !search ||
         o.id.toLowerCase().includes(search.toLowerCase()) ||
         o.destination.toLowerCase().includes(search.toLowerCase()) ||
@@ -82,7 +84,7 @@ export default function OrdersPage() {
       vehicleId: null,
       driverId: null
     });
-    toast('Order Dispatched to Queue', `Shipment ${id} generated. Ready for fleet allocation.`, 'success');
+    toast.success('Order Dispatched to Queue', { description: `Shipment ${id} generated. Ready for fleet allocation.` });
     setShowCreate(false);
     setPage(1);
     setTimeout(() => router.push('/allocation'), 600);
@@ -93,7 +95,7 @@ export default function OrdersPage() {
     setTimeout(() => {
       const headers = 'Order ID,Customer,Origin,Destination,Weight (kg),Status,Created At\n';
       const rows = orders.map(o => {
-        const cust = customers.find(c => c.id === o.customerId)?.name || o.customerId;
+        const cust = customers.find((c: Customer) => c.id === o.customerId)?.name || o.customerId;
         return `${o.id},"${cust}","${o.origin}","${o.destination}",${o.totalWeight},${o.status},${o.createdAt}`;
       }).join('\n');
       const blob = new Blob([headers + rows], { type: 'text/csv' });
@@ -104,7 +106,7 @@ export default function OrdersPage() {
       a.click();
       URL.revokeObjectURL(url);
       setIsExporting(false);
-      toast('Orders Exported', 'CSV downloaded successfully.', 'info');
+      toast.info('Orders Exported', { description: 'CSV downloaded successfully.' });
     }, 100);
   };
 
@@ -230,7 +232,7 @@ export default function OrdersPage() {
               </tr>
             ) : (
               filteredOrders.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map(order => {
-                const cust = customers.find(c => c.id === order.customerId);
+                const cust = customers.find((c: Customer) => c.id === order.customerId);
                 return (
                   <tr key={order.id}>
                     <td>

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useStore } from '@/lib/store';
@@ -18,7 +18,6 @@ const pageTitles: Record<string, { title: string; subtitle: string }> = {
   '/invoices': { title: 'Automated GST Billing & Invoicing', subtitle: 'Freight settlement & tax invoice generation' },
   '/leads': { title: 'Shipper Leads & CRM', subtitle: 'Inbound enquiries, freight quotes & lead conversion' },
   '/knowledge-base': { title: 'Knowledge Base & Config', subtitle: 'Dispatcher training data & bot response library' },
-  '/design-system': { title: 'Design System', subtitle: 'UI component library & theme tokens' },
 };
 
 
@@ -42,11 +41,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!mounted || !isLoggedIn) return null;
 
-  const info = pageTitles[pathname] || { title: 'Precision Logistics System', subtitle: 'Logistics Management' };
-  const isTrackingPage = pathname === '/tracking';
+  const info = pageTitles[pathname] || { title: 'LogiFlow', subtitle: 'Logistics Management' };
 
   return (
-    <div className={`app-layout${isTrackingPage ? ' tracking-theme' : ''}`}>
+    <div className="app-layout">
       {/* Mobile Drawer Backdrop */}
       <div
         className={`mobile-sidebar-backdrop ${isMobileSidebarOpen ? 'active' : ''}`}

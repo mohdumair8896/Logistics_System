@@ -1,6 +1,7 @@
-'use client';
+﻿'use client';
 import { useState, useRef, useEffect } from 'react';
 import { useStore } from '@/lib/store';
+import { initialCustomers as customers, initialProducts as products } from '@/lib/mockData';
 import {
   PackageCheck, CheckCircle, PenLine,
   RotateCcw, Camera, FileText
@@ -8,7 +9,7 @@ import {
 import { useRouter } from 'next/navigation';
 
 export default function DeliveryPage() {
-  const { trips, vehicles, drivers, orders, customers, products, completeDelivery, generateInvoice } = useStore();
+  const { trips, vehicles, drivers, orders, completeDelivery, generateInvoice } = useStore();
   const [selectedTrip, setSelectedTrip] = useState<string | null>(null);
   const [form, setForm] = useState({
     deliveredQty: 0,

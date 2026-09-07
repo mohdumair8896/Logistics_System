@@ -1,16 +1,16 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
 import { useStore } from '@/lib/store';
+import { initialCustomers as customers, initialProducts as products } from '@/lib/mockData';
 import {
   Warehouse, Package, CheckCircle, Truck,
   QrCode, Check, ShieldCheck, Gauge, Layers
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/components/ui/Toast';
+import { toast } from 'sonner';
 
 export default function WarehousePage() {
-  const { orders, products, inventory, vehicles, drivers, customers, confirmLoading, addTrip, scanOrderItem } = useStore();
-  const { toast } = useToast();
+  const { orders, inventory, vehicles, drivers, confirmLoading, addTrip, scanOrderItem } = useStore();
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [loadingBay, setLoadingBay] = useState('Bay 4 - North Dispatch');
   const [safetyChecks, setSafetyChecks] = useState({
@@ -39,14 +39,14 @@ export default function WarehousePage() {
     activeOrder.items.forEach(item => {
       scanOrderItem(activeOrder.id, item.productId);
     });
-    toast('Cargo Manifest Verified', `${activeOrder.items.length} pallet batches barcode scanned and cleared for loading.`, 'success');
+    toast.success('Cargo Manifest Verified', { description: `${activeOrder.items.length} pallet batches barcode scanned and cleared for loading.` });
   };
 
   const handleConfirmLoading = () => {
     if (!activeOrder) return;
     confirmLoading(activeOrder.id, loadingBay);
     const tripId = addTrip(activeOrder.id);
-    toast('Transit Dispatched', `Loading bay cleared. Corridor trip ${tripId} initiated on live GPS tracking.`, 'success');
+    toast.success('Transit Dispatched', { description: `Loading bay cleared. Corridor trip ${tripId} initiated on live GPS tracking.` });
     setLoaded(true);
     setTimeout(() => {
       router.push('/trips');

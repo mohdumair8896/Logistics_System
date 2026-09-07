@@ -1,16 +1,16 @@
 'use client';
 import { useState } from 'react';
 import { useStore } from '@/lib/store';
+import { initialCustomers as customers, initialProducts as products } from '@/lib/mockData';
 import {
   CheckCircle, Truck,
   AlertTriangle, Clock, CheckCircle2, ShieldAlert
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/components/ui/Toast';
+import { toast } from 'sonner';
 
 export default function AllocationPage() {
-  const { orders, vehicles, drivers, customers, allocateVehicle } = useStore();
-  const { toast } = useToast();
+  const { orders, vehicles, drivers, allocateVehicle } = useStore();
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [allocated, setAllocated] = useState(false);
   const [allocatedVehNo, setAllocatedVehNo] = useState('');
@@ -69,12 +69,10 @@ export default function AllocationPage() {
     if (!activeOrder) return;
     const veh = vehicles.find(v => v.id === vehicleId);
     setAllocatedVehNo(veh?.vehicleNo || vehicleId);
-    allocateVehicle(activeOrder.id, vehicleId, driverId, overrideReason);
-    toast(
-      'Fleet Asset Dispatched & Assigned',
-      `Order ${activeOrder.id} successfully paired with ${veh?.vehicleNo || vehicleId}. Transferred to Bay Staging.`,
-      'success'
-    );
+    allocateVehicle(activeOrder.id, vehicleId, driverId);
+    toast.success('Fleet Asset Dispatched & Assigned', {
+      description: `Order ${activeOrder.id} successfully paired with ${veh?.vehicleNo || vehicleId}. Transferred to Bay Staging.`
+    });
     setAllocated(true);
     setOverrideModal(null);
     setTimeout(() => {

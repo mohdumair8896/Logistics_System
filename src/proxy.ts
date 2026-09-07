@@ -29,7 +29,6 @@ const PROTECTED_PAGE_PREFIXES = [
   '/invoices',
   '/leads',
   '/knowledge-base',
-  '/design-system',
 ];
 
 // ── Content Security Policy ──────────────────────────────────────

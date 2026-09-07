@@ -1,18 +1,17 @@
-﻿'use client';
+'use client';
 import { useState } from 'react';
 import { useStore, KnowledgeBaseItem } from '@/lib/store';
 import {
   BookOpen, Plus, Search, Filter, Trash2,
   Sparkles, X
 } from 'lucide-react';
-import { useToast } from '@/components/ui/Toast';
+import { toast } from 'sonner';
 
 export default function KnowledgeBasePage() {
   const { knowledgeBase, addKnowledgeBaseItem, deleteKnowledgeBaseItem } = useStore();
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [search, setSearch] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
-  const { toast } = useToast();
 
   const [form, setForm] = useState({
     title: '',
@@ -55,11 +54,9 @@ export default function KnowledgeBasePage() {
       keywords: keywordsArray.length > 0 ? keywordsArray : [form.title.toLowerCase()]
     });
 
-    toast(
-      'Knowledge Base Updated',
-      `Article "${form.title}" added to LogiFlow training repository.`,
-      'success'
-    );
+    toast.success('Knowledge Base Updated', {
+      description: `Article "${form.title}" added to LogiFlow training repository.`
+    });
 
     setShowAddModal(false);
     setForm({ title: '', category: 'Hours & Operations', content: '', keywords: '' });
@@ -67,7 +64,7 @@ export default function KnowledgeBasePage() {
 
   const handleDelete = (id: string, title: string) => {
     deleteKnowledgeBaseItem(id);
-    toast('Article Removed', `Deleted "${title}" from knowledge base.`, 'info');
+    toast.info('Article Removed', { description: `Deleted "${title}" from knowledge base.` });
   };
 
   return (

@@ -1,6 +1,8 @@
-'use client';
+﻿'use client';
 import { useState, useEffect, useRef } from 'react';
 import { useStore } from '@/lib/store';
+import { initialCustomers as customers } from '@/lib/mockData';
+import type { Customer } from '@/lib/store';
 import {
   MapPin, Truck,
   FastForward, CheckCircle, Gauge, Fuel, Thermometer, ShieldCheck,
@@ -8,15 +10,15 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import DriverChatModal from '@/components/layout/DriverChatModal';
-import { useToast } from '@/components/ui/Toast';
+import { toast } from 'sonner';
 
 export default function TrackingPage() {
-  const { trips, vehicles, drivers, orders, customers, updateTrip } = useStore();
+  const { trips, vehicles, drivers, orders, updateTrip } = useStore();
   const [selectedTrip, setSelectedTrip] = useState<string | null>(null);
   const [simulating, setSimulating] = useState(false);
   const [chatDriverId, setChatDriverId] = useState<string | null>(null);
   const router = useRouter();
-  const { toast } = useToast();
+
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const activeTrips = trips.filter(t => t.status === 'In Transit');
@@ -35,7 +37,7 @@ export default function TrackingPage() {
   const vehicle = trip ? vehicles.find(v => v.id === trip.vehicleId) : null;
   const driver = trip ? drivers.find(d => d.id === trip.driverId) : null;
   const order = trip ? orders.find(o => o.id === trip.orderId) : null;
-  const customer = order ? customers.find(c => c.id === order.customerId) : null;
+  const customer = order ? customers.find((c: Customer) => c.id === order.customerId) : null;
 
   const distDone = trip ? Math.round((trip.progress / 100) * trip.distance) : 0;
   const distLeft = trip ? trip.distance - distDone : 0;
@@ -77,7 +79,7 @@ export default function TrackingPage() {
         if (intervalRef.current) clearInterval(intervalRef.current);
         setSimulating(false);
         // Peak-End Rule: positive celebration before leaving the page
-        toast('Shipment Delivered! ✓', 'Cargo successfully delivered. Generating POD.', 'success');
+        toast.success('Shipment Delivered! 🎉', { description: 'Cargo successfully delivered. Generating POD.' });
         setTimeout(() => router.push('/delivery'), 1800);
       }
     }, 600);

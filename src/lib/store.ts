@@ -49,12 +49,10 @@ export interface KnowledgeBaseItem {
 export interface AppState {
   vehicles: Vehicle[];
   drivers: Driver[];
-  customers: Customer[];
-  products: Product[];
-  inventory: typeof initialInventory;
   orders: Order[];
   trips: Trip[];
   invoices: Invoice[];
+  inventory: typeof initialInventory;
   alerts: SystemAlert[];
   messages: Record<string, { sender: 'driver' | 'dispatcher'; text: string; time: string }[]>;
   leads: ShipperLead[];
@@ -83,7 +81,7 @@ export interface AppState {
   updateOrder: (id: string, updates: Partial<Order>) => void;
   scanOrderItem: (orderId: string, productId: string) => void;
 
-  allocateVehicle: (orderId: string, vehicleId: string, driverId: string, overrideReason?: string) => void;
+  allocateVehicle: (orderId: string, vehicleId: string, driverId: string) => void;
   confirmLoading: (orderId: string, bay?: string) => void;
 
   addTrip: (orderId: string) => string;
@@ -206,12 +204,10 @@ export const useStore = create<AppState>()(
     (set, get) => ({
       vehicles: [...initialVehicles],
       drivers: [...initialDrivers],
-      customers: [...initialCustomers],
-      products: [...initialProducts],
-      inventory: [...initialInventory],
       orders: [...initialOrders],
       trips: [...initialTrips],
       invoices: [...initialInvoices],
+      inventory: [...initialInventory],
       alerts: [...initialAlerts],
       messages: { ...mockDriverMessages },
       leads: [...initialLeads],
@@ -406,7 +402,7 @@ export const useStore = create<AppState>()(
     }));
   },
 
-  allocateVehicle: (orderId, vehicleId, driverId, overrideReason) => {
+  allocateVehicle: (orderId, vehicleId, driverId) => {
     const { updateOrder, updateVehicle, updateDriver } = get();
     updateOrder(orderId, { status: 'Allocated', vehicleId, driverId });
     updateVehicle(vehicleId, { status: 'In Transit' });

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useState } from 'react';
 import { useStore } from '@/lib/store';
 import {
@@ -6,7 +6,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/components/ui/Toast';
+import { toast } from 'sonner';
 
 export default function LeadsCRMPage() {
   const { leads, updateLeadStatus, convertLeadToOrder } = useStore();
@@ -14,7 +14,6 @@ export default function LeadsCRMPage() {
   const [search, setSearch] = useState('');
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(leads[0]?.id || null);
   const router = useRouter();
-  const { toast } = useToast();
 
   const filteredLeads = leads.filter(l => {
     const matchesTab = activeTab === 'All' || l.status === activeTab;
@@ -35,11 +34,9 @@ export default function LeadsCRMPage() {
 
   const handleConvertLead = (leadId: string) => {
     const orderId = convertLeadToOrder(leadId);
-    toast(
-      'Lead Dispatched to Active Fleet',
-      `Shipment order ${orderId} created from inbound lead. Ready for vehicle allocation.`,
-      'success'
-    );
+    toast.success('Lead Dispatched to Active Fleet', {
+      description: `Shipment order ${orderId} created from inbound lead. Ready for vehicle allocation.`
+    });
     setTimeout(() => {
       router.push('/allocation');
     }, 1200);

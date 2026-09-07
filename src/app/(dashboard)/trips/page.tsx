@@ -1,10 +1,11 @@
-'use client';
+﻿'use client';
 import { useStore } from '@/lib/store';
+import { initialCustomers as customers, initialProducts as products } from '@/lib/mockData';
 import { Navigation, Clock, MapPin, CheckCircle, Truck } from 'lucide-react';
 import Link from 'next/link';
 
 export default function TripsPage() {
-  const { trips, vehicles, drivers, orders, customers } = useStore();
+  const { trips, vehicles, drivers, orders } = useStore();
 
   const statusColor: Record<string, string> = { 'In Transit': 'badge-cyan', 'Delivered': 'badge-green', 'Cancelled': 'badge-red' };
   const dotColor: Record<string, string> = { 'In Transit': 'dot-blue', 'Delivered': 'dot-green', 'Cancelled': 'dot-red' };

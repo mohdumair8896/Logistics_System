@@ -1,10 +1,11 @@
-'use client';
+﻿'use client';
 import { useState, useRef } from 'react';
 import { useStore } from '@/lib/store';
+import { initialCustomers as customers, initialProducts as products } from '@/lib/mockData';
 import { FileText, Download, Building2, Printer, ShieldCheck } from 'lucide-react';
 
 export default function InvoicesPage() {
-  const { invoices, orders, customers, vehicles, drivers, products } = useStore();
+  const { invoices, orders, vehicles, drivers } = useStore();
   const [selectedInv, setSelectedInv] = useState<string | null>(invoices[0]?.id || null);
   const printRef = useRef<HTMLDivElement>(null);
 
