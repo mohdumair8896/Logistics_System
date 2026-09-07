@@ -33,7 +33,7 @@ export default function LoginPage() {
   const login = useStore(s => s.login);
   const [selectedRole, setSelectedRole] = useState(enterpriseRoles[0]);
   const [email, setEmail] = useState(enterpriseRoles[0].email);
-  const [password, setPassword] = useState('Logistics2026!');
+  const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -44,7 +44,7 @@ export default function LoginPage() {
   const handleSelectRole = (r: typeof enterpriseRoles[0]) => {
     setSelectedRole(r);
     setEmail(r.email);
-    setPassword('Logistics2026!');
+    setPassword('');
     setError('');
   };
 
@@ -59,23 +59,42 @@ export default function LoginPage() {
       return;
     }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.');
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters.');
       setLoading(false);
       return;
     }
 
-    await new Promise(r => setTimeout(r, 500));
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+        credentials: 'same-origin',
+      });
 
-    login({
-      email,
-      name: selectedRole.email === email ? selectedRole.name : email.split('@')[0],
-      role: selectedRole.email === email ? selectedRole.role : 'Operations Director',
-      facility: selectedRole.facility
-    });
+      const data = await res.json();
 
-    router.push('/dashboard');
-    setLoading(false);
+      if (!res.ok || !data.success) {
+        setError(data.message || 'Invalid credentials. Please try again.');
+        setLoading(false);
+        return;
+      }
+
+      // Store the validated profile in Zustand (cookie is set server-side)
+      login({
+        email: data.user.email,
+        name: data.user.name,
+        role: data.user.role,
+        facility: data.user.facility,
+      });
+
+      router.push('/dashboard');
+    } catch {
+      setError('Network error. Please check your connection and try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

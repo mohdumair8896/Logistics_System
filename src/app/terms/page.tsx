@@ -1,0 +1,136 @@
+import React from 'react';
+import Link from 'next/link';
+import { ArrowLeft, FileCheck, Scale, AlertTriangle, Truck, CheckCircle2, Shield } from 'lucide-react';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Terms & Conditions | LogiFlow Logistics',
+  description: 'LogiFlow master service terms, carrier network conditions, freight liability policies, and service level agreements.',
+};
+
+export default function TermsPage() {
+  return (
+    <div style={{ background: '#020617', color: '#e2e8f0', minHeight: '100vh', padding: '48px 24px' }}>
+      <div style={{ maxWidth: 880, margin: '0 auto' }}>
+        
+        {/* Navigation back */}
+        <div style={{ marginBottom: 32 }}>
+          <Link
+            href="/"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              fontSize: 13,
+              fontWeight: 600,
+              color: '#94a3b8',
+              textDecoration: 'none',
+              padding: '8px 16px',
+              borderRadius: 10,
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              transition: 'color 0.2s',
+            }}
+          >
+            <ArrowLeft style={{ width: 16, height: 16 }} />
+            Back to Home
+          </Link>
+        </div>
+
+        {/* Header */}
+        <div style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: 32, marginBottom: 40 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: 10,
+              background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <FileCheck style={{ width: 20, height: 20, color: '#fbbf24' }} />
+            </div>
+            <span style={{ fontSize: 12, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: 2, color: '#fbbf24', fontWeight: 700 }}>
+              Master Service Agreement
+            </span>
+          </div>
+          <h1 style={{ fontSize: 'clamp(32px, 4vw, 44px)', fontWeight: 900, letterSpacing: -1, color: '#fff', margin: '0 0 12px' }}>
+            Terms and Conditions of Service
+          </h1>
+          <p style={{ fontSize: 14, color: '#94a3b8', margin: 0 }}>
+            Effective Date: January 1, 2026 &bull; Version 4.2
+          </p>
+        </div>
+
+        {/* Terms Body */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 36, lineHeight: 1.8, fontSize: 15, color: '#cbd5e1' }}>
+          
+          <section>
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: '#fff', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <Scale style={{ width: 18, height: 18, color: '#fbbf24' }} />
+              1. Acceptance of Terms
+            </h2>
+            <p>
+              By accessing, browsing, submitting freight manifests, or integrating APIs with the LogiFlow Logistics Platform (&ldquo;Platform&rdquo;), you (&ldquo;Customer&rdquo;, &ldquo;Shipper&rdquo;, or &ldquo;Carrier&rdquo;) agree to be bound unconditionally by these Terms and Conditions. If you are accepting on behalf of an enterprise entity, you warrant that you hold legal signing authority.
+            </p>
+          </section>
+
+          <section>
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: '#fff', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <Truck style={{ width: 18, height: 18, color: '#fbbf24' }} />
+              2. Logistics Services & AI Dispatch
+            </h2>
+            <p>
+              LogiFlow provides digital freight brokerage, autonomous dispatch coordination, automated manifest verification, IoT sensory tracking, and cross-dock allocation software:
+            </p>
+            <ul style={{ paddingLeft: 24, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <li>
+                <strong>Manifest Accuracy:</strong> Shippers must provide strictly truthful cargo weight, volume, hazmat classification, and temperature constraints prior to pickup induction.
+              </li>
+              <li>
+                <strong>Autonomous Matching:</strong> Our algorithmic dispatch engine pairs loads with certified third-party haulers based on safety scores, geofence availability, and equipment qualifications.
+              </li>
+              <li>
+                <strong>Proof of Delivery (POD):</strong> Digital signatures, geo-stamped receipts, and optical photos uploaded via the Driver Portal constitute conclusive proof of handover.
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: '#fff', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <Shield style={{ width: 18, height: 18, color: '#fbbf24' }} />
+              3. Carrier Liability & Cargo Insurance
+            </h2>
+            <p>
+              All shipments dispatched through the Platform are covered by standard carrier cargo liability under the Carmack Amendment / CMR Convention up to the declared value specified at booking, capped at $250,000 per trailer load unless supplemental high-value cargo rider insurance is bound in advance.
+            </p>
+          </section>
+
+          <section>
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: '#fff', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <AlertTriangle style={{ width: 18, height: 18, color: '#fbbf24' }} />
+              4. Service Availability & SLA
+            </h2>
+            <p>
+              LogiFlow guarantees a 99.9% uptime SLA for operational dispatch APIs and live tracking webhooks. Planned maintenance windows are communicated at least 72 hours in advance. In no event shall LogiFlow be liable for indirect, incidental, consequential, or punitive damages resulting from third-party road blockages, acts of God (force majeure), or carrier labor disputes.
+            </p>
+          </section>
+
+          <section id="security">
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: '#fff', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <CheckCircle2 style={{ width: 18, height: 18, color: '#fbbf24' }} />
+              5. Security, Invoicing & Billing
+            </h2>
+            <p>
+              Automated electronic invoices are generated upon verified POD delivery with Net-30 payment terms for approved commercial accounts. Overdue balances incur interest at 1.5% per month or the legal maximum. Enterprise access requires TLS 1.3 encryption and mandatory multi-factor authentication for administrative dispatchers.
+            </p>
+          </section>
+
+        </div>
+
+        {/* Footer */}
+        <div style={{ marginTop: 60, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.08)', textAlign: 'center', fontSize: 13, color: '#94a3b8' }}>
+          &copy; 2026 LogiFlow Technologies Inc. All rights reserved. &bull; <Link href="/privacy" style={{ color: '#fbbf24', textDecoration: 'none' }}>Privacy Policy</Link>
+        </div>
+
+      </div>
+    </div>
+  );
+}

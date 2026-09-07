@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import {
   Globe2,
   MapPinned,
@@ -12,7 +13,10 @@ import {
   ArrowRight,
   TrendingUp,
   Award,
+  Send,
+  CheckCircle2,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import QuoteRequest from './QuoteRequest';
 
 const glass = {
@@ -25,6 +29,44 @@ const glass = {
 
 export default function LogisticsSections() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  
+  // Newsletter state
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterHoneypot, setNewsletterHoneypot] = useState('');
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [newsletterConsent, setNewsletterConsent] = useState(false);
+
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // 1. Spam honeypot detection
+    if (newsletterHoneypot) {
+      setNewsletterEmail('');
+      return;
+    }
+
+    // 2. GDPR consent required before collecting email
+    if (!newsletterConsent) {
+      toast.error('Please confirm you agree to our Privacy Policy before subscribing.');
+      return;
+    }
+
+    // 3. Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!newsletterEmail || !emailRegex.test(newsletterEmail.trim())) {
+      toast.error('Please enter a valid work email address');
+      return;
+    }
+
+    setIsSubscribing(true);
+    setTimeout(() => {
+      setIsSubscribing(false);
+      setNewsletterEmail('');
+      toast.success('Subscribed!', {
+        description: 'You will now receive weekly freight intelligence reports.',
+      });
+    }, 600);
+  };
 
   const services = [
     {
@@ -65,6 +107,7 @@ export default function LogisticsSections() {
     { label: 'Automated Cross-Docking & Warehousing', pct: 92, color: '#a78bfa' },
     { label: 'Customer SLA Satisfaction & Retention', pct: 99, color: '#34d399' },
   ];
+  // Note: skill percentages are indicative performance targets, not verified averages.
 
   const steps = [
     { step: '01', title: 'Consultation & Rate Quote', desc: 'Input weight, route, and cargo specs for instant guaranteed rate calculation.' },
@@ -93,7 +136,7 @@ export default function LogisticsSections() {
   ];
 
   return (
-    <div style={{ background: '#020617', color: '#fff', fontFamily: 'var(--font-inter, system-ui, sans-serif)' }}>
+    <div style={{ background: '#020617', color: '#fff', fontFamily: 'var(--font-inter, system-ui, sans-serif)' }} role="main">
 
       {/* ── SECTION 1: SERVICES GRID ─────────────────────────────────── */}
       <section style={{ padding: '96px 24px' }}>
@@ -108,7 +151,7 @@ export default function LogisticsSections() {
                 Trusted Enterprise Logistics Services
               </h2>
             </div>
-            <p style={{ fontSize: 14, color: '#71717a', maxWidth: 400, lineHeight: 1.7 }}>
+            <p style={{ fontSize: 14, color: '#94a3b8', maxWidth: 400, lineHeight: 1.7 }}>
               End-to-end supply chain reliability engineered with modern automation, dynamic routing, and round-the-clock visibility.
             </p>
           </div>
@@ -126,10 +169,10 @@ export default function LogisticsSections() {
                   {s.icon}
                 </div>
                 <div>
-                  <span style={{ fontSize: 10, fontFamily: 'monospace', color: '#52525b', textTransform: 'uppercase', letterSpacing: 1 }}>{s.sub}</span>
+                  <span style={{ fontSize: 11, fontFamily: 'monospace', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 1 }}>{s.sub}</span>
                   <h3 style={{ fontSize: 18, fontWeight: 700, color: '#fff', marginTop: 4 }}>{s.title}</h3>
                 </div>
-                <p style={{ fontSize: 13, color: '#71717a', lineHeight: 1.7 }}>{s.desc}</p>
+                <p style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.7 }}>{s.desc}</p>
               </div>
             ))}
 
@@ -160,7 +203,7 @@ export default function LogisticsSections() {
           {/* Left: text + bars */}
           <div>
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: '#22d3ee', fontFamily: 'monospace' }}>
-              Proven Performance
+              Performance Targets
             </span>
             <h2 style={{ fontSize: 'clamp(28px, 4vw, 48px)', fontWeight: 900, letterSpacing: -1, color: '#fff', marginTop: 8, lineHeight: 1.15 }}>
               Skills That Keep Your <br />
@@ -168,7 +211,7 @@ export default function LogisticsSections() {
                 Business Moving Forward.
               </span>
             </h2>
-            <p style={{ fontSize: 14, color: '#71717a', lineHeight: 1.7, marginTop: 16, marginBottom: 32 }}>
+            <p style={{ fontSize: 14, color: '#94a3b8', lineHeight: 1.7, marginTop: 16, marginBottom: 32 }}>
               We leverage proprietary telemetry dispatch algorithms and rigorous carrier certification to eliminate deadhead miles, safeguard perishable freight, and maintain exceptional SLA compliance.
             </p>
 
@@ -176,7 +219,7 @@ export default function LogisticsSections() {
               {skills.map((s, i) => (
                 <div key={i}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontFamily: 'monospace', marginBottom: 6 }}>
-                    <span style={{ color: '#d4d4d8', fontWeight: 700 }}>{s.label}</span>
+                    <span style={{ color: '#e2e8f0', fontWeight: 700 }}>{s.label}</span>
                     <span style={{ color: s.color, fontWeight: 700 }}>{s.pct}%</span>
                   </div>
                   <div style={{ height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 99, overflow: 'hidden' }}>
@@ -185,11 +228,14 @@ export default function LogisticsSections() {
                 </div>
               ))}
             </div>
+            <p style={{ fontSize: 11, color: '#64748b', marginTop: 12, fontFamily: 'monospace' }}>
+              * Indicative performance targets. Actual results vary by route and cargo type.
+            </p>
           </div>
 
           {/* Right: stats box */}
           <div style={{ ...glass, padding: 48, borderRadius: 32 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, marginBottom: 32 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, marginBottom: 16 }}>
               {[
                 { val: '99.8%', label: 'On-Time Linehaul Delivery', color: '#fbbf24' },
                 { val: '2.4M',  label: 'Miles Monitored Annually',  color: '#22d3ee' },
@@ -197,15 +243,16 @@ export default function LogisticsSections() {
                 { val: '< 15s', label: 'Automated Dispatch Response', color: '#a78bfa' },
               ].map((stat, i) => (
                 <div key={i}>
-                  <span style={{ fontSize: 36, fontWeight: 900, color: stat.color, fontFamily: 'monospace', lineHeight: 1 }}>{stat.val}</span>
-                  <p style={{ fontSize: 10, color: '#71717a', textTransform: 'uppercase', letterSpacing: 1, marginTop: 4, fontFamily: 'monospace' }}>{stat.label}</p>
+                  <span style={{ fontSize: 36, fontWeight: 900, color: stat.color, fontFamily: 'monospace', lineHeight: 1 }}>{stat.val}*</span>
+                  <p style={{ fontSize: 11, color: '#a8b8c8', textTransform: 'uppercase', letterSpacing: 1, marginTop: 4, fontFamily: 'monospace' }}>{stat.label}</p>
                 </div>
               ))}
             </div>
+            <p style={{ fontSize: 11, color: '#64748b', fontFamily: 'monospace', marginBottom: 16 }}>* Simulated demo data. Results may vary.</p>
 
             <div style={{ padding: 16, borderRadius: 16, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', gap: 16 }}>
               <TrendingUp style={{ width: 32, height: 32, color: '#34d399', flexShrink: 0 }} />
-              <p style={{ fontSize: 12, color: '#a1a1aa', lineHeight: 1.6 }}>
+              <p style={{ fontSize: 13, color: '#cbd5e1', lineHeight: 1.6 }}>
                 AI load-balancing reduced client fuel expenditures by <strong style={{ color: '#fff' }}>18.4%</strong> across Q2 interstate operations.
               </p>
             </div>
@@ -223,7 +270,7 @@ export default function LogisticsSections() {
             <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 900, color: '#fff', marginTop: 8, letterSpacing: -1 }}>
               Our Seamless Moving Process
             </h2>
-            <p style={{ fontSize: 14, color: '#71717a', marginTop: 12, lineHeight: 1.7 }}>
+            <p style={{ fontSize: 14, color: '#94a3b8', marginTop: 12, lineHeight: 1.7 }}>
               From initial cargo booking to optical confirmation at destination, our transparent lifecycle keeps you completely informed.
             </p>
           </div>
@@ -235,7 +282,7 @@ export default function LogisticsSections() {
                   {item.step}
                 </div>
                 <h3 style={{ fontSize: 16, fontWeight: 700, color: '#fff', lineHeight: 1.3 }}>{item.title}</h3>
-                <p style={{ fontSize: 12, color: '#71717a', lineHeight: 1.7 }}>{item.desc}</p>
+                <p style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.7 }}>{item.desc}</p>
               </div>
             ))}
           </div>
@@ -258,25 +305,35 @@ export default function LogisticsSections() {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {faqs.map((f, i) => (
-              <div key={i} style={{ ...glass, borderRadius: 16, overflow: 'hidden' }}>
-                <button
-                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  style={{ width: '100%', padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'none', border: 'none', color: openFaq === i ? '#fbbf24' : '#e4e4e7', fontSize: 15, fontWeight: 700, textAlign: 'left', cursor: 'pointer', gap: 16 }}
-                >
-                  <span>{f.q}</span>
-                  {openFaq === i
-                    ? <ChevronUp style={{ width: 18, height: 18, color: '#fbbf24', flexShrink: 0 }} />
-                    : <ChevronDown style={{ width: 18, height: 18, color: '#71717a', flexShrink: 0 }} />
-                  }
-                </button>
-                {openFaq === i && (
-                  <div style={{ padding: '0 24px 20px', fontSize: 13, color: '#71717a', lineHeight: 1.75, borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 16 }}>
+            {faqs.map((f, i) => {
+              const panelId = `faq-panel-${i}`;
+              const isOpen = openFaq === i;
+              return (
+                <div key={i} style={{ ...glass, borderRadius: 16, overflow: 'hidden' }}>
+                  <button
+                    onClick={() => setOpenFaq(isOpen ? null : i)}
+                    aria-expanded={isOpen}
+                    aria-controls={panelId}
+                    style={{ width: '100%', padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'none', border: 'none', color: isOpen ? '#fbbf24' : '#e4e4e7', fontSize: 15, fontWeight: 700, textAlign: 'left', cursor: 'pointer', gap: 16 }}
+                  >
+                    <span>{f.q}</span>
+                    {isOpen
+                      ? <ChevronUp style={{ width: 18, height: 18, color: '#fbbf24', flexShrink: 0 }} aria-hidden="true" />
+                      : <ChevronDown style={{ width: 18, height: 18, color: '#a8b8c8', flexShrink: 0 }} aria-hidden="true" />
+                    }
+                  </button>
+                  <div
+                    id={panelId}
+                    role="region"
+                    aria-label={f.q}
+                    hidden={!isOpen}
+                    style={{ padding: isOpen ? '0 24px 20px' : undefined, fontSize: 14, color: '#cbd5e1', lineHeight: 1.75, borderTop: isOpen ? '1px solid rgba(255,255,255,0.05)' : undefined, paddingTop: isOpen ? 16 : undefined }}
+                  >
                     {f.a}
                   </div>
-                )}
-              </div>
-            ))}
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -294,55 +351,166 @@ export default function LogisticsSections() {
                 </div>
                 <span style={{ fontWeight: 800, fontSize: 16, color: '#fff' }}>LogiFlow</span>
               </div>
-              <p style={{ fontSize: 12, color: '#52525b', lineHeight: 1.7 }}>
+              <p style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.7 }}>
                 Autonomous logistics infrastructure connecting industrial shippers, cross-docks, and final-mile electric delivery fleets.
               </p>
             </div>
 
             {/* Quick links */}
             <div>
-              <h4 style={{ fontSize: 10, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: 2, color: '#52525b', fontWeight: 700, marginBottom: 16 }}>Quick Links</h4>
+              <h4 style={{ fontSize: 11, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: 2, color: '#cbd5e1', fontWeight: 700, marginBottom: 16 }}>Quick Links</h4>
               <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {[['Operations Dashboard', '/dashboard'], ['Live Shipment Tracker', '/tracking'], ['Fleet Telematics', '/vehicles'], ['Order Dispatch', '/orders']].map(([label, href]) => (
-                  <li key={href}><a href={href} style={{ fontSize: 12, color: '#52525b', textDecoration: 'none', transition: 'color 0.15s' }} onMouseEnter={e => (e.currentTarget.style.color = '#fff')} onMouseLeave={e => (e.currentTarget.style.color = '#52525b')}>{label}</a></li>
+                {[
+                  ['Operations Dashboard', '/dashboard'],
+                  ['Live Shipment Tracker', '/tracking'],
+                  ['Fleet Telematics', '/vehicles'],
+                  ['Order Dispatch', '/orders'],
+                ].map(([label, href]) => (
+                  <li key={href}>
+                    <Link
+                      href={href}
+                      style={{ fontSize: 13, color: '#94a3b8', textDecoration: 'none', transition: 'color 0.15s' }}
+                      onMouseEnter={e => (e.currentTarget.style.color = '#fbbf24')}
+                      onMouseLeave={e => (e.currentTarget.style.color = '#94a3b8')}
+                    >
+                      {label}
+                    </Link>
+                  </li>
                 ))}
               </ul>
             </div>
 
             {/* Solutions */}
             <div>
-              <h4 style={{ fontSize: 10, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: 2, color: '#52525b', fontWeight: 700, marginBottom: 16 }}>Solutions</h4>
+              <h4 style={{ fontSize: 11, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: 2, color: '#cbd5e1', fontWeight: 700, marginBottom: 16 }}>Solutions</h4>
               <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {['Autonomous Sorting & Cross-Dock', 'Cold-Chain Vaccine & Food Transit', 'Intermodal Port & Freight Logistics', 'Final-Mile Green Delivery Routing'].map(s => (
-                  <li key={s} style={{ fontSize: 12, color: '#52525b' }}>{s}</li>
+                {[
+                  'Autonomous Sorting & Cross-Dock',
+                  'Cold-Chain Vaccine & Food Transit',
+                  'Intermodal Port & Freight Logistics',
+                  'Final-Mile Green Delivery Routing'
+                ].map(s => (
+                  <li key={s} style={{ fontSize: 13, color: '#94a3b8' }}>{s}</li>
                 ))}
               </ul>
             </div>
 
-            {/* Newsletter */}
+            {/* Newsletter with GDPR consent, spam protection & validation */}
             <div>
-              <h4 style={{ fontSize: 10, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: 2, color: '#52525b', fontWeight: 700, marginBottom: 16 }}>Stay Updated</h4>
-              <div style={{ display: 'flex', gap: 8 }}>
+              <h4 style={{ fontSize: 11, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: 2, color: '#cbd5e1', fontWeight: 700, marginBottom: 16 }}>Stay Updated</h4>
+              <p style={{ fontSize: 12, color: '#a8b8c8', marginBottom: 12 }}>
+                Weekly carrier freight index and telematics reports. Unsubscribe anytime.
+              </p>
+              
+              <form onSubmit={handleNewsletterSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {/* Invisible honeypot field — bots fill this, humans don&apos;t see it */}
                 <input
-                  type="email"
-                  placeholder="Enter work email"
-                  style={{ flex: 1, background: '#0f172a', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: '8px 14px', fontSize: 12, color: '#fff', outline: 'none', minWidth: 0 }}
+                  type="text"
+                  name="user_work_code"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={newsletterHoneypot}
+                  onChange={e => setNewsletterHoneypot(e.target.value)}
+                  style={{ display: 'none', opacity: 0, position: 'absolute', left: '-9999px' }}
+                  aria-hidden="true"
                 />
-                <button style={{ background: '#f59e0b', color: '#1c1917', border: 'none', borderRadius: 10, padding: '8px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                  Join
-                </button>
-              </div>
+
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <label htmlFor="newsletter-email" style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, overflow: 'hidden' }}>
+                    Work email address
+                  </label>
+                  <input
+                    id="newsletter-email"
+                    type="email"
+                    required
+                    placeholder="Enter work email"
+                    value={newsletterEmail}
+                    onChange={e => setNewsletterEmail(e.target.value)}
+                    style={{
+                      flex: 1,
+                      background: '#0f172a',
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      borderRadius: 10,
+                      padding: '10px 14px',
+                      fontSize: 13,
+                      color: '#fff',
+                      outline: 'none',
+                      minWidth: 0,
+                    }}
+                  />
+                  <button
+                    type="submit"
+                    disabled={isSubscribing}
+                    aria-busy={isSubscribing}
+                    aria-label={isSubscribing ? 'Subscribing, please wait' : 'Subscribe to newsletter'}
+                    style={{
+                      background: '#f59e0b',
+                      color: '#1c1917',
+                      border: 'none',
+                      borderRadius: 10,
+                      padding: '10px 16px',
+                      fontSize: 13,
+                      fontWeight: 700,
+                      cursor: isSubscribing ? 'wait' : 'pointer',
+                      whiteSpace: 'nowrap',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      opacity: isSubscribing ? 0.7 : 1,
+                    }}
+                  >
+                    {isSubscribing ? 'Sending…' : 'Subscribe'}
+                    <Send style={{ width: 14, height: 14 }} aria-hidden="true" />
+                  </button>
+                </div>
+
+                {/* GDPR explicit consent checkbox */}
+                <label
+                  htmlFor="newsletter-consent"
+                  style={{ display: 'flex', alignItems: 'flex-start', gap: 8, cursor: 'pointer', fontSize: 11, color: '#a8b8c8', lineHeight: 1.5 }}
+                >
+                  <input
+                    id="newsletter-consent"
+                    type="checkbox"
+                    checked={newsletterConsent}
+                    onChange={e => setNewsletterConsent(e.target.checked)}
+                    required
+                    style={{ width: 14, height: 14, accentColor: '#f59e0b', marginTop: 2, flexShrink: 0 }}
+                  />
+                  I agree to receive freight intelligence emails and accept the{' '}
+                  <a href="/privacy" style={{ color: '#fbbf24', textDecoration: 'underline' }}>Privacy Policy</a>.
+                  Unsubscribe anytime.
+                </label>
+              </form>
             </div>
           </div>
 
           {/* Bottom bar */}
-          <div style={{ paddingTop: 32, borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 16, fontSize: 11, color: '#3f3f46' }}>
-            <p>© 2026 LogiFlow Technologies Inc. All rights reserved.</p>
-            <div style={{ display: 'flex', gap: 24 }}>
-              {['Privacy Policy', 'Terms of Service', 'Security & Compliance'].map(l => (
-                <a key={l} href="#" style={{ color: '#3f3f46', textDecoration: 'none' }} onMouseEnter={e => (e.currentTarget.style.color = '#71717a')} onMouseLeave={e => (e.currentTarget.style.color = '#3f3f46')}>{l}</a>
-              ))}
+          <div style={{ paddingTop: 32, borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 16, fontSize: 12, color: '#a8b8c8' }}>
+            <div>
+              <p style={{ margin: '0 0 2px', color: '#a8b8c8' }}>© 2026 [Your Company Legal Name]. All rights reserved.</p>
+              <p style={{ margin: 0, fontSize: 11, color: '#64748b' }}>CIN: [XXXXXXXXXXXXXXX] &bull; GST: [XXXXXXXXXXXXXXXXX] &bull; [City, State, India]</p>
             </div>
+            <nav aria-label="Legal links">
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20 }}>
+                {[
+                  ['Privacy Policy', '/privacy'],
+                  ['Terms of Service', '/terms'],
+                  ['Cookie Policy', '/cookies'],
+                  ['Refund Policy', '/refund'],
+                ].map(([label, href]) => (
+                  <Link
+                    key={label}
+                    href={href}
+                    style={{ color: '#a8b8c8', textDecoration: 'none', transition: 'color 0.15s' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#fbbf24')}
+                    onMouseLeave={e => (e.currentTarget.style.color = '#a8b8c8')}
+                  >
+                    {label}
+                  </Link>
+                ))}
+              </div>
+            </nav>
           </div>
         </div>
       </footer>

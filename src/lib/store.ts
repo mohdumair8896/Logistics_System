@@ -218,7 +218,7 @@ export const useStore = create<AppState>()(
       messages: { ...mockDriverMessages },
       leads: [...initialLeads],
       knowledgeBase: [...initialKnowledgeBase],
-      isLoggedIn: true,
+      isLoggedIn: false,
       currentUser: {
         id: 'USR-001',
         name: 'Rajesh Varma',
@@ -336,7 +336,12 @@ export const useStore = create<AppState>()(
         }
       },
 
-      logout: () => set({ isLoggedIn: false }),
+      logout: () => {
+        // Clear Zustand state
+        set({ isLoggedIn: false });
+        // Clear the HttpOnly session cookie server-side
+        fetch('/api/auth/logout', { method: 'POST' }).catch(() => {/* best-effort */});
+      },
 
       resetSystemData: () => {
         set({

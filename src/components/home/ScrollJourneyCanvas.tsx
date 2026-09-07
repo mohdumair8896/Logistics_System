@@ -158,6 +158,8 @@ export default function ScrollJourneyCanvas() {
       {/* Canvas — physical resolution via .width/.height, CSS size via style */}
       <canvas
         ref={canvasRef}
+        role="img"
+        aria-label="Interactive 3D animated logistics freight corridor visualization"
         style={{
           position: 'absolute', inset: 0, display: 'block', pointerEvents: 'none',
           opacity: (isReady && hasFrames) ? 1 : 0,
@@ -194,10 +196,10 @@ export default function ScrollJourneyCanvas() {
           <p style={{ fontSize: 11, fontWeight: 700, color: '#cbd5e1', letterSpacing: 3, textTransform: 'uppercase', marginBottom: 6 }}>
             Initialising Journey Engine
           </p>
-          <p style={{ fontSize: 10, color: '#334155', fontFamily: 'monospace', marginBottom: 20 }}>
+          <p style={{ fontSize: 11, color: '#94a3b8', fontFamily: 'monospace', marginBottom: 20 }}>
             {hasFrames ? 'Streaming cinematic frames…' : 'Preparing hero experience…'}
           </p>
-          <div style={{ width: '100%', height: 2, background: 'rgba(255,255,255,0.05)', borderRadius: 99, overflow: 'hidden' }}>
+          <div style={{ width: '100%', height: 2, background: 'rgba(255,255,255,0.08)', borderRadius: 99, overflow: 'hidden' }}>
             <div style={{
               height: '100%',
               width: `${hasFrames ? pct : Math.min(pct + 30, 96)}%`,
@@ -205,7 +207,7 @@ export default function ScrollJourneyCanvas() {
               borderRadius: 99, transition: 'width 0.5s ease',
             }} />
           </div>
-          <p style={{ fontSize: 10, color: '#1e293b', fontFamily: 'monospace', marginTop: 8 }}>
+          <p style={{ fontSize: 11, color: '#94a3b8', fontFamily: 'monospace', marginTop: 8 }}>
             {loadedCount} / {TOTAL_FRAMES} &bull; {pct}%
           </p>
         </div>

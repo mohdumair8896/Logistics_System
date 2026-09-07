@@ -135,7 +135,7 @@ export const JourneyHUD: React.FC<JourneyHUDProps> = ({ progress }) => {
         <div style={{ ...glass, padding: '8px 16px', borderRadius: 16, display: 'flex', alignItems: 'center', gap: 10, fontFamily: 'monospace', fontSize: 11, color: '#d4d4d8', pointerEvents: 'auto' }}>
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#34d399', display: 'inline-block', boxShadow: '0 0 8px #34d399' }} />
           <span style={{ color: '#fff', fontWeight: 700 }}>SHIPMENT #LF-9042</span>
-          <span style={{ color: '#52525b' }}>|</span>
+          <span style={{ color: '#94a3b8' }}>|</span>
           <span style={{ color: '#fbbf24', fontWeight: 700 }}>{Math.round(progress * 100)}% COMPLETE</span>
         </div>
 
@@ -157,12 +157,13 @@ export const JourneyHUD: React.FC<JourneyHUDProps> = ({ progress }) => {
       {/* ── Bottom: stage card ── */}
       <div style={{
         maxWidth: 520,
+        width: '100%',
         opacity: visible ? 1 : 0,
         transform: visible ? 'translateY(0)' : 'translateY(20px)',
         transition: 'opacity 0.7s, transform 0.7s',
         pointerEvents: 'auto',
       }}>
-        <div style={{ ...glass, padding: 'clamp(16px, 3vw, 32px)', borderRadius: 24, position: 'relative', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.12)' }}>
+        <div style={{ ...glass, padding: 'clamp(14px, 3vw, 28px)', borderRadius: 24, position: 'relative', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.14)' }}>
 
           {/* Accent glow top bar */}
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: stage.color, transition: 'background 0.5s' }} />
@@ -174,7 +175,7 @@ export const JourneyHUD: React.FC<JourneyHUDProps> = ({ progress }) => {
                 {stage.icon}
               </div>
               <div>
-                <span style={{ fontSize: 10, fontFamily: 'monospace', fontWeight: 700, letterSpacing: 2, color: '#71717a', textTransform: 'uppercase' }}>
+                <span style={{ fontSize: 11, fontFamily: 'monospace', fontWeight: 700, letterSpacing: 2, color: '#cbd5e1', textTransform: 'uppercase' }}>
                   Stage 0{stage.id + 1} of 05
                 </span>
                 <h3 style={{ fontSize: 'clamp(16px, 2vw, 22px)', fontWeight: 900, color: '#fff', margin: 0, letterSpacing: -0.5, lineHeight: 1.2 }}>
@@ -194,15 +195,15 @@ export const JourneyHUD: React.FC<JourneyHUDProps> = ({ progress }) => {
           </div>
 
           {/* Description */}
-          <p style={{ fontSize: 12, color: '#a1a1aa', lineHeight: 1.7, margin: '0 0 16px' }}>
+          <p style={{ fontSize: 13, color: '#cbd5e1', lineHeight: 1.7, margin: '0 0 16px' }}>
             {stage.desc}
           </p>
 
           {/* Metrics */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 14, marginBottom: 14 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', gap: 12, borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 14, marginBottom: 14 }}>
             {stage.metrics.map((m, idx) => (
               <div key={idx}>
-                <span style={{ fontSize: 9, color: '#52525b', fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: 1 }}>{m.label}</span>
+                <span style={{ fontSize: 10, color: '#94a3b8', fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: 1 }}>{m.label}</span>
                 <p style={{ fontSize: 12, fontWeight: 700, color: '#fff', fontFamily: 'monospace', margin: '2px 0 0' }}>{m.value}</p>
               </div>
             ))}
