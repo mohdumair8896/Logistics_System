@@ -4,8 +4,7 @@ import { useStore } from '@/lib/store';
 import {
   Navigation, MapPin, Clock, Truck, ChevronRight, Play,
   FastForward, CheckCircle, Gauge, Fuel, Thermometer, ShieldCheck,
-  Phone, MessageSquare, AlertTriangle, AlertCircle, Radio, Activity,
-  Compass, Zap, RefreshCw
+  Phone, MessageSquare, AlertTriangle, AlertCircle
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import DriverChatModal from '@/components/layout/DriverChatModal';
@@ -39,10 +38,6 @@ export default function TrackingPage() {
   const distDone = trip ? Math.round((trip.progress / 100) * trip.distance) : 0;
   const distLeft = trip ? trip.distance - distDone : 0;
 
-  // Real speedometer needle angle calculation (0 to 120 km/h maps to -90 to 90 deg)
-  const currentSpeed = trip?.speedKmH || 64;
-  const needleDeg = Math.min(90, Math.max(-90, ((currentSpeed / 120) * 180) - 90));
-
   const startSimulation = () => {
     if (!trip || trip.progress >= 100) return;
     setSimulating(true);
@@ -53,7 +48,7 @@ export default function TrackingPage() {
         setSimulating(false);
         return;
       }
-      const newProgress = Math.min(100, current.progress + 15);
+      const newProgress = Math.min(100, current.progress + 10);
       const remaining = trip.distance - Math.round((newProgress / 100) * trip.distance);
       const etaMin = Math.round((remaining / trip.distance) * (trip.distance / 60 * 60));
 
@@ -70,9 +65,9 @@ export default function TrackingPage() {
         progress: newProgress,
         eta: newProgress >= 100 ? 'Arrived at Destination!' : `${etaMin} min`,
         status: newProgress >= 100 ? 'Delivered' : 'In Transit',
-        speedKmH: newProgress >= 100 ? 0 : Math.floor(Math.random() * 12) + 62,
-        fuelPercent: Math.max(15, (current.fuelPercent || 85) - 3),
-        geofenceStatus: newProgress >= 100 ? 'Docked Inside Facility' : 'Inside Corridor (NH-19)',
+        speedKmH: newProgress >= 100 ? 0 : Math.floor(Math.random() * 15) + 60,
+        fuelPercent: Math.max(20, (current.fuelPercent || 85) - 2),
+        geofenceStatus: newProgress >= 100 ? 'Arrived' : 'Inside Corridor',
         checkpoints: updatedCheckpoints
       });
 
@@ -81,13 +76,13 @@ export default function TrackingPage() {
         setSimulating(false);
         setTimeout(() => router.push('/delivery'), 1800);
       }
-    }, 700);
+    }, 600);
   };
 
   const defaultCheckpoints = [
-    { name: `${trip?.origin || 'Origin'} Terminal Dispatch`, location: 'Ingate Checkpoint', passed: true, time: trip?.startedAt || '08:30 AM' },
-    { name: 'National Express Highway Corridor Toll', location: 'Tollgate NH-19', passed: (trip?.progress || 0) > 40, time: (trip?.progress || 0) > 40 ? '10:15 AM' : undefined },
-    { name: `${trip?.destination || 'Destination'} Facility Ingate`, location: 'Delivery Gate 2', passed: (trip?.progress || 0) >= 100, time: (trip?.progress || 0) >= 100 ? 'Arrived' : undefined }
+    { name: `${trip?.origin || 'Origin'} Hub Ingate`, location: 'Terminal Dispatch', passed: true, time: trip?.startedAt },
+    { name: 'National Corridor Express Toll', location: 'NH-19 Checkpoint', passed: (trip?.progress || 0) > 40, time: (trip?.progress || 0) > 40 ? '10:15 AM' : undefined },
+    { name: `${trip?.destination || 'Destination'} Facility Ingate`, location: 'Delivery Gate', passed: (trip?.progress || 0) >= 100, time: (trip?.progress || 0) >= 100 ? 'Arrived' : undefined }
   ];
 
   const displayCheckpoints = trip?.checkpoints && trip.checkpoints.length > 0 ? trip.checkpoints : defaultCheckpoints;
@@ -96,48 +91,23 @@ export default function TrackingPage() {
     <div className="animate-slide-in">
       <div className="page-header">
         <div>
-          <div className="page-title" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Radio size={22} color="var(--accent)" />
-            Live Telematics & Geofence Corridor Tracking
-          </div>
-          <div className="page-subtitle">
-            High-frequency GPS sensor HUD, real-time speed diagnostics & route telematics
-          </div>
+          <div className="page-title">Live Telematics & Geofencing Tracking</div>
+          <div className="page-subtitle">Real-time GPS coordinates, vehicle HUD sensors & waypoint logs</div>
         </div>
-
-        {trip && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span className="badge badge-cyan" style={{ fontSize: 11, padding: '4px 10px' }}>
-              GPS LOCK: ACTIVE (35ms latency)
-            </span>
-          </div>
-        )}
       </div>
 
       {activeTrips.length === 0 && trips.filter(t => t.status === 'Delivered').length > 0 ? (
         <div className="card" style={{ textAlign: 'center', padding: 60 }}>
           <CheckCircle size={48} color="#10b981" style={{ margin: '0 auto 16px' }} />
-          <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>All Dispatched Trips Completed!</div>
-          <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 8 }}>
-            View completed shipments in the Delivery & e-POD module or allocate new orders.
-          </div>
-          <button
-            className="btn btn-primary btn-sm"
-            style={{ marginTop: 16 }}
-            onClick={() => router.push('/orders')}
-          >
-            Go to Orders Queue →
-          </button>
+          <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>All Active Deliveries Completed!</div>
+          <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 8 }}>View completed shipments in the Delivery & POD module.</div>
         </div>
       ) : (
-        <div className="responsive-split-2">
-          {/* Active Trips Sidebar Selector */}
+        <div className="grid-2" style={{ gridTemplateColumns: '320px 1fr', gap: 20 }}>
+          {/* Active Trips Sidebar List */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
-                Active Transit Fleet ({activeTrips.length})
-              </span>
-              <span className="badge badge-cyan" style={{ fontSize: 9.5 }}>LIVE STREAM</span>
+            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
+              Active Corridor Trips ({activeTrips.length})
             </div>
 
             {activeTrips.map(t => {
@@ -153,19 +123,13 @@ export default function TrackingPage() {
                   style={{
                     cursor: 'pointer',
                     padding: 14,
-                    borderColor: isSelected ? 'var(--accent)' : undefined,
-                    transition: 'all 0.15s ease'
+                    borderColor: isSelected ? 'rgba(59,130,246,0.5)' : undefined
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                    <span className="mono" style={{ fontWeight: 800, fontSize: 13, color: 'var(--accent)' }}>
-                      {t.id}
-                    </span>
-                    <span className="badge badge-cyan" style={{ fontSize: 9.5 }}>
-                      {t.speedKmH || 64} KM/H
-                    </span>
+                    <span className="mono" style={{ fontWeight: 800, fontSize: 13, color: '#60a5fa' }}>{t.id}</span>
+                    <span className="badge badge-cyan" style={{ fontSize: 10 }}>LIVE GPS</span>
                   </div>
-
                   <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>
                     {t.origin.split(' ')[0]} → {t.destination}
                   </div>
@@ -175,8 +139,8 @@ export default function TrackingPage() {
                   </div>
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-muted)' }}>
-                    <span>{t.progress}% traveled</span>
-                    <span style={{ color: '#10b981', fontWeight: 600 }}>ETA: {t.eta}</span>
+                    <span>{t.progress}% complete</span>
+                    <span style={{ color: '#34d399', fontWeight: 600 }}>ETA: {t.eta}</span>
                   </div>
 
                   <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 8, paddingTop: 6, borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between' }}>
@@ -188,232 +152,112 @@ export default function TrackingPage() {
             })}
           </div>
 
-          {/* Main Tracking Canvas & Telematics HUD */}
+          {/* Main Tracking Canvas & Telematics HUD (Stitch Screen 10) */}
           {trip && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {/* Telematics Gauge HUD */}
+              {/* Telematics HUD Bar (Stitch Screen 10) */}
               <div className="grid-4" style={{ gap: 12 }}>
-                {/* Visual Speedometer Gauge Card */}
-                <div className="card" style={{ padding: 14, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div className="hud-gauge">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                      Velocity HUD
-                    </span>
-                    <Gauge size={15} color="var(--accent)" />
+                    <span className="hud-gauge-label">Live Speed</span>
+                    <Gauge size={13} color="#60a5fa" />
                   </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, margin: '8px 0' }}>
-                    {/* SVG Semi-Circle Speedometer */}
-                    <svg width="60" height="40" viewBox="0 0 60 40">
-                      <path d="M 5 35 A 25 25 0 0 1 55 35" fill="none" stroke="var(--border)" strokeWidth="6" strokeLinecap="round" />
-                      <path d="M 5 35 A 25 25 0 0 1 55 35" fill="none" stroke="var(--accent)" strokeWidth="6" strokeDasharray="80" strokeDashoffset={80 - (80 * (currentSpeed / 120))} strokeLinecap="round" />
-                      <line x1="30" y1="35" x2={30 + 18 * Math.cos((needleDeg * Math.PI) / 180)} y2={35 + 18 * Math.sin((needleDeg * Math.PI) / 180)} stroke="#FAFAF9" strokeWidth="2" strokeLinecap="round" />
-                      <circle cx="30" cy="35" r="3" fill="var(--accent)" />
-                    </svg>
-
-                    <div>
-                      <div className="mono" style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 }}>
-                        {trip.speedKmH || 64}
-                      </div>
-                      <div style={{ fontSize: 10.5, color: 'var(--text-muted)', marginTop: 2 }}>KM / HOUR</div>
-                    </div>
-                  </div>
-
-                  <div style={{ fontSize: 10.5, color: '#10b981', fontWeight: 600 }}>
-                    Cruising inside speed limit
+                  <div className="hud-gauge-value" style={{ color: '#60a5fa' }}>
+                    {trip.speedKmH || 64} <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500 }}>km/h</span>
                   </div>
                 </div>
 
-                {/* Fuel Level */}
-                <div className="card" style={{ padding: 14, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div className="hud-gauge">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                      Diesel Fuel
-                    </span>
-                    <Fuel size={15} color="#10b981" />
+                    <span className="hud-gauge-label">Fuel Level</span>
+                    <Fuel size={13} color="#34d399" />
                   </div>
-
-                  <div style={{ margin: '8px 0' }}>
-                    <div className="mono" style={{ fontSize: 24, fontWeight: 800, color: '#10b981', lineHeight: 1 }}>
-                      {trip.fuelPercent || 78}%
-                    </div>
-                    <div className="progress-bar" style={{ marginTop: 8 }}>
-                      <div className="progress-fill" style={{ width: `${trip.fuelPercent || 78}%`, background: (trip.fuelPercent || 78) > 25 ? '#10b981' : 'var(--danger)' }} />
-                    </div>
-                  </div>
-
-                  <div style={{ fontSize: 10.5, color: 'var(--text-muted)' }}>
-                    Range: ~{Math.round((trip.fuelPercent || 78) * 6.5)} km remaining
+                  <div className="hud-gauge-value" style={{ color: '#34d399' }}>
+                    {trip.fuelPercent || 78}%
                   </div>
                 </div>
 
-                {/* Cargo Temperature */}
-                <div className="card" style={{ padding: 14, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div className="hud-gauge">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                      Reefer / Cargo
-                    </span>
-                    <Thermometer size={15} color="var(--warning)" />
+                    <span className="hud-gauge-label">Cargo Temp</span>
+                    <Thermometer size={13} color="#f59e0b" />
                   </div>
-
-                  <div style={{ margin: '8px 0' }}>
-                    <div className="mono" style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>
-                      {trip.cargoTemp || '21.5°C'}
-                    </div>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
-                      Ambient Insulated
-                    </div>
-                  </div>
-
-                  <div style={{ fontSize: 10.5, color: '#10b981', fontWeight: 600 }}>
-                    Sensor Calibrated
+                  <div className="hud-gauge-value" style={{ fontSize: 14, color: '#f59e0b', marginTop: 2 }}>
+                    {trip.cargoTemp || '21.5°C Ambient'}
                   </div>
                 </div>
 
-                {/* Geofence Perimeter */}
-                <div className="card" style={{ padding: 14, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div className="hud-gauge">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                      Geofence Guard
-                    </span>
-                    <ShieldCheck size={15} color="#10b981" />
+                    <span className="hud-gauge-label">Geofence</span>
+                    <ShieldCheck size={13} color="#10b981" />
                   </div>
-
-                  <div style={{ margin: '8px 0' }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#10b981', display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span className="status-dot dot-green" />
-                      {trip.geofenceStatus || 'Inside Corridor'}
-                    </div>
-                    <div style={{ fontSize: 10.5, color: 'var(--text-muted)', marginTop: 4 }}>
-                      Route: NH-19 Corridor Verified
-                    </div>
-                  </div>
-
-                  <div style={{ fontSize: 10.5, color: 'var(--text-secondary)' }}>
-                    Deviation Alert: 0 km
+                  <div className="hud-gauge-value" style={{ fontSize: 13, color: '#10b981', marginTop: 2 }}>
+                    {trip.geofenceStatus || 'Inside Corridor'}
                   </div>
                 </div>
               </div>
 
-              {/* Corridor Route Visualizer with Interactive Distance HUD */}
-              <div className="card" style={{ position: 'relative', overflow: 'hidden', padding: 24, minHeight: 280, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: 320, position: 'relative' }}>
+              {/* Corridor Route Visualizer */}
+              <div className="map-container" style={{ minHeight: 260, padding: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: 260, position: 'relative' }}>
                   {/* Origin node */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, zIndex: 2 }}>
-                    <div style={{ width: 14, height: 14, borderRadius: '50%', background: '#10b981', boxShadow: '0 0 12px #10b981' }} />
-                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
-                      {trip.origin}
-                    </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#10b981', boxShadow: '0 0 10px #10b981' }} />
+                    <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>{trip.origin}</span>
                   </div>
 
-                  {/* Route Progress Track */}
-                  <div style={{ width: 3, height: 32, background: '#10b981', margin: '4px 0' }} />
-                  <div style={{ position: 'relative', width: '100%', height: 130 }}>
-                    <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 3, background: 'linear-gradient(180deg, #10b981 0%, var(--accent) 100%)', transform: 'translateX(-50%)' }} />
+                  {/* Route progress track */}
+                  <div style={{ width: 2, height: 30, background: '#10b981', margin: '4px 0' }} />
+                  <div style={{ position: 'relative', width: 220, height: 110 }}>
+                    <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 2, background: 'linear-gradient(180deg, #10b981 0%, #3b82f6 100%)', transform: 'translateX(-50%)' }} />
 
-                    {/* Animated High-Visibility Vehicle Pulse */}
-                    <div
-                      style={{
-                        position: 'absolute',
-                        left: '50%',
-                        top: `${Math.min(90, Math.max(10, trip.progress))}%`,
-                        transform: 'translate(-50%, -50%)',
-                        zIndex: 10,
-                        transition: 'top 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
-                      }}
-                    >
-                      <div
-                        style={{
-                          background: 'var(--bg-secondary)',
-                          border: '2px solid var(--accent)',
-                          borderRadius: 20,
-                          padding: '4px 12px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 6,
-                          boxShadow: '0 0 20px var(--accent)',
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        <Truck size={16} color="var(--accent)" />
-                        <span className="mono" style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)' }}>
-                          {vehicle?.vehicleNo || 'TRUCK'}
-                        </span>
-                      </div>
+                    {/* Truck icon */}
+                    <div style={{
+                      position: 'absolute',
+                      left: '50%',
+                      top: `${Math.min(88, (trip.progress / 100) * 100)}%`,
+                      transform: 'translate(-50%, -50%)',
+                      fontSize: 26,
+                      filter: 'drop-shadow(0 0 10px rgba(59,130,246,0.9))',
+                      transition: 'top 0.5s ease',
+                      animation: simulating ? 'float 1s infinite' : 'none'
+                    }}>
+                      🚚
                     </div>
                   </div>
-                  <div style={{ width: 3, height: 32, background: trip.progress >= 100 ? '#10b981' : 'var(--border)', margin: '4px 0' }} />
+                  <div style={{ width: 2, height: 30, background: trip.progress >= 100 ? '#10b981' : 'var(--border-light)', margin: '4px 0' }} />
 
                   {/* Destination node */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, zIndex: 2 }}>
-                    <div style={{ width: 14, height: 14, borderRadius: '50%', background: trip.progress >= 100 ? '#10b981' : 'var(--text-muted)' }} />
-                    <span style={{ fontSize: 13, fontWeight: 700, color: trip.progress >= 100 ? '#10b981' : 'var(--text-muted)' }}>
-                      {trip.destination}
-                    </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ width: 12, height: 12, borderRadius: '50%', background: trip.progress >= 100 ? '#10b981' : 'var(--text-muted)' }} />
+                    <span style={{ fontSize: 12, fontWeight: 700, color: trip.progress >= 100 ? '#10b981' : 'var(--text-muted)' }}>{trip.destination}</span>
                   </div>
                 </div>
 
-                {/* Distance & ETA Floating Badge */}
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 16,
-                    right: 16,
-                    background: 'rgba(28, 25, 23, 0.92)',
-                    border: '1px solid var(--border-light)',
-                    borderRadius: 10,
-                    padding: '10px 14px',
-                    textAlign: 'right'
-                  }}
-                >
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Distance Remaining</div>
-                  <div className="mono" style={{ fontSize: 18, fontWeight: 800, color: 'var(--accent)' }}>
-                    {distLeft} km
-                  </div>
-                  <div style={{ fontSize: 11, color: '#10b981', fontWeight: 600, marginTop: 4 }}>
-                    ETA: {trip.eta}
-                  </div>
+                {/* Live Distance & ETA Pill */}
+                <div style={{ position: 'absolute', top: 14, right: 14, background: 'rgba(17, 24, 39, 0.92)', border: '1px solid var(--border-light)', borderRadius: 10, padding: '10px 14px', textAlign: 'right' }}>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Remaining Distance</div>
+                  <div className="mono" style={{ fontSize: 16, fontWeight: 800, color: '#38bdf8' }}>{distLeft} km</div>
+                  <div style={{ fontSize: 11, color: '#34d399', fontWeight: 600, marginTop: 4 }}>ETA: {trip.eta}</div>
                 </div>
               </div>
 
-              {/* Waypoint Checkpoints Log & Simulation Action Bar */}
+              {/* Waypoint Checkpoint Log & Simulation Controls (Stitch Screen 10) */}
               <div className="grid-2" style={{ gap: 16 }}>
                 {/* Waypoint Log */}
                 <div className="card">
-                  <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--text-primary)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <MapPin size={15} color="var(--accent)" /> Corridor Checkpoint Log
+                  <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--text-primary)', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <MapPin size={14} color="#38bdf8" /> Corridor Checkpoint Log
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {displayCheckpoints.map((cp, idx) => (
-                      <div
-                        key={idx}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          fontSize: 12,
-                          padding: '8px 0',
-                          borderBottom: idx < displayCheckpoints.length - 1 ? '1px solid var(--border)' : 'none'
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <span
-                            style={{
-                              width: 8,
-                              height: 8,
-                              borderRadius: '50%',
-                              background: cp.passed ? '#10b981' : 'var(--text-muted)',
-                              boxShadow: cp.passed ? '0 0 8px #10b981' : 'none'
-                            }}
-                          />
-                          <div>
-                            <div style={{ color: cp.passed ? 'var(--text-primary)' : 'var(--text-muted)', fontWeight: cp.passed ? 600 : 400 }}>
-                              {cp.name}
-                            </div>
-                            <div style={{ fontSize: 10.5, color: 'var(--text-muted)' }}>{cp.location}</div>
-                          </div>
+                      <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, padding: '6px 0', borderBottom: idx < displayCheckpoints.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ width: 7, height: 7, borderRadius: '50%', background: cp.passed ? '#10b981' : 'var(--text-muted)' }} />
+                          <span style={{ color: cp.passed ? 'var(--text-primary)' : 'var(--text-muted)', fontWeight: cp.passed ? 600 : 400 }}>{cp.name}</span>
                         </div>
-                        <span className="mono" style={{ fontSize: 11, color: cp.passed ? '#10b981' : 'var(--text-muted)', fontWeight: 600 }}>
+                        <span style={{ fontSize: 11, color: cp.passed ? '#34d399' : 'var(--text-muted)' }}>
                           {cp.passed ? cp.time || 'Passed' : 'Pending'}
                         </span>
                       </div>
@@ -421,30 +265,22 @@ export default function TrackingPage() {
                   </div>
                 </div>
 
-                {/* Driver Communication & Simulation Trigger */}
+                {/* Driver Controls & Simulation Trigger */}
                 <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--text-primary)', marginBottom: 6 }}>
-                      Driver & Telematics Control
+                    <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--text-primary)', marginBottom: 8 }}>
+                      Driver & Dispatch Controls
                     </div>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>
-                      Assigned Driver: <strong style={{ color: 'var(--text-primary)' }}>{driver?.name}</strong> • Phone: <span className="mono">{driver?.phone}</span>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>
+                      Driver: <strong style={{ color: 'var(--text-primary)' }}>{driver?.name}</strong> • Vehicle: <span className="mono" style={{ color: '#60a5fa' }}>{vehicle?.vehicleNo}</span>
                     </div>
 
-                    <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-                      <button
-                        className="btn btn-secondary btn-sm"
-                        style={{ flex: 1, justifyContent: 'center' }}
-                        onClick={() => driver && setChatDriverId(driver.id)}
-                      >
-                        <MessageSquare size={14} /> Dispatch Chat
+                    <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+                      <button className="btn btn-secondary btn-sm" style={{ flex: 1 }} onClick={() => driver && setChatDriverId(driver.id)}>
+                        <MessageSquare size={13} /> Chat Driver
                       </button>
-                      <a
-                        href={`tel:${driver?.phone}`}
-                        className="btn btn-ghost btn-sm"
-                        style={{ flex: 1, textDecoration: 'none', justifyContent: 'center' }}
-                      >
-                        <Phone size={14} color="#10b981" /> Direct Call
+                      <a href={`tel:${driver?.phone}`} className="btn btn-ghost btn-sm" style={{ flex: 1, textDecoration: 'none', justifyContent: 'center' }}>
+                        <Phone size={13} color="#34d399" /> Call
                       </a>
                     </div>
                   </div>
@@ -457,23 +293,14 @@ export default function TrackingPage() {
                       disabled={simulating}
                     >
                       {simulating ? (
-                        <>
-                          <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,0.3)', borderTopColor: '#111', borderRadius: '50%' }} className="animate-spin" />
-                          Simulating Fast-Forward Transit...
-                        </>
+                        <><div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,0.3)', borderTopColor: '#111', borderRadius: '50%' }} className="animate-spin" /> Simulating Transit...</>
                       ) : (
-                        <>
-                          <FastForward size={16} /> Fast-Forward Journey Simulation (Live Telematics)
-                        </>
+                        <><FastForward size={16} /> Fast-Forward Journey Simulation</>
                       )}
                     </button>
                   ) : (
-                    <button
-                      className="btn btn-success w-full btn-lg"
-                      style={{ justifyContent: 'center' }}
-                      onClick={() => router.push('/delivery')}
-                    >
-                      <CheckCircle size={16} /> Destination Arrived — Finalize e-POD
+                    <button className="btn btn-success w-full btn-lg" style={{ justifyContent: 'center' }} onClick={() => router.push('/delivery')}>
+                      <CheckCircle size={16} /> Arrived — Proceed to Delivery & e-POD
                     </button>
                   )}
                 </div>

@@ -1,6 +1,52 @@
 @import "tailwindcss";
 
 /* ============================================================
+   TAILWIND V4 THEME — Register custom tokens so all utility
+   classes used in home page components resolve correctly.
+   ============================================================ */
+@theme {
+  /* Extended slate palette (slate-950 missing from v4 default) */
+  --color-slate-950: #020617;
+  --color-slate-900: #0f172a;
+  --color-slate-800: #1e293b;
+
+  /* Zinc extended */
+  --color-zinc-950: #09090b;
+
+  /* Amber extended (matches design tokens) */
+  --color-amber-50:  #fffbeb;
+  --color-amber-100: #fef3c7;
+  --color-amber-200: #fde68a;
+  --color-amber-300: #fcd34d;
+  --color-amber-400: #fbbf24;
+  --color-amber-500: #f59e0b;
+  --color-amber-600: #d97706;
+  --color-amber-700: #b45309;
+  --color-amber-800: #92400e;
+  --color-amber-900: #78350f;
+  --color-amber-950: #451a03;
+
+  /* Emerald extended */
+  --color-emerald-950: #022c22;
+
+  /* Sky */
+  --color-sky-400: #38bdf8;
+
+  /* Font families — map to loaded Google Font CSS variables */
+  --font-family-sans:  var(--font-inter), var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-family-mono:  var(--font-mono), var(--font-geist-mono), ui-monospace, monospace;
+  --font-family-serif: ui-serif, Georgia, serif;
+
+  /* Backdrop blur scale */
+  --blur-sm:  4px;
+  --blur-md:  12px;
+  --blur-lg:  16px;
+  --blur-xl:  24px;
+  --blur-2xl: 40px;
+  --blur-3xl: 64px;
+}
+
+/* ============================================================
    PRECISION LOGISTICS SYSTEM — DESIGN TOKENS
    Theme: Amber Industrial (primary) + Midnight Command (tracking)
    Inspired by: DHL, UPS, SAP TMS, Industrial Safety Standards
@@ -79,6 +125,24 @@
 }
 
 /* ============================================================
+   ANIMATIONS — referenced by inline style animation: properties
+   ============================================================ */
+@keyframes pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.4); }
+  50%       { opacity: 0.6; box-shadow: 0 0 0 6px rgba(52, 211, 153, 0); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(5px); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
    GLOBAL RESET
    ============================================================ */
 * {
@@ -87,14 +151,18 @@
   padding: 0;
 }
 
-html,
+html {
+  min-height: 100%;
+}
+
 body {
-  height: 100%;
+  min-height: 100%;
   font-family: var(--font-body);
   background: var(--bg-primary);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* NO overflow-x:hidden here — it breaks position:sticky in Firefox/Safari */
 }
 
 /* ============================================================

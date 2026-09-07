@@ -54,7 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${plusJakarta.variable} ${inter.variable} ${jetbrainsMono.variable}`}
     >
-      <body className="antialiased" style={{ fontFamily: 'var(--font-geist-sans, var(--font-inter, sans-serif))' }}>
+      <body className="antialiased">
         {children}
         <Toaster
           position="top-right"
