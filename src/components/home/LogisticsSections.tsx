@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import Link from 'next/link';
@@ -29,7 +29,7 @@ const glass = {
 
 export default function LogisticsSections() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
-  
+
   // Newsletter state
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterHoneypot, setNewsletterHoneypot] = useState('');
@@ -122,7 +122,7 @@ export default function LogisticsSections() {
       a: 'We operate across India’s national highway network including the Golden Quadrilateral (NH-44, NH-48, NH-19, NH-16), key industrial corridors (Delhi-Mumbai, Eastern Dedicated Freight Corridor), and regional feeder routes connecting Tier-2 and Tier-3 cities across Uttar Pradesh, Maharashtra, Gujarat, and Rajasthan.',
     },
     {
-      q: 'How does the predictive AI dispatch route optimization work?',
+      q: 'How does the predictive dispatch route optimization work?',
       a: 'Our algorithmic engine analyzes real-time weather, port congestion, highway traffic, and fuel tariffs to dynamically re-route shipments before bottlenecks occur.',
     },
     {
@@ -238,10 +238,10 @@ export default function LogisticsSections() {
             {/* Stats group — uniform connectedness: same card style = same data type */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, marginBottom: 8 }}>
               {[
-                { val: '99.8%*', label: 'On-Time Delivery Rate',      color: '#fbbf24' },
-                { val: '2.4M*',  label: 'Miles Tracked Annually',     color: '#22d3ee' },
-                { val: '0.02%*', label: 'Cargo Damage Rate',          color: '#34d399' },
-                { val: '<15s*',  label: 'Dispatch Response Time',     color: '#a78bfa' },
+                { val: '99.8%*', label: 'On-Time Delivery Rate', color: '#fbbf24' },
+                { val: '2.4M*', label: 'Miles Tracked Annually', color: '#22d3ee' },
+                { val: '0.02%*', label: 'Cargo Damage Rate', color: '#34d399' },
+                { val: '<15s*', label: 'Dispatch Response Time', color: '#a78bfa' },
               ].map((stat, i) => (
                 <div key={i}>
                   <span style={{ fontSize: 36, fontWeight: 900, color: stat.color, fontFamily: 'monospace', lineHeight: 1 }}>{stat.val}</span>
@@ -256,7 +256,7 @@ export default function LogisticsSections() {
             <div style={{ padding: 16, borderRadius: 16, background: 'rgba(52,211,153,0.07)', border: '1px solid rgba(52,211,153,0.15)', display: 'flex', alignItems: 'center', gap: 16 }}>
               <TrendingUp style={{ width: 32, height: 32, color: '#34d399', flexShrink: 0 }} aria-hidden="true" />
               <p style={{ fontSize: 13, color: '#cbd5e1', lineHeight: 1.6, margin: 0 }}>
-                AI load-balancing reduced client fuel costs by <strong style={{ color: '#34d399' }}>18.4%</strong> on average across Q2 interstate routes.*
+                Algorithmic load-balancing reduced client fuel costs by <strong style={{ color: '#34d399' }}>18.4%</strong> on average across Q2 interstate routes.*
               </p>
             </div>
           </div>

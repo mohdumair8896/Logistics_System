@@ -44,9 +44,6 @@ export const HeroOverlay: React.FC<HeroOverlayProps> = ({ onScrollClick }) => {
           <div>
             <h1 style={{ fontSize: 18, fontWeight: 900, color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: 8, letterSpacing: -0.5 }}>
               LogiFlow
-              <span style={{ fontSize: 10, fontFamily: 'monospace', fontWeight: 700, color: '#fbbf24', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 99, padding: '2px 8px' }}>
-                AI
-              </span>
             </h1>
             <p style={{ fontSize: 11, color: '#94a3b8', margin: 0, fontWeight: 500 }}>Enterprise Autonomous Freight</p>
           </div>
@@ -94,7 +91,7 @@ export const HeroOverlay: React.FC<HeroOverlayProps> = ({ onScrollClick }) => {
           textTransform: 'uppercase', letterSpacing: 2, marginBottom: 20,
         }}>
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fbbf24', display: 'inline-block' }} />
-          Next-Gen AI Fleet Logistics
+          Next-Gen Fleet Logistics
         </div>
 
         <h2 style={{

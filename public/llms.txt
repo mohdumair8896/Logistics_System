@@ -4,7 +4,7 @@
 ## About
 LogiFlow is an enterprise autonomous logistics management system (LMS) built for
 commercial freight operators in India. It provides real-time fleet telematics,
-AI dispatch, GPS shipment tracking, driver management, warehouse operations,
+dispatch, GPS shipment tracking, driver management, warehouse operations,
 and proof-of-delivery (POD) workflows.
 
 ## Product

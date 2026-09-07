@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import {
@@ -63,7 +63,7 @@ export const JOURNEY_STAGES: StageData[] = [
   {
     id: 2,
     label: 'Interstate Skyway Transit',
-    sub: 'Corridor Alpha • Dynamic AI Rerouting',
+    sub: 'Corridor Alpha • Dynamic Rerouting',
     tag: 'IN TRANSIT',
     desc: 'Long-haul high-speed corridor engaged. Real-time telematics monitors weather, traffic bottlenecks, and battery reserve.',
     color: '#38BDF8',

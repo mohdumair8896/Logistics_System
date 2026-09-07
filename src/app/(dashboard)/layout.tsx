@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useStore } from '@/lib/store';
@@ -10,14 +10,14 @@ const pageTitles: Record<string, { title: string; subtitle: string }> = {
   '/vehicles': { title: 'Fleet Roster & Telematics', subtitle: 'Master vehicle status, maintenance & live load' },
   '/drivers': { title: 'Driver Management & Credentials', subtitle: 'Personnel roster, licensing & verification' },
   '/orders': { title: 'Order Intake & Dispatch Queue', subtitle: 'Customer shipments and scheduling' },
-  '/allocation': { title: 'Smart Vehicle Allocation', subtitle: 'AI load matching and fleet recommendation' },
+  '/allocation': { title: 'Smart Vehicle Allocation', subtitle: 'Smart load matching and fleet recommendation' },
   '/warehouse': { title: 'Warehouse Staging & Loading Manifest', subtitle: 'Bay assignment, barcode scan & weight distribution' },
   '/trips': { title: 'Dispatched Trips & Route Planning', subtitle: 'Active transit routes and corridor monitoring' },
   '/tracking': { title: 'Live Telematics & Geofence Tracking', subtitle: 'Real-time vehicle HUD, speed & corridor status' },
   '/delivery': { title: 'Electronic Proof of Delivery (e-POD)', subtitle: 'Digital signature capture & goods verification' },
   '/invoices': { title: 'Automated GST Billing & Invoicing', subtitle: 'Freight settlement & tax invoice generation' },
   '/leads': { title: 'Shipper Leads & CRM', subtitle: 'Inbound enquiries, freight quotes & lead conversion' },
-  '/knowledge-base': { title: 'Knowledge Base & AI Config', subtitle: 'Dispatcher training data & bot response library' },
+  '/knowledge-base': { title: 'Knowledge Base & Config', subtitle: 'Dispatcher training data & bot response library' },
   '/design-system': { title: 'Design System', subtitle: 'UI component library & theme tokens' },
 };
 

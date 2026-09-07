@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
 import { useStore } from '@/lib/store';
 import {
@@ -62,7 +62,7 @@ export default function LeadsCRMPage() {
             Inbound Shipper Leads & Spot Intake CRM
           </div>
           <div className="page-subtitle">
-            24/7 AI-captured freight requests, spot tariff quotations & dispatch conversion
+            24/7 Captured freight requests, spot tariff quotations & dispatch conversion
           </div>
         </div>
       </div>
@@ -108,7 +108,7 @@ export default function LeadsCRMPage() {
         <div className="stat-card">
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-              AI Conversion Rate
+              Conversion Rate
             </div>
             <div className="mono" style={{ fontSize: 26, fontWeight: 800, color: '#F59E0B', marginTop: 4 }}>
               {leads.length > 0 ? Math.round((allocatedCount / leads.length) * 100) : 0}%
@@ -275,7 +275,7 @@ export default function LeadsCRMPage() {
               {selectedLead.transcriptSnippet && (
                 <div>
                   <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 6 }}>
-                    AI Conversation Transcript Snippet
+                    Conversation Transcript Snippet
                   </div>
                   <div style={{
                     padding: '10px 12px',

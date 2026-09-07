@@ -14,7 +14,7 @@
   --color-zinc-950: #09090b;
 
   /* Amber extended (matches design tokens) */
-  --color-amber-50:  #fffbeb;
+  --color-amber-50: #fffbeb;
   --color-amber-100: #fef3c7;
   --color-amber-200: #fde68a;
   --color-amber-300: #fcd34d;
@@ -33,14 +33,14 @@
   --color-sky-400: #38bdf8;
 
   /* Font families — map to loaded Google Font CSS variables */
-  --font-family-sans:  var(--font-inter), var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-family-mono:  var(--font-mono), var(--font-geist-mono), ui-monospace, monospace;
+  --font-family-sans: var(--font-inter), var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-family-mono: var(--font-mono), var(--font-geist-mono), ui-monospace, monospace;
 
   /* Backdrop blur scale */
-  --blur-sm:  4px;
-  --blur-md:  12px;
-  --blur-lg:  16px;
-  --blur-xl:  24px;
+  --blur-sm: 4px;
+  --blur-md: 12px;
+  --blur-lg: 16px;
+  --blur-xl: 24px;
   --blur-2xl: 40px;
   --blur-3xl: 64px;
 }
@@ -52,44 +52,44 @@
    ============================================================ */
 
 :root {
-  /* === AMBER INDUSTRIAL — Base Surfaces === */
-  --bg-primary:    #0C0A09;           /* Deep warm near-black */
-  --bg-secondary:  #1C1917;           /* Dark charcoal sidebar/header */
-  --bg-tertiary:   #292524;           /* Input / control backgrounds */
-  --bg-card:       #1E1B1A;           /* Card surfaces */
-  --bg-hover:      #2D2926;           /* Hover state */
-  --border:        #292524;           /* Subtle warm border */
-  --border-light:  #3D3733;           /* Elevated border */
+  /* === DEEP SPACE — Base Surfaces (matches home page) === */
+  --bg-primary:   #020617;            /* Slate-950 — deepest canvas */
+  --bg-secondary: #0f172a;            /* Slate-900 — sidebar, header */
+  --bg-tertiary:  #1e293b;            /* Slate-800 — inputs, controls */
+  --bg-card:      rgba(15,23,42,0.65);/* Glassmorphism card base */
+  --bg-hover:     rgba(255,255,255,0.05); /* Subtle hover state */
+  --border:       rgba(255,255,255,0.08); /* Default border */
+  --border-light: rgba(255,255,255,0.14); /* Elevated / focus border */
 
-  /* === AMBER INDUSTRIAL — Accent & Brand === */
-  --accent:        #F59E0B;           /* Amber — primary brand, CTA */
-  --accent-hover:  #D97706;           /* Amber dark on hover */
-  --accent-glow:   rgba(245, 158, 11, 0.15); /* Amber glow/highlight */
+  /* === ACCENT & BRAND (amber — unchanged) === */
+  --accent:       #f59e0b;            /* Amber-400 — primary CTA */
+  --accent-hover: #d97706;            /* Amber-600 — hover */
+  --accent-glow:  rgba(245,158,11,0.15); /* Amber glow fill */
 
-  /* === AMBER INDUSTRIAL — Status Colors === */
-  --success:       #10B981;           /* Emerald — DELIVERED / ON TIME */
-  --success-bg:    rgba(16, 185, 129, 0.12);
-  --warning:       #F97316;           /* Orange — DELAYED / ATTENTION */
-  --warning-bg:    rgba(249, 115, 22, 0.12);
-  --danger:        #F43F5E;           /* Rose — CRITICAL / FAILED */
-  --danger-bg:     rgba(244, 63, 94, 0.12);
-  --purple:        #A78BFA;           /* Violet — STAGED / IN WAREHOUSE */
-  --purple-bg:     rgba(167, 139, 250, 0.12);
-  --cyan:          #22D3EE;           /* Sky — LIVE TRACKING / IN TRANSIT */
-  --cyan-bg:       rgba(34, 211, 238, 0.12);
+  /* === STATUS COLORS (aligned to homepage secondaries) === */
+  --success:      #34d399;            /* Emerald-400 — DELIVERED / ON TIME */
+  --success-bg:   rgba(52,211,153,0.10);
+  --warning:      #fbbf24;            /* Amber-400 — DELAYED / ATTENTION */
+  --warning-bg:   rgba(251,191,36,0.10);
+  --danger:       #fb7185;            /* Rose-400 — CRITICAL / FAILED */
+  --danger-bg:    rgba(251,113,133,0.10);
+  --purple:       #a78bfa;            /* Violet-400 — STAGED / IN WAREHOUSE */
+  --purple-bg:    rgba(167,139,250,0.10);
+  --cyan:         #22d3ee;            /* Cyan-400 — LIVE TRACKING / IN TRANSIT */
+  --cyan-bg:      rgba(34,211,238,0.10);
 
-  /* === AMBER INDUSTRIAL — Typography === */
-  --text-primary:  #FAFAF9;           /* Warm white — headings, values */
-  --text-secondary:#D6D3D1;           /* Warm gray — body, labels */
-  --text-muted:    #A8A29E;           /* Stone 400 — metadata, timestamps — WCAG AA ≥4.5:1 on dark bg */
+  /* === TYPOGRAPHY === */
+  --text-primary:   #ffffff;          /* Pure white — headings, values */
+  --text-secondary: #e2e8f0;          /* Slate-200 — body, labels */
+  --text-muted:     #94a3b8;          /* Slate-400 — metadata, timestamps */
 
   /* === LAYOUT === */
   --sidebar-width: 260px;
 
   /* === FONTS === */
-  --font-heading:  var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
-  --font-body:     var(--font-inter), 'Inter', sans-serif;
-  --font-mono:     var(--font-mono), 'JetBrains Mono', monospace;
+  --font-heading: var(--font-inter), 'Inter', sans-serif;
+  --font-body:    var(--font-inter), 'Inter', sans-serif;
+  --font-mono:    ui-monospace, 'JetBrains Mono', monospace;
 }
 
 /* ============================================================
@@ -98,47 +98,87 @@
    Applied via .tracking-theme class on app-layout wrapper
    ============================================================ */
 .tracking-theme {
-  --bg-primary:    #020817;           /* Space black */
-  --bg-secondary:  #0A0F1E;           /* Deep navy */
-  --bg-tertiary:   #0F172A;           /* Navy control surface */
-  --bg-card:       #0D1526;           /* HUD card dark */
-  --bg-hover:      #162033;           /* Navy hover */
-  --border:        #1A2540;           /* Dark navy border */
-  --border-light:  #243050;           /* Mid navy border */
-  --accent:        #00D4FF;           /* Electric cyan */
-  --accent-hover:  #00AACC;           /* Cyan dark */
-  --accent-glow:   rgba(0, 212, 255, 0.15);
-  --success:       #00E676;           /* Neon green — DELIVERED */
-  --success-bg:    rgba(0, 230, 118, 0.12);
-  --warning:       #FFB800;           /* Gold — DELAYED */
-  --warning-bg:    rgba(255, 184, 0, 0.12);
-  --danger:        #FF4747;           /* Bright red — ALERT */
-  --danger-bg:     rgba(255, 71, 71, 0.12);
-  --purple:        #C084FC;           /* Bright violet */
-  --purple-bg:     rgba(192, 132, 252, 0.12);
-  --cyan:          #00D4FF;           /* Same as accent in this theme */
-  --cyan-bg:       rgba(0, 212, 255, 0.12);
-  --text-primary:  #E2E8F0;           /* Cool white */
-  --text-secondary:#94A3B8;           /* Slate gray */
-  --text-muted:    #475569;           /* Dark slate */
+  --bg-primary: #020817;
+  /* Space black */
+  --bg-secondary: #0A0F1E;
+  /* Deep navy */
+  --bg-tertiary: #0F172A;
+  /* Navy control surface */
+  --bg-card: #0D1526;
+  /* HUD card dark */
+  --bg-hover: #162033;
+  /* Navy hover */
+  --border: #1A2540;
+  /* Dark navy border */
+  --border-light: #243050;
+  /* Mid navy border */
+  --accent: #00D4FF;
+  /* Electric cyan */
+  --accent-hover: #00AACC;
+  /* Cyan dark */
+  --accent-glow: rgba(0, 212, 255, 0.15);
+  --success: #00E676;
+  /* Neon green — DELIVERED */
+  --success-bg: rgba(0, 230, 118, 0.12);
+  --warning: #FFB800;
+  /* Gold — DELAYED */
+  --warning-bg: rgba(255, 184, 0, 0.12);
+  --danger: #FF4747;
+  /* Bright red — ALERT */
+  --danger-bg: rgba(255, 71, 71, 0.12);
+  --purple: #C084FC;
+  /* Bright violet */
+  --purple-bg: rgba(192, 132, 252, 0.12);
+  --cyan: #00D4FF;
+  /* Same as accent in this theme */
+  --cyan-bg: rgba(0, 212, 255, 0.12);
+  --text-primary: #E2E8F0;
+  /* Cool white */
+  --text-secondary: #94A3B8;
+  /* Slate gray */
+  --text-muted: #475569;
+  /* Dark slate */
 }
 
 /* ============================================================
    ANIMATIONS — referenced by inline style animation: properties
    ============================================================ */
 @keyframes pulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.4); }
-  50%       { opacity: 0.6; box-shadow: 0 0 0 6px rgba(52, 211, 153, 0); }
+
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.4);
+  }
+
+  50% {
+    opacity: 0.6;
+    box-shadow: 0 0 0 6px rgba(52, 211, 153, 0);
+  }
 }
 
 @keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(5px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(5px);
+  }
 }
 
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ============================================================
@@ -260,15 +300,18 @@ body {
 .sidebar {
   width: var(--sidebar-width);
   height: 100vh;
-  background: var(--bg-secondary);
-  border-right: 1px solid var(--border);
+  background: rgba(2,6,23,0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-right: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 4px 0 32px rgba(0,0,0,0.5);
   display: flex;
   flex-direction: column;
   position: fixed;
   left: 0;
   top: 0;
   z-index: 160;
-  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease, border-color 0.3s ease;
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-logo {
@@ -400,14 +443,18 @@ body {
    ============================================================ */
 .header {
   height: 60px;
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border);
+  background: rgba(2,6,23,0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
   flex-shrink: 0;
-  transition: background 0.3s ease, border-color 0.3s ease;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .header-left {
@@ -477,26 +524,33 @@ body {
    CARDS
    ============================================================ */
 .card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  background: rgba(15,23,42,0.6);
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 16px;
   padding: 20px;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
 }
 
 .card:hover {
-  border-color: var(--border-light);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255,255,255,0.14);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+  transform: translateY(-1px);
 }
 
 .stat-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  background: rgba(15,23,42,0.6);
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 16px;
   padding: 20px;
   display: flex;
   align-items: flex-start;
   gap: 14px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
   transition: all 0.2s;
   position: relative;
   overflow: hidden;
@@ -921,6 +975,7 @@ body {
   .responsive-split-map {
     grid-template-columns: 1fr;
   }
+
   .grid-4 {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -1158,24 +1213,45 @@ body {
    KEYFRAME ANIMATIONS
    ============================================================ */
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.4; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes slideIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ============================================================
    ANIMATION UTILITIES
    ============================================================ */
-.animate-spin          { animation: spin 1s linear infinite; }
-.animate-slide-in      { animation: slideIn 0.3s ease forwards; }
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease forwards;
+}
 
 /* ============================================================
    TYPOGRAPHY UTILITIES
@@ -1191,52 +1267,159 @@ body {
 /* ============================================================
    FLEX / LAYOUT UTILITIES
    ============================================================ */
-.flex            { display: flex; }
-.flex-col        { flex-direction: column; }
-.items-center    { align-items: center; }
-.items-start     { align-items: flex-start; }
-.justify-between { justify-content: space-between; }
-.justify-center  { justify-content: center; }
-.gap-2           { gap: 8px; }
-.gap-3           { gap: 12px; }
-.gap-4           { gap: 16px; }
-.gap-6           { gap: 24px; }
-.w-full          { width: 100%; }
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.items-start {
+  align-items: flex-start;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.gap-2 {
+  gap: 8px;
+}
+
+.gap-3 {
+  gap: 12px;
+}
+
+.gap-4 {
+  gap: 16px;
+}
+
+.gap-6 {
+  gap: 24px;
+}
+
+.w-full {
+  width: 100%;
+}
 
 /* ============================================================
    TEXT UTILITIES
    ============================================================ */
-.text-sm       { font-size: 13px; }
-.text-xs       { font-size: 11px; }
-.text-muted    { color: var(--text-muted); }
-.text-secondary { color: var(--text-secondary); }
-.font-bold     { font-weight: 700; }
-.font-semibold { font-weight: 600; }
-.font-medium   { font-weight: 500; }
-.text-right    { text-align: right; }
-.text-center   { text-align: center; }
-.uppercase     { text-transform: uppercase; }
-.tracking-wide { letter-spacing: 0.5px; }
+.text-sm {
+  font-size: 13px;
+}
+
+.text-xs {
+  font-size: 11px;
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.uppercase {
+  text-transform: uppercase;
+}
+
+.tracking-wide {
+  letter-spacing: 0.5px;
+}
 
 /* ============================================================
    SPACING UTILITIES
    ============================================================ */
-.mt-1 { margin-top: 4px; }
-.mt-2 { margin-top: 8px; }
-.mt-3 { margin-top: 12px; }
-.mt-4 { margin-top: 16px; }
-.mt-6 { margin-top: 24px; }
-.mb-2 { margin-bottom: 8px; }
-.mb-4 { margin-bottom: 16px; }
-.mb-6 { margin-bottom: 24px; }
-.p-4  { padding: 16px; }
+.mt-1 {
+  margin-top: 4px;
+}
+
+.mt-2 {
+  margin-top: 8px;
+}
+
+.mt-3 {
+  margin-top: 12px;
+}
+
+.mt-4 {
+  margin-top: 16px;
+}
+
+.mt-6 {
+  margin-top: 24px;
+}
+
+.mb-2 {
+  margin-bottom: 8px;
+}
+
+.mb-4 {
+  margin-bottom: 16px;
+}
+
+.mb-6 {
+  margin-bottom: 24px;
+}
+
+.p-4 {
+  padding: 16px;
+}
 
 /* ============================================================
    MISC UTILITIES
    ============================================================ */
-.rounded        { border-radius: 8px; }
-.rounded-lg     { border-radius: 12px; }
-.cursor-pointer { cursor: pointer; }
-.overflow-hidden { overflow: hidden; }
-.relative       { position: relative; }
-.absolute       { position: absolute; }
+.rounded {
+  border-radius: 8px;
+}
+
+.rounded-lg {
+  border-radius: 12px;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+}

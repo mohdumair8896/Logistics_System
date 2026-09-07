@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import Link from 'next/link';
 import { ArrowLeft, FileCheck, Scale, AlertTriangle, Truck, CheckCircle2, Shield } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -87,7 +87,7 @@ export default function TermsPage() {
           <section>
             <h2 style={{ fontSize: 20, fontWeight: 700, color: '#fff', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
               <Truck style={{ width: 18, height: 18, color: '#fbbf24' }} />
-              2. Logistics Services & AI Dispatch
+              2. Logistics Services & Dispatch
             </h2>
             <p>
               LogiFlow provides digital freight brokerage, autonomous dispatch coordination, automated manifest verification, IoT sensory tracking, and cross-dock allocation software:

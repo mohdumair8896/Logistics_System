@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
 import { useStore, KnowledgeBaseItem } from '@/lib/store';
 import {
@@ -57,7 +57,7 @@ export default function KnowledgeBasePage() {
 
     toast(
       'Knowledge Base Updated',
-      `Article "${form.title}" added to LogiFlow AI training repository.`,
+      `Article "${form.title}" added to LogiFlow training repository.`,
       'success'
     );
 
@@ -67,7 +67,7 @@ export default function KnowledgeBasePage() {
 
   const handleDelete = (id: string, title: string) => {
     deleteKnowledgeBaseItem(id);
-    toast('Article Removed', `Deleted "${title}" from AI knowledge base.`, 'info');
+    toast('Article Removed', `Deleted "${title}" from knowledge base.`, 'info');
   };
 
   return (
@@ -77,10 +77,10 @@ export default function KnowledgeBasePage() {
         <div>
           <div className="page-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <BookOpen size={20} color="var(--accent)" />
-            AI Knowledge Base & Corridor Policy Portal
+            Knowledge Base & Corridor Policy Portal
           </div>
           <div className="page-subtitle">
-            Configure freight tariffs, hub operating guidelines & cold-chain SOPs queryable by LogiFlow AI
+            Configure freight tariffs, hub operating guidelines & cold-chain SOPs queryable by LogiFlow
           </div>
         </div>
         <button
@@ -214,7 +214,7 @@ export default function KnowledgeBasePage() {
           <div className="modal" style={{ maxWidth: 500 }} onClick={e => e.stopPropagation()}>
             <div className="modal-title">
               <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Sparkles size={16} color="var(--accent)" /> Add AI Knowledge Document
+                <Sparkles size={16} color="var(--accent)" /> Add Knowledge Document
               </span>
               <button onClick={() => setShowAddModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
                 <X size={18} />
@@ -276,7 +276,7 @@ export default function KnowledgeBasePage() {
                   Cancel
                 </button>
                 <button type="submit" className="btn btn-primary" style={{ flex: 1.5 }}>
-                  Save & Ingest into AI
+                  Save & Ingest
                 </button>
               </div>
             </form>

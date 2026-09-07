@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import {
@@ -183,7 +183,7 @@ const QuoteRequest: React.FC = () => {
             </span>
           </h2>
           <p style={{ fontSize: 15, color: '#a8b8c8', lineHeight: 1.75, maxWidth: 480, marginBottom: 40 }}>
-            Our AI matches your shipment to the optimal verified carrier — minimum transit time, maximum route efficiency, real-time tracking from pickup to proof of delivery.
+            Our system matches your shipment to the optimal verified carrier — minimum transit time, maximum route efficiency, real-time tracking from pickup to proof of delivery.
           </p>
 
           <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 24 }}>

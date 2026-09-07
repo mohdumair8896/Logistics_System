@@ -41,7 +41,7 @@ const navItems: NavSection[] = [
     { href: '/vehicles',    icon: Truck,  label: 'Vehicles',    badge: 'vehicles' },
     { href: '/drivers',     icon: Users,  label: 'Drivers' },
   ]},
-  { label: 'AI TOOLS', items: [
+  { label: 'TOOLS', items: [
     { href: '/leads',          icon: Sparkles, label: 'Shipper Leads CRM', badge: 'leads' },
     { href: '/knowledge-base', icon: BookOpen, label: 'Knowledge Base' },
   ]},
@@ -80,11 +80,11 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     <aside className={`sidebar ${isOpen ? 'drawer-open' : ''}`}>
       <div className="sidebar-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div className="logo-mark">
-          <div className="logo-icon">
-            <Truck size={20} color="#1C1917" />
+          <div className="logo-icon" style={{ fontWeight: 900, fontSize: 13, color: '#1c1917', letterSpacing: -0.5 }}>
+            LF
           </div>
           <div className="logo-text">
-            <div className="name">Precision Logistics</div>
+            <div className="name">LogiFlow</div>
             <div className="sub">Fleet Intelligence LMS</div>
           </div>
         </div>

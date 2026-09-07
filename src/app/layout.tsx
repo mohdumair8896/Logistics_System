@@ -92,7 +92,7 @@ const organizationSchema = {
   "name": "Precision Logistics Technologies Pvt. Ltd.",
   "alternateName": "LogiFlow",
   "url": siteUrl,
-  "description": "Enterprise autonomous logistics infrastructure connecting industrial shippers, cross-docks, AI dispatch, real-time IoT sensory tracking, and electric fleet routing across India.",
+  "description": "Enterprise autonomous logistics infrastructure connecting industrial shippers, cross-docks, dispatch, real-time IoT sensory tracking, and electric fleet routing across India.",
   "foundingDate": "2024",
   "areaServed": "IN",
   "serviceType": "Freight & Logistics Management",
