@@ -1,12 +1,10 @@
 'use client';
 import { useStore } from '@/lib/store';
 import { Navigation, Clock, MapPin, CheckCircle, Truck } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function TripsPage() {
   const { trips, vehicles, drivers, orders, customers } = useStore();
-  const router = useRouter();
 
   const statusColor: Record<string, string> = { 'In Transit': 'badge-cyan', 'Delivered': 'badge-green', 'Cancelled': 'badge-red' };
   const dotColor: Record<string, string> = { 'In Transit': 'dot-blue', 'Delivered': 'dot-green', 'Cancelled': 'dot-red' };
@@ -39,7 +37,7 @@ export default function TripsPage() {
               const distDone = Math.round((trip.progress / 100) * trip.distance);
               const distLeft = trip.distance - distDone;
               return (
-                <div key={trip.id} className="card" onClick={() => router.push('/tracking')} style={{ cursor: 'pointer' }}>
+                <Link key={trip.id} href="/tracking" className="card" style={{ cursor: 'pointer', display: 'block', textDecoration: 'none', color: 'inherit' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -84,7 +82,7 @@ export default function TripsPage() {
                       <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{trip.load.toLocaleString()} kg</span>
                     </div>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>

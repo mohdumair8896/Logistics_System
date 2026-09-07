@@ -53,7 +53,9 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
 
-    if (!email || !email.includes('@')) {
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail || !trimmedEmail.includes('@')) {
       setError('Please enter a valid business email address.');
       setLoading(false);
       return;
@@ -69,7 +71,7 @@ export default function LoginPage() {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: trimmedEmail, password }),
         credentials: 'same-origin',
       });
 

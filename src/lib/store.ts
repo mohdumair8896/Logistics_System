@@ -64,14 +64,12 @@ export interface AppState {
 
   login: (credentials?: { email?: string; role?: string; name?: string; facility?: string }) => void;
   logout: () => void;
-  resetSystemData: () => void;
 
   addShipperLead: (lead: Omit<ShipperLead, 'id' | 'createdAt' | 'status'>) => string;
   updateLeadStatus: (id: string, status: ShipperLead['status']) => void;
   convertLeadToOrder: (leadId: string) => string;
 
   addKnowledgeBaseItem: (item: Omit<KnowledgeBaseItem, 'id' | 'lastUpdated'>) => string;
-  updateKnowledgeBaseItem: (id: string, updates: Partial<KnowledgeBaseItem>) => void;
   deleteKnowledgeBaseItem: (id: string) => void;
 
   addVehicle: (v: Omit<Vehicle, 'id'>) => void;
@@ -285,11 +283,6 @@ export const useStore = create<AppState>()(
         return id;
       },
 
-      updateKnowledgeBaseItem: (id, updates) => {
-        set(s => ({
-          knowledgeBase: s.knowledgeBase.map(k => k.id === id ? { ...k, ...updates, lastUpdated: new Date().toISOString().split('T')[0] } : k)
-        }));
-      },
 
       deleteKnowledgeBaseItem: (id) => {
         set(s => ({
@@ -343,20 +336,6 @@ export const useStore = create<AppState>()(
         fetch('/api/auth/logout', { method: 'POST' }).catch(() => {/* best-effort */});
       },
 
-      resetSystemData: () => {
-        set({
-          vehicles: JSON.parse(JSON.stringify(initialVehicles)),
-          drivers: JSON.parse(JSON.stringify(initialDrivers)),
-          customers: JSON.parse(JSON.stringify(initialCustomers)),
-          products: JSON.parse(JSON.stringify(initialProducts)),
-          inventory: JSON.parse(JSON.stringify(initialInventory)),
-          orders: JSON.parse(JSON.stringify(initialOrders)),
-          trips: JSON.parse(JSON.stringify(initialTrips)),
-          invoices: JSON.parse(JSON.stringify(initialInvoices)),
-          alerts: JSON.parse(JSON.stringify(initialAlerts)),
-          messages: JSON.parse(JSON.stringify(mockDriverMessages)),
-        });
-      },
 
       addVehicle: (v) => {
     const id = `V${String(vehicleCounter++).padStart(3, '0')}`;

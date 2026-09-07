@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Bell, Search, AlertTriangle, Check, X, ShieldAlert, Truck } from 'lucide-react';
+import { Bell, AlertTriangle, Check, X, ShieldAlert, Truck } from 'lucide-react';
 import { useStore } from '@/lib/store';
 import Link from 'next/link';
 
@@ -58,21 +58,26 @@ export default function Header({ title, subtitle }: HeaderProps) {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                 <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 6 }}>
                   <ShieldAlert size={15} color="#f59e0b" />
-                  Fleet Alerts & Advisories ({alerts.length})
+                  Alerts ({alerts.length})
                 </div>
-                <button onClick={() => setShowAlerts(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                <button
+                  onClick={() => setShowAlerts(false)}
+                  aria-label="Close alerts panel"
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '6px 8px', minWidth: 32, minHeight: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6 }}
+                >
                   <X size={15} />
                 </button>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 280, overflowY: 'auto' }}>
+                {/* Serial Position: newest alerts first */}
                 {alerts.length === 0 ? (
                   <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-muted)', fontSize: 12.5 }}>
                     <Check size={24} color="#10b981" style={{ margin: '0 auto 8px' }} />
                     All fleet operations normal. No active alerts.
                   </div>
                 ) : (
-                  alerts.map(a => (
+                  [...alerts].sort((a, b) => (b.timestamp > a.timestamp ? 1 : -1)).map(a => (
                     <div key={a.id} style={{
                       padding: 10,
                       background: 'var(--bg-tertiary)',
@@ -81,7 +86,11 @@ export default function Header({ title, subtitle }: HeaderProps) {
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                         <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>{a.title}</span>
-                        <button onClick={() => dismissAlert(a.id)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 2 }}>
+                        <button
+                          onClick={() => dismissAlert(a.id)}
+                          aria-label={`Dismiss alert: ${a.title}`}
+                          style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '6px 8px', minWidth: 32, minHeight: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 4 }}
+                        >
                           <X size={12} />
                         </button>
                       </div>

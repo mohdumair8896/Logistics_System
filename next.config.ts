@@ -3,6 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
+  // P1 Security: hide TypeScript source from browser DevTools in production
+  productionBrowserSourceMaps: false,
   async headers() {
     return [
       {
@@ -18,7 +20,7 @@ const nextConfig: NextConfig = {
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=()' },
           {
             // Content Security Policy
-            // Note: These are also set by src/middleware.ts (Edge layer).
+            // Note: These are also set by src/proxy.ts (Edge layer).
             // next.config.ts headers act as a static fallback for static pages.
             key: 'Content-Security-Policy',
             value: [

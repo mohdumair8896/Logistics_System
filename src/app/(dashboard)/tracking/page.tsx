@@ -2,12 +2,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useStore } from '@/lib/store';
 import {
-  Navigation, MapPin, Clock, Truck, ChevronRight, Play,
+  MapPin, Truck,
   FastForward, CheckCircle, Gauge, Fuel, Thermometer, ShieldCheck,
-  Phone, MessageSquare, AlertTriangle, AlertCircle
+  Phone, MessageSquare
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import DriverChatModal from '@/components/layout/DriverChatModal';
+import { useToast } from '@/components/ui/Toast';
 
 export default function TrackingPage() {
   const { trips, vehicles, drivers, orders, customers, updateTrip } = useStore();
@@ -15,6 +16,7 @@ export default function TrackingPage() {
   const [simulating, setSimulating] = useState(false);
   const [chatDriverId, setChatDriverId] = useState<string | null>(null);
   const router = useRouter();
+  const { toast } = useToast();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const activeTrips = trips.filter(t => t.status === 'In Transit');
@@ -74,6 +76,8 @@ export default function TrackingPage() {
       if (newProgress >= 100) {
         if (intervalRef.current) clearInterval(intervalRef.current);
         setSimulating(false);
+        // Peak-End Rule: positive celebration before leaving the page
+        toast('Shipment Delivered! ✓', 'Cargo successfully delivered. Generating POD.', 'success');
         setTimeout(() => router.push('/delivery'), 1800);
       }
     }, 600);

@@ -1,9 +1,9 @@
 'use client';
 import { useState } from 'react';
-import { useStore, ShipperLead } from '@/lib/store';
+import { useStore } from '@/lib/store';
 import {
-  Users, Search, Filter, Phone, Mail, MapPin, Truck, CheckCircle,
-  Clock, ArrowRight, ShieldAlert, FileText, ChevronRight, X, Sparkles, Check
+  Search, Filter, Phone, Truck, CheckCircle,
+  Sparkles
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/Toast';

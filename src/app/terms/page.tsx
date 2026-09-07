@@ -6,11 +6,23 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Terms & Conditions | LogiFlow Logistics',
   description: 'LogiFlow master service terms, carrier network conditions, freight liability policies, and service level agreements.',
+  alternates: { canonical: '/terms' },
+};
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://logiflow.io" },
+    { "@type": "ListItem", "position": 2, "name": "Terms & Conditions", "item": "https://logiflow.io/terms" },
+  ]
 };
 
 export default function TermsPage() {
   return (
-    <div style={{ background: '#020617', color: '#e2e8f0', minHeight: '100vh', padding: '48px 24px' }}>
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <div style={{ background: '#020617', color: '#e2e8f0', minHeight: '100vh', padding: '48px 24px' }}>
       <div style={{ maxWidth: 880, margin: '0 auto' }}>
         
         {/* Navigation back */}
@@ -132,5 +144,6 @@ export default function TermsPage() {
 
       </div>
     </div>
+    </>
   );
 }

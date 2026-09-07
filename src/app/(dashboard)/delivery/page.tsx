@@ -2,8 +2,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { useStore } from '@/lib/store';
 import {
-  PackageCheck, CheckCircle, Upload, PenLine, AlertTriangle,
-  RotateCcw, Camera, ShieldCheck, FileText, ArrowRight
+  PackageCheck, CheckCircle, PenLine,
+  RotateCcw, Camera, FileText
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 

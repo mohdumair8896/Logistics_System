@@ -1,7 +1,7 @@
 'use client';
 import { useState, useRef } from 'react';
 import { useStore } from '@/lib/store';
-import { FileText, Download, CheckCircle, Building2, Printer, ShieldCheck, Check } from 'lucide-react';
+import { FileText, Download, Building2, Printer, ShieldCheck } from 'lucide-react';
 
 export default function InvoicesPage() {
   const { invoices, orders, customers, vehicles, drivers, products } = useStore();

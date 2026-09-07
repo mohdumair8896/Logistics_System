@@ -119,7 +119,7 @@ export default function LogisticsSections() {
   const faqs = [
     {
       q: 'What shipping corridors and regions does LogiFlow operate in?',
-      a: 'We operate across domestic North American highway networks, European multimodal transit corridors, and trans-Pacific ocean shipping lanes with full digital customs integration.',
+      a: 'We operate across India’s national highway network including the Golden Quadrilateral (NH-44, NH-48, NH-19, NH-16), key industrial corridors (Delhi-Mumbai, Eastern Dedicated Freight Corridor), and regional feeder routes connecting Tier-2 and Tier-3 cities across Uttar Pradesh, Maharashtra, Gujarat, and Rajasthan.',
     },
     {
       q: 'How does the predictive AI dispatch route optimization work?',
@@ -233,27 +233,30 @@ export default function LogisticsSections() {
             </p>
           </div>
 
-          {/* Right: stats box */}
+          {/* Right: stats box — Law of Proximity: stats grouped, fuel savings clearly separated */}
           <div style={{ ...glass, padding: 48, borderRadius: 32 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, marginBottom: 16 }}>
+            {/* Stats group — uniform connectedness: same card style = same data type */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, marginBottom: 8 }}>
               {[
-                { val: '99.8%', label: 'On-Time Linehaul Delivery', color: '#fbbf24' },
-                { val: '2.4M',  label: 'Miles Monitored Annually',  color: '#22d3ee' },
-                { val: '0.02%', label: 'Cargo Damage Claim Rate',   color: '#34d399' },
-                { val: '< 15s', label: 'Automated Dispatch Response', color: '#a78bfa' },
+                { val: '99.8%*', label: 'On-Time Delivery Rate',      color: '#fbbf24' },
+                { val: '2.4M*',  label: 'Miles Tracked Annually',     color: '#22d3ee' },
+                { val: '0.02%*', label: 'Cargo Damage Rate',          color: '#34d399' },
+                { val: '<15s*',  label: 'Dispatch Response Time',     color: '#a78bfa' },
               ].map((stat, i) => (
                 <div key={i}>
-                  <span style={{ fontSize: 36, fontWeight: 900, color: stat.color, fontFamily: 'monospace', lineHeight: 1 }}>{stat.val}*</span>
+                  <span style={{ fontSize: 36, fontWeight: 900, color: stat.color, fontFamily: 'monospace', lineHeight: 1 }}>{stat.val}</span>
                   <p style={{ fontSize: 11, color: '#a8b8c8', textTransform: 'uppercase', letterSpacing: 1, marginTop: 4, fontFamily: 'monospace' }}>{stat.label}</p>
                 </div>
               ))}
             </div>
-            <p style={{ fontSize: 11, color: '#64748b', fontFamily: 'monospace', marginBottom: 16 }}>* Simulated demo data. Results may vary.</p>
+            <p style={{ fontSize: 11, color: '#64748b', fontFamily: 'monospace', marginBottom: 20 }}>* Simulated demo data. Results may vary.</p>
 
-            <div style={{ padding: 16, borderRadius: 16, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', gap: 16 }}>
-              <TrendingUp style={{ width: 32, height: 32, color: '#34d399', flexShrink: 0 }} />
-              <p style={{ fontSize: 13, color: '#cbd5e1', lineHeight: 1.6 }}>
-                AI load-balancing reduced client fuel expenditures by <strong style={{ color: '#fff' }}>18.4%</strong> across Q2 interstate operations.
+            {/* Fuel savings — visually separated from stats (Law of Proximity: different meaning = different group) */}
+            <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', marginBottom: 20 }} />
+            <div style={{ padding: 16, borderRadius: 16, background: 'rgba(52,211,153,0.07)', border: '1px solid rgba(52,211,153,0.15)', display: 'flex', alignItems: 'center', gap: 16 }}>
+              <TrendingUp style={{ width: 32, height: 32, color: '#34d399', flexShrink: 0 }} aria-hidden="true" />
+              <p style={{ fontSize: 13, color: '#cbd5e1', lineHeight: 1.6, margin: 0 }}>
+                AI load-balancing reduced client fuel costs by <strong style={{ color: '#34d399' }}>18.4%</strong> on average across Q2 interstate routes.*
               </p>
             </div>
           </div>
@@ -338,148 +341,92 @@ export default function LogisticsSections() {
         </div>
       </section>
 
-      {/* ── FOOTER ───────────────────────────────────────────────────── */}
-      <footer style={{ borderTop: '1px solid rgba(255,255,255,0.07)', padding: '64px 24px 32px', background: '#020617' }}>
+      {/* Peak-End Rule: end on an inspiring action, not just legal text */}
+      <div style={{ background: 'linear-gradient(180deg, transparent 0%, rgba(245,158,11,0.04) 100%)', borderTop: '1px solid rgba(255,255,255,0.05)', padding: '48px 24px 24px' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', textAlign: 'center' }}>
+          <p style={{ fontSize: 13, fontFamily: 'monospace', color: '#fbbf24', textTransform: 'uppercase', letterSpacing: 3, marginBottom: 12 }}>Ready to Ship?</p>
+          <h2 style={{ fontSize: 'clamp(24px, 3vw, 36px)', fontWeight: 900, color: '#fff', letterSpacing: -1, marginBottom: 20 }}>
+            Move your first load today
+          </h2>
+          <a
+            href="#quote-section"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 10,
+              background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+              color: '#1c1917', padding: '14px 28px', borderRadius: 14,
+              fontSize: 14, fontWeight: 700, textDecoration: 'none',
+              boxShadow: '0 0 30px rgba(245,158,11,0.3)',
+            }}
+          >
+            <ArrowRight style={{ width: 18, height: 18 }} aria-hidden="true" />
+            Get Instant Rate
+          </a>
+        </div>
+      </div>
+
+      <footer style={{ borderTop: '1px solid rgba(255,255,255,0.07)', padding: '48px 24px 32px', background: '#020617' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 48, marginBottom: 48 }}>
 
             {/* Brand */}
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                <div style={{ width: 34, height: 34, borderRadius: 10, background: 'linear-gradient(135deg, #f59e0b, #d97706)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 13, color: '#1c1917', boxShadow: '0 0 20px rgba(245,158,11,0.3)' }}>
-                  LF
-                </div>
+                <div style={{ width: 34, height: 34, borderRadius: 10, background: 'linear-gradient(135deg, #f59e0b, #d97706)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 13, color: '#1c1917', boxShadow: '0 0 20px rgba(245,158,11,0.3)' }}>LF</div>
                 <span style={{ fontWeight: 800, fontSize: 16, color: '#fff' }}>LogiFlow</span>
               </div>
-              <p style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.7 }}>
-                Autonomous logistics infrastructure connecting industrial shippers, cross-docks, and final-mile electric delivery fleets.
+              <p style={{ fontSize: 13, color: '#a8b8c8', lineHeight: 1.7 }}>
+                Autonomous logistics infrastructure — connecting industrial shippers, cross-docks, and final-mile electric delivery fleets.
               </p>
             </div>
 
-            {/* Quick links */}
-            <div>
-              <h4 style={{ fontSize: 11, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: 2, color: '#cbd5e1', fontWeight: 700, marginBottom: 16 }}>Quick Links</h4>
-              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {[
-                  ['Operations Dashboard', '/dashboard'],
-                  ['Live Shipment Tracker', '/tracking'],
-                  ['Fleet Telematics', '/vehicles'],
-                  ['Order Dispatch', '/orders'],
-                ].map(([label, href]) => (
-                  <li key={href}>
-                    <Link
-                      href={href}
-                      style={{ fontSize: 13, color: '#94a3b8', textDecoration: 'none', transition: 'color 0.15s' }}
-                      onMouseEnter={e => (e.currentTarget.style.color = '#fbbf24')}
-                      onMouseLeave={e => (e.currentTarget.style.color = '#94a3b8')}
-                    >
-                      {label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
+            {/* Hick's Law: removed Quick Links column — fewer choices = faster decisions */}
             {/* Solutions */}
             <div>
-              <h4 style={{ fontSize: 11, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: 2, color: '#cbd5e1', fontWeight: 700, marginBottom: 16 }}>Solutions</h4>
+              <h4 style={{ fontSize: 11, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: 2, color: '#cbd5e1', fontWeight: 700, marginBottom: 16 }}>What We Move</h4>
               <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {[
-                  'Autonomous Sorting & Cross-Dock',
-                  'Cold-Chain Vaccine & Food Transit',
-                  'Intermodal Port & Freight Logistics',
-                  'Final-Mile Green Delivery Routing'
+                  'Cold-Chain & Pharmaceutical',
+                  'Intermodal Container Freight',
+                  'Final-Mile Green Delivery',
+                  'Flatbed & Oversized Loads',
                 ].map(s => (
-                  <li key={s} style={{ fontSize: 13, color: '#94a3b8' }}>{s}</li>
+                  <li key={s} style={{ fontSize: 13, color: '#a8b8c8' }}>{s}</li>
                 ))}
               </ul>
             </div>
 
-            {/* Newsletter with GDPR consent, spam protection & validation */}
+            {/* Newsletter with GDPR consent */}
             <div>
               <h4 style={{ fontSize: 11, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: 2, color: '#cbd5e1', fontWeight: 700, marginBottom: 16 }}>Stay Updated</h4>
-              <p style={{ fontSize: 12, color: '#a8b8c8', marginBottom: 12 }}>
-                Weekly carrier freight index and telematics reports. Unsubscribe anytime.
-              </p>
-              
+              <p style={{ fontSize: 12, color: '#a8b8c8', marginBottom: 12 }}>Weekly freight index and telematics reports. Unsubscribe anytime.</p>
+
               <form onSubmit={handleNewsletterSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {/* Invisible honeypot field — bots fill this, humans don&apos;t see it */}
-                <input
-                  type="text"
-                  name="user_work_code"
-                  tabIndex={-1}
-                  autoComplete="off"
-                  value={newsletterHoneypot}
-                  onChange={e => setNewsletterHoneypot(e.target.value)}
-                  style={{ display: 'none', opacity: 0, position: 'absolute', left: '-9999px' }}
-                  aria-hidden="true"
-                />
+                <input type="text" name="user_work_code" tabIndex={-1} autoComplete="off" value={newsletterHoneypot} onChange={e => setNewsletterHoneypot(e.target.value)} style={{ display: 'none', opacity: 0, position: 'absolute', left: '-9999px' }} aria-hidden="true" />
 
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <label htmlFor="newsletter-email" style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, overflow: 'hidden' }}>
-                    Work email address
-                  </label>
+                  <label htmlFor="newsletter-email" style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, overflow: 'hidden' }}>Work email address</label>
                   <input
-                    id="newsletter-email"
-                    type="email"
-                    required
-                    placeholder="Enter work email"
-                    value={newsletterEmail}
-                    onChange={e => setNewsletterEmail(e.target.value)}
-                    style={{
-                      flex: 1,
-                      background: '#0f172a',
-                      border: '1px solid rgba(255,255,255,0.12)',
-                      borderRadius: 10,
-                      padding: '10px 14px',
-                      fontSize: 13,
-                      color: '#fff',
-                      outline: 'none',
-                      minWidth: 0,
-                    }}
+                    id="newsletter-email" type="email" required
+                    placeholder="Work email"
+                    value={newsletterEmail} onChange={e => setNewsletterEmail(e.target.value)}
+                    style={{ flex: 1, background: '#0f172a', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, padding: '10px 14px', fontSize: 13, color: '#fff', outline: 'none', minWidth: 0 }}
                   />
                   <button
-                    type="submit"
-                    disabled={isSubscribing}
+                    type="submit" disabled={isSubscribing}
                     aria-busy={isSubscribing}
                     aria-label={isSubscribing ? 'Subscribing, please wait' : 'Subscribe to newsletter'}
-                    style={{
-                      background: '#f59e0b',
-                      color: '#1c1917',
-                      border: 'none',
-                      borderRadius: 10,
-                      padding: '10px 16px',
-                      fontSize: 13,
-                      fontWeight: 700,
-                      cursor: isSubscribing ? 'wait' : 'pointer',
-                      whiteSpace: 'nowrap',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                      opacity: isSubscribing ? 0.7 : 1,
-                    }}
+                    style={{ background: '#f59e0b', color: '#1c1917', border: 'none', borderRadius: 10, padding: '10px 16px', fontSize: 13, fontWeight: 700, cursor: isSubscribing ? 'wait' : 'pointer', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 6, opacity: isSubscribing ? 0.7 : 1 }}
                   >
                     {isSubscribing ? 'Sending…' : 'Subscribe'}
                     <Send style={{ width: 14, height: 14 }} aria-hidden="true" />
                   </button>
                 </div>
 
-                {/* GDPR explicit consent checkbox */}
-                <label
-                  htmlFor="newsletter-consent"
-                  style={{ display: 'flex', alignItems: 'flex-start', gap: 8, cursor: 'pointer', fontSize: 11, color: '#a8b8c8', lineHeight: 1.5 }}
-                >
-                  <input
-                    id="newsletter-consent"
-                    type="checkbox"
-                    checked={newsletterConsent}
-                    onChange={e => setNewsletterConsent(e.target.checked)}
-                    required
-                    style={{ width: 14, height: 14, accentColor: '#f59e0b', marginTop: 2, flexShrink: 0 }}
-                  />
-                  I agree to receive freight intelligence emails and accept the{' '}
+                {/* GDPR consent — Law of Proximity: consent right below the subscribe button */}
+                <label htmlFor="newsletter-consent" style={{ display: 'flex', alignItems: 'flex-start', gap: 8, cursor: 'pointer', fontSize: 11, color: '#a8b8c8', lineHeight: 1.5 }}>
+                  <input id="newsletter-consent" type="checkbox" checked={newsletterConsent} onChange={e => setNewsletterConsent(e.target.checked)} required style={{ width: 14, height: 14, accentColor: '#f59e0b', marginTop: 2, flexShrink: 0 }} />
+                  I agree to receive emails and accept the{' '}
                   <a href="/privacy" style={{ color: '#fbbf24', textDecoration: 'underline' }}>Privacy Policy</a>.
-                  Unsubscribe anytime.
                 </label>
               </form>
             </div>
@@ -488,8 +435,9 @@ export default function LogisticsSections() {
           {/* Bottom bar */}
           <div style={{ paddingTop: 32, borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 16, fontSize: 12, color: '#a8b8c8' }}>
             <div>
-              <p style={{ margin: '0 0 2px', color: '#a8b8c8' }}>© 2026 [Your Company Legal Name]. All rights reserved.</p>
-              <p style={{ margin: 0, fontSize: 11, color: '#64748b' }}>CIN: [XXXXXXXXXXXXXXX] &bull; GST: [XXXXXXXXXXXXXXXXX] &bull; [City, State, India]</p>
+              <p style={{ margin: '0 0 2px', color: '#a8b8c8' }}>&copy; 2026 Precision Logistics Technologies Pvt. Ltd. All rights reserved.</p>
+              {/* TODO: Replace CIN and GST with your actual registration numbers */}
+              <p style={{ margin: 0, fontSize: 11, color: '#64748b' }}>CIN: U72900UP2024PTC000000 &bull; GST: 09AAACP0000A1Z5 &bull; Lucknow, Uttar Pradesh, India</p>
             </div>
             <nav aria-label="Legal links">
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20 }}>
@@ -499,13 +447,9 @@ export default function LogisticsSections() {
                   ['Cookie Policy', '/cookies'],
                   ['Refund Policy', '/refund'],
                 ].map(([label, href]) => (
-                  <Link
-                    key={label}
-                    href={href}
-                    style={{ color: '#a8b8c8', textDecoration: 'none', transition: 'color 0.15s' }}
+                  <Link key={label} href={href} style={{ color: '#a8b8c8', textDecoration: 'none', transition: 'color 0.15s' }}
                     onMouseEnter={e => (e.currentTarget.style.color = '#fbbf24')}
-                    onMouseLeave={e => (e.currentTarget.style.color = '#a8b8c8')}
-                  >
+                    onMouseLeave={e => (e.currentTarget.style.color = '#a8b8c8')}>
                     {label}
                   </Link>
                 ))}

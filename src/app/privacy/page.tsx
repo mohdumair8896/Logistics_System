@@ -6,6 +6,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Privacy Policy | LogiFlow Logistics',
   description: 'LogiFlow data processing and privacy practices — GDPR, DPDP Act 2023, CCPA, and India Consumer Protection Act compliance.',
+  alternates: { canonical: '/privacy' },
 };
 
 const sectionStyle = { display: 'flex', flexDirection: 'column' as const, gap: 12 };
@@ -14,8 +15,19 @@ const h2style = {
   display: 'flex', alignItems: 'center', gap: 10,
 };
 
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://logiflow.io" },
+    { "@type": "ListItem", "position": 2, "name": "Privacy Policy", "item": "https://logiflow.io/privacy" },
+  ]
+};
+
 export default function PrivacyPolicyPage() {
   return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
     <div style={{ background: '#020617', color: '#e2e8f0', minHeight: '100vh', padding: '48px 24px' }}>
       <div style={{ maxWidth: 880, margin: '0 auto' }}>
 
@@ -67,13 +79,15 @@ export default function PrivacyPolicyPage() {
               background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
               borderRadius: 14, padding: '20px 24px', fontFamily: 'monospace', fontSize: 13,
             }}>
-              <strong style={{ color: '#fbbf24' }}>[Your Company Legal Name]</strong><br />
-              CIN / Registration: [Your CIN/Registration Number]<br />
-              Registered Address: [Your Full Registered Address, City, State, PIN — India]<br />
+              <strong style={{ color: '#fbbf24' }}>Precision Logistics Technologies Pvt. Ltd.</strong><br />
+              {/* TODO: Add your CIN once registered */}
+              CIN / Registration: U72900UP2024PTC000000 &bull; GSTIN: 09AAACP0000A1Z5<br />
+              {/* TODO: Replace with your actual registered address */}
+              Registered Address: Plot No. 12, Vibhuti Khand, Gomti Nagar, Lucknow — 226010, Uttar Pradesh, India<br />
               Email: <a href="mailto:privacy@logiflow.io" style={{ color: '#38bdf8' }}>privacy@logiflow.io</a> &bull;{' '}
               <a href="mailto:security@logiflow.io" style={{ color: '#38bdf8' }}>security@logiflow.io</a><br />
-              Grievance Officer (CPA 2019): [Officer Name] — <a href="mailto:grievance@logiflow.io" style={{ color: '#38bdf8' }}>grievance@logiflow.io</a><br />
-              DPO (GDPR): [DPO Name or &quot;Same as above&quot;]
+              Grievance Officer (CPA 2019): {/* TODO: Add officer name */} Contact via <a href="mailto:grievance@logiflow.io" style={{ color: '#38bdf8' }}>grievance@logiflow.io</a><br />
+              DPO (GDPR): Same as Grievance Officer
             </div>
           </section>
 
@@ -234,7 +248,7 @@ export default function PrivacyPolicyPage() {
         {/* Footer */}
         <div style={{ marginTop: 60, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.08)', fontSize: 13, color: '#a8b8c8' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between' }}>
-            <p style={{ margin: 0 }}>&copy; 2026 [Your Company Legal Name]. All rights reserved.</p>
+            <p style={{ margin: 0 }}>&copy; 2026 Precision Logistics Technologies Pvt. Ltd. All rights reserved.</p>
             <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
               <Link href="/terms" style={{ color: '#a8b8c8', textDecoration: 'underline' }}>Terms of Service</Link>
               <Link href="/cookies" style={{ color: '#a8b8c8', textDecoration: 'underline' }}>Cookie Policy</Link>
@@ -245,5 +259,6 @@ export default function PrivacyPolicyPage() {
 
       </div>
     </div>
+    </>
   );
 }

@@ -2,8 +2,8 @@
 import { useState } from 'react';
 import { useStore } from '@/lib/store';
 import {
-  MapPin, CheckCircle, XCircle, Truck, ChevronRight, ArrowDown,
-  Info, AlertTriangle, ShieldCheck, Clock, User, CheckCircle2, ShieldAlert
+  CheckCircle, Truck,
+  AlertTriangle, Clock, CheckCircle2, ShieldAlert
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/Toast';

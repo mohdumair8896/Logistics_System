@@ -3,9 +3,8 @@ import { useState, useEffect } from 'react';
 import { useStore } from '@/lib/store';
 import {
   Truck, Users, ShoppingCart, Navigation, PackageCheck, Clock,
-  TrendingUp, AlertTriangle, ShieldAlert, Plus, Search, ArrowRight,
-  MapPin, CheckCircle2, Activity, Radio, ExternalLink, Gauge,
-  Thermometer, Fuel, RefreshCw, Layers
+  TrendingUp, Plus, Search,
+  MapPin, Activity, Radio, ExternalLink, Fuel
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -34,7 +33,6 @@ export default function DashboardPage() {
   const [selectedTruck, setSelectedTruck] = useState<ActiveTruckMarker | null>(null);
   const [trackingQuery, setTrackingQuery] = useState('');
   const [trackingError, setTrackingError] = useState('');
-  const [radarPulse, setRadarPulse] = useState(0);
 
   const pendingOrders = orders.filter(o => o.status === 'Pending');
   const activeTrips = trips.filter(t => t.status === 'In Transit');
@@ -107,13 +105,7 @@ export default function DashboardPage() {
     }
   ];
 
-  // Periodic simulated radar blip
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setRadarPulse(p => (p + 1) % 100);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
+
 
   const stats = [
     {
@@ -242,7 +234,7 @@ export default function DashboardPage() {
             <div>
               <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Radio size={16} color="var(--accent)" />
-                Live Fleet Radar & National Corridors
+                Live Fleet Map
                 <span className="badge badge-green" style={{ fontSize: 9, padding: '2px 6px' }}>
                   LIVE GPS PINGS
                 </span>
@@ -431,7 +423,8 @@ export default function DashboardPage() {
                   </div>
                   <button
                     onClick={() => setSelectedTruck(null)}
-                    style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 14 }}
+                    aria-label="Close truck details"
+                    style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '8px', minWidth: 36, minHeight: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6 }}
                   >
                     ✕
                   </button>
@@ -639,7 +632,7 @@ export default function DashboardPage() {
           <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-primary)' }}>
-                Active Freight Manifests
+                Recent Orders
               </div>
               <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 1 }}>
                 Live dispatch queue and delivery milestones
@@ -656,8 +649,8 @@ export default function DashboardPage() {
                 <tr>
                   <th>Order ID</th>
                   <th>Route</th>
-                  <th>Payload Weight</th>
-                  <th>Scheduled SLA</th>
+                  <th>Weight</th>
+                  <th>Deadline</th>
                   <th>Status</th>
                 </tr>
               </thead>

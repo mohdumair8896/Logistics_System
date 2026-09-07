@@ -2,8 +2,8 @@
 import { useState } from 'react';
 import { useStore, KnowledgeBaseItem } from '@/lib/store';
 import {
-  BookOpen, Plus, Search, Filter, Tag, Clock, Trash2, Edit3,
-  CheckCircle, Sparkles, X, ChevronRight, Layers, FileText
+  BookOpen, Plus, Search, Filter, Trash2,
+  Sparkles, X
 } from 'lucide-react';
 import { useToast } from '@/components/ui/Toast';
 

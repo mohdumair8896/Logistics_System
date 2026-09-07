@@ -1,3 +1,15 @@
+/**
+ * TEMPORARY: Mock Data Layer
+ * ─────────────────────────────────────────────────────────────────
+ * This file is the interim data source for all dashboard pages and
+ * API routes while a real backend database is not yet connected.
+ *
+ * TODO: Replace each export with real API/database calls when
+ * a backend (PostgreSQL schema in docs/schema.sql) is integrated.
+ *
+ * DO NOT add business logic here. Keep it as pure data fixtures.
+ */
+
 // Mock Data for Precision Logistics Management System (LMS)
 
 export interface ActivityLogItem {
@@ -516,34 +528,4 @@ export const mockDriverMessages: Record<string, { sender: 'driver' | 'dispatcher
   ]
 };
 
-// Aliases for backwards compatibility
-export const mockVehicles = initialVehicles;
-export const mockDrivers = initialDrivers;
-export const mockCustomers = initialCustomers;
-export const mockProducts = initialProducts;
-export const mockInventory = initialInventory;
-export const mockOrders = initialOrders;
-export const mockTrips = initialTrips;
-export const mockInvoices = initialInvoices;
 
-export const getVehicleById = (id: string) => mockVehicles.find(v => v.id === id);
-export const getDriverById = (id: string) => mockDrivers.find(d => d.id === id);
-export const getCustomerById = (id: string) => mockCustomers.find(c => c.id === id);
-export const getProductById = (id: string) => mockProducts.find(p => p.id === id);
-export const getOrderById = (id: string) => mockOrders.find(o => o.id === id);
-export const getTripById = (id: string) => mockTrips.find(t => t.id === id);
-
-export const statusColors: Record<string, string> = {
-  'Available': 'badge-green',
-  'In Transit': 'badge-blue',
-  'Maintenance': 'badge-red',
-  'On Trip': 'badge-yellow',
-  'Off Duty': 'badge-gray',
-  'Pending': 'badge-yellow',
-  'Allocated': 'badge-blue',
-  'Delivered': 'badge-green',
-  'Cancelled': 'badge-red',
-  'In Progress': 'badge-cyan',
-  'Paid': 'badge-green',
-  'Unpaid': 'badge-red',
-};

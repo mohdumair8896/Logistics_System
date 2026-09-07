@@ -35,7 +35,6 @@
   /* Font families — map to loaded Google Font CSS variables */
   --font-family-sans:  var(--font-inter), var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-family-mono:  var(--font-mono), var(--font-geist-mono), ui-monospace, monospace;
-  --font-family-serif: ui-serif, Georgia, serif;
 
   /* Backdrop blur scale */
   --blur-sm:  4px;
@@ -82,7 +81,7 @@
   /* === AMBER INDUSTRIAL — Typography === */
   --text-primary:  #FAFAF9;           /* Warm white — headings, values */
   --text-secondary:#D6D3D1;           /* Warm gray — body, labels */
-  --text-muted:    #78716C;           /* Stone — metadata, timestamps */
+  --text-muted:    #A8A29E;           /* Stone 400 — metadata, timestamps — WCAG AA ≥4.5:1 on dark bg */
 
   /* === LAYOUT === */
   --sidebar-width: 260px;
@@ -698,14 +697,7 @@ body {
   box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
 }
 
-.btn-danger {
-  background: var(--danger);
-  color: white;
-}
 
-.btn-danger:hover {
-  box-shadow: 0 0 16px rgba(244, 63, 94, 0.4);
-}
 
 .btn-warning {
   background: var(--warning);
@@ -879,14 +871,7 @@ body {
   scrollbar-width: thin;
 }
 
-/* Mobile Visibility Classes */
-.hide-mobile {
-  display: inline-flex !important;
-}
 
-.show-mobile {
-  display: none !important;
-}
 
 /* Mobile Navigation Toggle & Drawer Backdrop */
 .mobile-menu-toggle {
@@ -1055,10 +1040,7 @@ body {
   box-shadow: 0 0 6px var(--success);
 }
 
-.dot-yellow {
-  background: var(--warning);
-  box-shadow: 0 0 6px var(--warning);
-}
+
 
 .dot-red {
   background: var(--danger);
@@ -1129,11 +1111,7 @@ body {
   font-family: var(--font-heading);
 }
 
-.divider {
-  height: 1px;
-  background: var(--border);
-  margin: 16px 0;
-}
+
 
 /* ============================================================
    RECOMMENDED CARD (Allocation)
@@ -1193,30 +1171,11 @@ body {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-6px); }
-}
-
-@keyframes truckPulse {
-  0%, 100% { transform: scale(1); }
-  50%       { transform: scale(1.08); }
-}
-
-@keyframes glowPulse {
-  0%, 100% { box-shadow: 0 0 8px var(--accent); }
-  50%       { box-shadow: 0 0 20px var(--accent); }
-}
-
 /* ============================================================
    ANIMATION UTILITIES
    ============================================================ */
-.animate-pulse-custom  { animation: pulse 2s infinite; }
 .animate-spin          { animation: spin 1s linear infinite; }
 .animate-slide-in      { animation: slideIn 0.3s ease forwards; }
-.animate-float         { animation: float 3s ease-in-out infinite; }
-.animate-truck         { animation: truckPulse 1.5s ease-in-out infinite; }
-.animate-glow          { animation: glowPulse 2s ease-in-out infinite; }
 
 /* ============================================================
    TYPOGRAPHY UTILITIES

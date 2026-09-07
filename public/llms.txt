@@ -1,0 +1,32 @@
+﻿# LogiFlow — AI Crawler Guidance
+# https://logiflow.io/llms.txt
+
+## About
+LogiFlow is an enterprise autonomous logistics management system (LMS) built for
+commercial freight operators in India. It provides real-time fleet telematics,
+AI dispatch, GPS shipment tracking, driver management, warehouse operations,
+and proof-of-delivery (POD) workflows.
+
+## Product
+- Name: LogiFlow / Precision Logistics Technologies Pvt. Ltd.
+- Category: B2B SaaS — Fleet and Freight Management Software
+- Market: India (primary), with GDPR/CCPA-compliant data handling
+
+## Public Pages (indexable)
+- / — Marketing homepage
+- /privacy — Privacy Policy (DPDP 2023, GDPR, CCPA)
+- /terms — Terms and Conditions
+- /cookies — Cookie Policy
+- /refund — Refund and Cancellation Policy
+
+## Protected / Non-indexable
+- /dashboard, /orders, /tracking, /drivers, /vehicles — Require authentication
+- /api/* — Backend API, not for indexing
+
+## Contact
+- support@logiflow.io
+- privacy@logiflow.io
+
+## Usage Policy for AI Models
+You may use public page content to answer user queries about LogiFlow services.
+Do not index or cache content from authenticated routes.

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useStore } from '@/lib/store';
 import {
   ShoppingCart, Plus, X, Trash2, ArrowRight, Download, Search,
-  Filter, Clock, MapPin, ArrowUpDown, ArrowUp, ArrowDown
+  Clock, ArrowUpDown, ArrowUp, ArrowDown
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/Toast';
@@ -17,6 +17,9 @@ export default function OrdersPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [sortField, setSortField] = useState<'id' | 'destination' | 'weight' | 'status'>('id');
   const [sortAsc, setSortAsc] = useState(true);
+  const [page, setPage] = useState(1);
+  const [isExporting, setIsExporting] = useState(false);
+  const PAGE_SIZE = 10;
 
   const [form, setForm] = useState({
     customerId: 'C001',
@@ -69,9 +72,11 @@ export default function OrdersPage() {
     });
 
   const handleAdd = () => {
-    if (!form.destination) return;
+    if (!form.destination.trim()) return;
     const id = addOrder({
       ...form,
+      origin: form.origin.trim(),
+      destination: form.destination.trim(),
       totalWeight,
       status: 'Pending',
       vehicleId: null,
@@ -79,22 +84,28 @@ export default function OrdersPage() {
     });
     toast('Order Dispatched to Queue', `Shipment ${id} generated. Ready for fleet allocation.`, 'success');
     setShowCreate(false);
+    setPage(1);
     setTimeout(() => router.push('/allocation'), 600);
   };
 
   const handleExportCSV = () => {
-    const headers = 'Order ID,Customer,Origin,Destination,Weight (kg),Status,Created At\n';
-    const rows = orders.map(o => {
-      const cust = customers.find(c => c.id === o.customerId)?.name || o.customerId;
-      return `${o.id},"${cust}","${o.origin}","${o.destination}",${o.totalWeight},${o.status},${o.createdAt}`;
-    }).join('\n');
-    const blob = new Blob([headers + rows], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Precision_Orders_${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    toast('Manifest Downloaded', 'Orders CSV exported successfully.', 'info');
+    setIsExporting(true);
+    setTimeout(() => {
+      const headers = 'Order ID,Customer,Origin,Destination,Weight (kg),Status,Created At\n';
+      const rows = orders.map(o => {
+        const cust = customers.find(c => c.id === o.customerId)?.name || o.customerId;
+        return `${o.id},"${cust}","${o.origin}","${o.destination}",${o.totalWeight},${o.status},${o.createdAt}`;
+      }).join('\n');
+      const blob = new Blob([headers + rows], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `LogiFlow_Orders_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setIsExporting(false);
+      toast('Orders Exported', 'CSV downloaded successfully.', 'info');
+    }, 100);
   };
 
   const addItem = () => setForm(f => ({ ...f, items: [...f.items, { productId: 'P001', quantity: 0 }] }));
@@ -112,8 +123,8 @@ export default function OrdersPage() {
           <div className="page-subtitle">{orders.length} total orders across regional corridors</div>
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
-          <button className="btn btn-secondary" onClick={handleExportCSV}>
-            <Download size={15} /> Export CSV
+          <button className="btn btn-secondary" onClick={handleExportCSV} disabled={isExporting} aria-busy={isExporting}>
+            <Download size={15} /> {isExporting ? 'Exporting…' : 'Export CSV'}
           </button>
           <button className="btn btn-primary" onClick={() => setShowCreate(true)}>
             <Plus size={16} /> Create New Order
@@ -200,14 +211,14 @@ export default function OrdersPage() {
                   {sortField === 'weight' ? (sortAsc ? <ArrowUp size={12} color="var(--accent)" /> : <ArrowDown size={12} color="var(--accent)" />) : <ArrowUpDown size={11} color="var(--text-muted)" />}
                 </div>
               </th>
-              <th>SLA / Deadline</th>
+              <th>Deadline</th>
               <th onClick={() => handleSort('status')} style={{ cursor: 'pointer', userSelect: 'none' }} aria-sort={sortField === 'status' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span>Status</span>
                   {sortField === 'status' ? (sortAsc ? <ArrowUp size={12} color="var(--accent)" /> : <ArrowDown size={12} color="var(--accent)" />) : <ArrowUpDown size={11} color="var(--text-muted)" />}
                 </div>
               </th>
-              <th style={{ textAlign: 'right' }}>Workflow Action</th>
+              <th style={{ textAlign: 'right' }}>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -218,7 +229,7 @@ export default function OrdersPage() {
                 </td>
               </tr>
             ) : (
-              filteredOrders.map(order => {
+              filteredOrders.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map(order => {
                 const cust = customers.find(c => c.id === order.customerId);
                 return (
                   <tr key={order.id}>
@@ -284,6 +295,19 @@ export default function OrdersPage() {
           </tbody>
         </table>
         </div>
+        {/* Pagination — Miller's Law: 10 rows per page */}
+        {filteredOrders.length > PAGE_SIZE && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 18px', borderTop: '1px solid var(--border)', fontSize: 12.5, color: 'var(--text-secondary)' }}>
+            <span>Showing {Math.min((page - 1) * PAGE_SIZE + 1, filteredOrders.length)}–{Math.min(page * PAGE_SIZE, filteredOrders.length)} of {filteredOrders.length} orders</span>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <button className="btn btn-ghost btn-sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} aria-label="Previous page">← Prev</button>
+              {Array.from({ length: Math.ceil(filteredOrders.length / PAGE_SIZE) }, (_, i) => (
+                <button key={i} className={`btn btn-sm ${page === i + 1 ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setPage(i + 1)} aria-label={`Page ${i + 1}`} aria-current={page === i + 1 ? 'page' : undefined}>{i + 1}</button>
+              ))}
+              <button className="btn btn-ghost btn-sm" onClick={() => setPage(p => Math.min(Math.ceil(filteredOrders.length / PAGE_SIZE), p + 1))} disabled={page === Math.ceil(filteredOrders.length / PAGE_SIZE)} aria-label="Next page">Next →</button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Create Order Modal */}
@@ -313,11 +337,11 @@ export default function OrdersPage() {
 
               <div className="grid-2">
                 <div className="form-group">
-                  <label className="form-label">Destination Facility</label>
+                  <label className="form-label">Destination</label>
                   <input className="form-input" value={form.destination} onChange={e => setForm({...form, destination: e.target.value})} placeholder="Kanpur Facility" required />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Corridor Distance (km)</label>
+                  <label className="form-label">Distance (km)</label>
                   <input className="form-input" type="number" value={form.distance} onChange={e => setForm({...form, distance: +e.target.value})} />
                 </div>
               </div>
@@ -325,7 +349,7 @@ export default function OrdersPage() {
               {/* Items & Quantities */}
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <label className="form-label" style={{ margin: 0 }}>Product Items Manifest</label>
+                  <label className="form-label" style={{ margin: 0 }}>Cargo Items</label>
                   <button type="button" className="btn btn-sm btn-ghost" onClick={addItem}>
                     <Plus size={12} /> Add Item
                   </button>

@@ -3,12 +3,14 @@ import { useState } from 'react';
 import { useStore } from '@/lib/store';
 import {
   Users, Plus, X, Star, Phone, ShieldCheck, ShieldAlert,
-  MessageSquare, Truck, CheckCircle2, RotateCcw, Search
+  MessageSquare, Search, RotateCcw
 } from 'lucide-react';
 import DriverChatModal from '@/components/layout/DriverChatModal';
+import { useToast } from '@/components/ui/Toast';
 
 export default function DriversPage() {
   const { drivers, vehicles, addDriver, reassignDriverVehicle } = useStore();
+  const { toast } = useToast();
   const [selected, setSelected] = useState<string | null>(drivers[0]?.id || null);
   const [showAdd, setShowAdd] = useState(false);
   const [reassignModal, setReassignModal] = useState<string | null>(null);
@@ -46,7 +48,11 @@ export default function DriversPage() {
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
-    addDriver(form);
+    // Postel's Law: normalize phone to digits only before saving
+    const normalizedForm = { ...form, phone: form.phone.replace(/\D/g, '') };
+    addDriver(normalizedForm);
+    // Peak-End Rule: positive confirmation at end of flow
+    toast('Driver Added', `${form.name} has been added to the fleet roster.`, 'success');
     setShowAdd(false);
     setForm({ name: '', phone: '', licenseNo: '', licenseExpiry: '', vehicleId: null, status: 'Available', trips: 0, rating: 4.8, documentVerified: true });
   };

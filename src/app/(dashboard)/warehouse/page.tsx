@@ -2,8 +2,8 @@
 import { useState } from 'react';
 import { useStore } from '@/lib/store';
 import {
-  Warehouse, Package, CheckCircle, Truck, AlertTriangle,
-  QrCode, Check, ShieldCheck, ArrowRight, Gauge, Layers
+  Warehouse, Package, CheckCircle, Truck,
+  QrCode, Check, ShieldCheck, Gauge, Layers
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/Toast';

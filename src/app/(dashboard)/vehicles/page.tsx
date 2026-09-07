@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useStore } from '@/lib/store';
 import {
-  Truck, Plus, X, CheckCircle, AlertTriangle, MessageSquare, Phone,
+  Truck, Plus, X, MessageSquare, Phone,
   Search, Filter, Wrench, Package, ShieldCheck, Gauge, Fuel
 } from 'lucide-react';
 import DriverChatModal from '@/components/layout/DriverChatModal';

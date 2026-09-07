@@ -6,6 +6,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Refund & Cancellation Policy | LogiFlow Logistics',
   description: 'LogiFlow freight cancellation terms, refund eligibility, and dispute resolution process under the Consumer Protection Act 2019.',
+  alternates: { canonical: '/refund' },
 };
 
 const section = { display: 'flex', flexDirection: 'column' as const, gap: 12 };
@@ -14,8 +15,19 @@ const h2style = {
   display: 'flex', alignItems: 'center', gap: 10,
 };
 
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://logiflow.io" },
+    { "@type": "ListItem", "position": 2, "name": "Refund Policy", "item": "https://logiflow.io/refund" },
+  ]
+};
+
 export default function RefundPolicyPage() {
   return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
     <div style={{ background: '#020617', color: '#e2e8f0', minHeight: '100vh', padding: '48px 24px' }}>
       <div style={{ maxWidth: 880, margin: '0 auto' }}>
 
@@ -150,11 +162,13 @@ export default function RefundPolicyPage() {
               borderRadius: 14, padding: '20px 24px', marginTop: 12, fontFamily: 'monospace', fontSize: 13,
             }}>
               <strong style={{ color: '#fbbf24', display: 'block', marginBottom: 8 }}>Nodal / Grievance Officer (CPA 2019):</strong>
-              [Your Company Grievance Officer Name]<br />
-              [Your Company Legal Name]<br />
-              [Registered Address, City, State, PIN]<br />
+              {/* TODO: Add your Grievance Officer name */}Grievance Officer<br />
+              Precision Logistics Technologies Pvt. Ltd.<br />
+              {/* TODO: Replace with actual registered address */}
+              Plot No. 12, Vibhuti Khand, Gomti Nagar, Lucknow — 226010, Uttar Pradesh, India<br />
               Email: <a href="mailto:grievance@logiflow.io" style={{ color: '#38bdf8' }}>grievance@logiflow.io</a><br />
-              Phone: [+91-XXXXXXXXXX] &bull; Available Mon–Fri, 9 AM – 6 PM IST
+              {/* TODO: Add actual phone number */}
+              Phone: Contact via email &bull; Available Mon–Fri, 9 AM – 6 PM IST
             </div>
           </section>
 
@@ -183,7 +197,8 @@ export default function RefundPolicyPage() {
             }}>
               Email: <a href="mailto:billing@logiflow.io" style={{ color: '#38bdf8' }}>billing@logiflow.io</a><br />
               Support Portal: Dashboard → Help &amp; Support → Raise Ticket<br />
-              Phone: [+91-XXXXXXXXXX]<br />
+              {/* TODO: Add actual phone number */}
+              Phone: Contact via email or support portal<br />
               Response SLA: 48 hours on business days
             </div>
           </section>
@@ -193,7 +208,7 @@ export default function RefundPolicyPage() {
         {/* Footer */}
         <div style={{ marginTop: 60, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.08)', fontSize: 13, color: '#a8b8c8' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between' }}>
-            <p style={{ margin: 0 }}>&copy; 2026 [Your Company Legal Name]. All rights reserved.</p>
+            <p style={{ margin: 0 }}>&copy; 2026 Precision Logistics Technologies Pvt. Ltd. All rights reserved.</p>
             <div style={{ display: 'flex', gap: 16 }}>
               <Link href="/privacy" style={{ color: '#a8b8c8', textDecoration: 'underline' }}>Privacy Policy</Link>
               <Link href="/terms" style={{ color: '#a8b8c8', textDecoration: 'underline' }}>Terms of Service</Link>
@@ -204,5 +219,6 @@ export default function RefundPolicyPage() {
 
       </div>
     </div>
+    </>
   );
 }

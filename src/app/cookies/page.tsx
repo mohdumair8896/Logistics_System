@@ -6,6 +6,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Cookie Policy | LogiFlow Logistics',
   description: 'How LogiFlow uses cookies and similar tracking technologies — what we set, why, and how to control them.',
+  alternates: { canonical: '/cookies' },
 };
 
 const sectionStyle = { display: 'flex', flexDirection: 'column' as const, gap: 12 };
@@ -42,6 +43,15 @@ function CookieTable({ cookies }: { cookies: CookieRow[] }) {
   );
 }
 
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://logiflow.io" },
+    { "@type": "ListItem", "position": 2, "name": "Cookie Policy", "item": "https://logiflow.io/cookies" },
+  ]
+};
+
 export default function CookiePolicyPage() {
   const essentialCookies: CookieRow[] = [
     { name: 'lf_session', type: 'Essential', purpose: 'Secures your authenticated dispatch session using HMAC-SHA256 signing. Required for all dashboard functionality.', duration: '24 hours' },
@@ -53,7 +63,9 @@ export default function CookiePolicyPage() {
   ];
 
   return (
-    <div style={{ background: '#020617', color: '#e2e8f0', minHeight: '100vh', padding: '48px 24px' }}>
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <div style={{ background: '#020617', color: '#e2e8f0', minHeight: '100vh', padding: '48px 24px' }}>
       <div style={{ maxWidth: 880, margin: '0 auto' }}>
 
         {/* Back */}
@@ -179,7 +191,7 @@ export default function CookiePolicyPage() {
         {/* Footer */}
         <div style={{ marginTop: 60, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.08)', fontSize: 13, color: '#a8b8c8' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between' }}>
-            <p style={{ margin: 0 }}>&copy; 2026 [Your Company Legal Name]. All rights reserved.</p>
+            <p style={{ margin: 0 }}>&copy; 2026 Precision Logistics Technologies Pvt. Ltd. All rights reserved.</p>
             <div style={{ display: 'flex', gap: 16 }}>
               <Link href="/privacy" style={{ color: '#a8b8c8', textDecoration: 'underline' }}>Privacy Policy</Link>
               <Link href="/terms" style={{ color: '#a8b8c8', textDecoration: 'underline' }}>Terms of Service</Link>
@@ -190,5 +202,6 @@ export default function CookiePolicyPage() {
 
       </div>
     </div>
+    </>
   );
 }

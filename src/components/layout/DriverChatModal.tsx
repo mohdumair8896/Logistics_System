@@ -57,7 +57,11 @@ export default function DriverChatModal({ driverId, onClose }: Props) {
             <a href={`tel:${driver?.phone}`} className="btn btn-ghost btn-sm" style={{ padding: '6px 10px' }} title="Call Driver">
               <Phone size={14} color="#34d399" />
             </a>
-            <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex' }}>
+            <button
+              onClick={onClose}
+              aria-label="Close chat"
+              style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8, minWidth: 40, minHeight: 40, borderRadius: 8 }}
+            >
               <X size={20} />
             </button>
           </div>

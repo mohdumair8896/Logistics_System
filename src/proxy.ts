@@ -1,5 +1,5 @@
 /**
- * Next.js Middleware (proxy.ts — Next.js 16 Turbopack naming convention)
+ * Next.js Middleware (middleware.ts — standard Next.js naming convention)
  * ─────────────────────────────────────────────────────────────────
  * Runs on EVERY request at the Edge before any page or route renders.
  *
