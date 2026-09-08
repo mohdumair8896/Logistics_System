@@ -1139,3 +1139,494 @@ body {
 .animate-slide-in {
   animation: slideIn 0.3s ease forwards;
 }
+
+/* ============================================================
+   JOURNEY TRACKING — Scroll-driven shipment lifecycle
+   These rules are additive. No existing rules are modified.
+   ============================================================ */
+
+/* Root two-column layout */
+.journey-root {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+  padding-bottom: 80px;
+}
+
+.journey-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.journey-right {
+  width: 300px;
+  flex-shrink: 0;
+}
+
+/* Sticky telemetry wrapper */
+.telemetry-sticky {
+  position: sticky;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Vertical timeline container */
+.journey-timeline {
+  position: relative;
+  padding-left: 80px;
+}
+
+/* The central amber→cyan→emerald line */
+.journey-timeline::before {
+  content: '';
+  position: absolute;
+  left: 30px;
+  top: 60px;
+  bottom: 60px;
+  width: 2px;
+  background: linear-gradient(
+    180deg,
+    rgba(245,158,11,0.9)  0%,
+    rgba(245,158,11,0.7) 18%,
+    rgba(34,211,238,0.7) 45%,
+    rgba(52,211,153,0.9) 75%,
+    rgba(52,211,153,0.5) 100%
+  );
+}
+
+/* Individual stage row */
+.journey-stage {
+  position: relative;
+  margin-bottom: 36px;
+  animation: journeyFadeUp 0.5s ease both;
+  opacity: 0;
+}
+
+/* Stagger delays */
+.journey-stage:nth-child(1)  { animation-delay: 0.06s; }
+.journey-stage:nth-child(2)  { animation-delay: 0.12s; }
+.journey-stage:nth-child(3)  { animation-delay: 0.18s; }
+.journey-stage:nth-child(4)  { animation-delay: 0.24s; }
+.journey-stage:nth-child(5)  { animation-delay: 0.30s; }
+.journey-stage:nth-child(6)  { animation-delay: 0.36s; }
+.journey-stage:nth-child(7)  { animation-delay: 0.42s; }
+.journey-stage:nth-child(8)  { animation-delay: 0.48s; }
+.journey-stage:nth-child(9)  { animation-delay: 0.54s; }
+.journey-stage:nth-child(10) { animation-delay: 0.60s; }
+.journey-stage:nth-child(11) { animation-delay: 0.66s; }
+
+/* Timeline node (circle on the left of each stage) */
+.journey-node {
+  position: absolute;
+  left: -80px;
+  top: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2px;
+  border: 2px solid;
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+
+.journey-node-num {
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+  font-family: var(--font-mono);
+}
+
+.journey-node-label {
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  opacity: 0.75;
+  line-height: 1;
+}
+
+/* Node state: completed */
+.journey-node-completed {
+  background: rgba(52,211,153,0.12);
+  border-color: rgba(52,211,153,0.65);
+  color: #34d399;
+}
+
+/* Node state: active (current stage) */
+.journey-node-active {
+  background: rgba(34,211,238,0.12);
+  border-color: rgba(34,211,238,0.85);
+  color: #22d3ee;
+  box-shadow: 0 0 24px rgba(34,211,238,0.28), 0 0 48px rgba(34,211,238,0.10);
+}
+
+/* Node state: upcoming */
+.journey-node-upcoming {
+  background: rgba(148,163,184,0.06);
+  border-color: rgba(148,163,184,0.22);
+  color: #94a3b8;
+}
+
+/* Stage card */
+.journey-card {
+  background: rgba(15,23,42,0.72);
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 16px;
+  padding: 24px 28px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.journey-card-active {
+  border-color: rgba(34,211,238,0.3);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(34,211,238,0.08);
+}
+
+.journey-card-completed {
+  border-color: rgba(52,211,153,0.18);
+}
+
+.journey-card-upcoming {
+  opacity: 0.55;
+}
+
+/* Stage internal header */
+.journey-stage-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.journey-stage-kicker {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.journey-stage-id {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+}
+
+/* Two-column data grid inside a stage card */
+.journey-data-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.journey-data-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.journey-data-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+}
+
+.journey-data-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  word-break: break-word;
+}
+
+.journey-data-value-mono {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: #60a5fa;
+}
+
+/* In-transit route visualizer */
+.journey-route-track {
+  position: relative;
+  height: 320px;
+  width: 100%;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.journey-route-inner {
+  position: relative;
+  width: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.journey-route-line-full {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: rgba(148,163,184,0.15);
+  transform: translateX(-50%);
+  border-radius: 2px;
+}
+
+.journey-route-line-done {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 3px;
+  background: linear-gradient(180deg, #10b981, #3b82f6);
+  transform: translateX(-50%);
+  border-radius: 2px;
+  transition: height 0.6s ease;
+}
+
+.journey-truck-icon {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 30px;
+  z-index: 2;
+  transition: top 0.6s cubic-bezier(0.25,0.46,0.45,0.94);
+  line-height: 1;
+}
+
+.journey-truck-simulating {
+  animation: truckPulse 1.8s ease-in-out infinite;
+}
+
+/* Telematics panel */
+.telemetry-card {
+  background: rgba(15,23,42,0.88);
+  border: 1px solid rgba(34,211,238,0.22);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(34,211,238,0.04);
+}
+
+.telemetry-grid-2x2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.telemetry-cell {
+  background: rgba(2,6,23,0.65);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.telemetry-cell-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  margin-bottom: 5px;
+}
+
+.telemetry-cell-value {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+/* Checkpoint list */
+.cp-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.cp-row {
+  display: flex;
+  gap: 16px;
+  padding: 14px 0;
+  position: relative;
+}
+
+.cp-row:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 38px;
+  bottom: 0;
+  width: 2px;
+  background: rgba(255,255,255,0.07);
+}
+
+.cp-row.cp-done:not(:last-child)::after {
+  background: rgba(52,211,153,0.3);
+}
+
+.cp-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.cp-row.cp-done .cp-dot {
+  background: rgba(52,211,153,0.15);
+  border-color: #34d399;
+}
+
+.cp-row.cp-pending .cp-dot {
+  background: rgba(148,163,184,0.07);
+  border-color: rgba(148,163,184,0.28);
+}
+
+/* Delivery / completion */
+.delivery-hero {
+  text-align: center;
+  padding: 32px 16px;
+}
+
+.delivery-hero-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(52,211,153,0.12);
+  border: 2px solid rgba(52,211,153,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  animation: completionPulse 2.5s ease-in-out infinite;
+}
+
+/* Journey header banner */
+.journey-banner {
+  background: rgba(15,23,42,0.85);
+  border: 1px solid rgba(255,255,255,0.10);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.journey-trip-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.journey-trip-chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  border: 1px solid;
+  transition: all 0.2s ease;
+}
+
+.journey-trip-chip-active {
+  background: rgba(34,211,238,0.12);
+  border-color: rgba(34,211,238,0.6);
+  color: #22d3ee;
+}
+
+.journey-trip-chip-inactive {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.12);
+  color: var(--text-muted);
+}
+
+.journey-trip-chip-inactive:hover {
+  border-color: rgba(255,255,255,0.25);
+  color: var(--text-secondary);
+}
+
+/* Keyframes */
+@keyframes journeyFadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes truckPulse {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(59,130,246,0.7))  drop-shadow(0 3px 8px rgba(0,0,0,0.5)); }
+  50%       { filter: drop-shadow(0 0 22px rgba(59,130,246,1.0)) drop-shadow(0 6px 14px rgba(0,0,0,0.5)); }
+}
+
+@keyframes completionPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(52,211,153,0.4); }
+  50%       { box-shadow: 0 0 0 14px rgba(52,211,153,0); }
+}
+
+/* Journey responsive breakpoints */
+@media (max-width: 1100px) {
+  .journey-root {
+    flex-direction: column;
+  }
+  .journey-right {
+    width: 100%;
+    order: -1;
+  }
+  .telemetry-sticky {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .journey-timeline {
+    padding-left: 56px;
+  }
+  .journey-timeline::before {
+    left: 21px;
+  }
+  .journey-node {
+    left: -56px;
+    width: 44px;
+    height: 44px;
+  }
+  .journey-node-label {
+    display: none;
+  }
+  .journey-card {
+    padding: 16px 18px;
+  }
+  .journey-data-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .journey-route-track {
+    height: 240px;
+  }
+}
+
