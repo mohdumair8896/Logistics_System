@@ -1,20 +1,14 @@
 'use client';
-import { useState } from 'react';
-import dynamic from 'next/dynamic';
+import { useState, useEffect } from 'react';
 import { useStore } from '@/lib/store';
 import {
   Truck, Users, ShoppingCart, Navigation, PackageCheck, Clock,
   TrendingUp, Plus, Search,
-  MapPin, Activity, Radio, ExternalLink
+  MapPin, Activity, Radio, ExternalLink, Fuel
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { initialHubNodes, HubNode } from '@/lib/mockData';
-
-const DashboardJourneySection = dynamic(
-  () => import('@/components/dashboard/DashboardJourneySection'),
-  { ssr: false }
-);
 
 interface ActiveTruckMarker {
   id: string;
@@ -206,12 +200,6 @@ export default function DashboardPage() {
 
   return (
     <div className="animate-slide-in">
-      {/* ── Scroll-driven logistics journey hero ─────────────────────── */}
-      <DashboardJourneySection />
-
-      {/* ── Operational dashboard (below journey) ─────────────────────── */}
-      <div id="dashboard-ops-section" style={{ paddingTop: 32 }}>
-
       {/* Top Stats Responsive Grid */}
       <div className="grid-6" style={{ marginBottom: 20 }}>
         {stats.map((s, i) => {
@@ -772,8 +760,6 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-
-      </div>{/* end #dashboard-ops-section */}
     </div>
   );
 }
