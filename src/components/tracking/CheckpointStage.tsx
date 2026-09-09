@@ -1,6 +1,6 @@
-﻿'use client';
+'use client';
 import { MapPin, Check } from 'lucide-react';
-import type { Waypoint } from '@/lib/mockData';
+import type { Waypoint } from '@/features/trips/types';
 
 interface Props {
   checkpoints: Waypoint[];

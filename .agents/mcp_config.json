@@ -1,0 +1,31 @@
+{
+  "mcpServers": {
+    "watermelon-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://mcp.watermelon.sh/mcp"
+      ],
+      "serverUrl": "https://mcp.watermelon.sh/mcp",
+      "url": "https://mcp.watermelon.sh/mcp",
+      "type": "streamable-http"
+    },
+    "firecrawl": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://mcp.firecrawl.dev/v2/mcp",
+        "--header",
+        "Authorization: Bearer fc-c95ae50b462e454f86a0354366d25b0b"
+      ],
+      "env": {
+        "FIRECRAWL_API_KEY": "fc-c95ae50b462e454f86a0354366d25b0b"
+      },
+      "serverUrl": "https://mcp.firecrawl.dev/v2/mcp",
+      "url": "https://mcp.firecrawl.dev/v2/mcp-oauth",
+      "type": "remote"
+    }
+  }
+}

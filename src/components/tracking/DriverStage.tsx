@@ -1,6 +1,7 @@
-﻿'use client';
+'use client';
 import { CheckCircle, User, Phone, CreditCard } from 'lucide-react';
-import type { Driver, Vehicle } from '@/lib/mockData';
+import type { Driver } from '@/features/drivers/types';
+import type { Vehicle } from '@/features/vehicles/types';
 
 interface Props {
   driver: Driver | null;

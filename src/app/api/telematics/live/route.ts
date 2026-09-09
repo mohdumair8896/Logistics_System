@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { initialTrips, initialVehicles, initialDrivers } from '@/lib/mockData';
+import { initialTrips } from '@/features/trips/data';
+import { initialVehicles } from '@/features/vehicles/data';
+import { initialDrivers } from '@/features/drivers/data';
 import { requireAuth, isAuthError } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {

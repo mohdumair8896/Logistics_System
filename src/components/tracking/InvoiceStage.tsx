@@ -1,6 +1,8 @@
-﻿'use client';
+'use client';
 import { Receipt, ExternalLink } from 'lucide-react';
-import type { Invoice, Order, Customer } from '@/lib/mockData';
+import type { Invoice } from '@/features/invoices/types';
+import type { Order } from '@/features/orders/types';
+import type { Customer } from '@/shared/types/common';
 
 interface Props {
   invoice: Invoice | null;

@@ -1,5 +1,5 @@
-﻿'use client';
-import type { Trip } from '@/lib/mockData';
+'use client';
+import type { Trip } from '@/features/trips/types';
 
 interface Props {
   trip: Trip;

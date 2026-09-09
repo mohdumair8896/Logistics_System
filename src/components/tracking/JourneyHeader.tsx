@@ -1,7 +1,9 @@
-﻿'use client';
+'use client';
 import { MapPin, Radio, ExternalLink, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
-import type { Trip, Order, Customer } from '@/lib/mockData';
+import type { Trip } from '@/features/trips/types';
+import type { Order } from '@/features/orders/types';
+import type { Customer } from '@/shared/types/common';
 
 interface Props {
   activeTrips: Trip[];

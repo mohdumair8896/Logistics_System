@@ -1,6 +1,7 @@
-﻿'use client';
+'use client';
 import { CheckCircle, Truck } from 'lucide-react';
-import type { Vehicle, Order } from '@/lib/mockData';
+import type { Vehicle } from '@/features/vehicles/types';
+import type { Order } from '@/features/orders/types';
 
 interface Props {
   vehicle: Vehicle | null;

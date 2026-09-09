@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import {
@@ -13,7 +13,9 @@ import {
   FileSpreadsheet
 } from 'lucide-react';
 import { toast } from 'sonner';
-import type { Trip, Order, Invoice } from '@/lib/mockData';
+import type { Trip } from '@/features/trips/types';
+import type { Order } from '@/features/orders/types';
+import type { Invoice } from '@/features/invoices/types';
 
 interface Props {
   trip: Trip | null;

@@ -1,6 +1,8 @@
-﻿'use client';
+'use client';
 import { Gauge, Fuel, Thermometer, ShieldCheck, FastForward, MessageSquare, CheckCircle, MapPin } from 'lucide-react';
-import type { Trip, Vehicle, Driver } from '@/lib/mockData';
+import type { Trip } from '@/features/trips/types';
+import type { Vehicle } from '@/features/vehicles/types';
+import type { Driver } from '@/features/drivers/types';
 
 interface Props {
   trip: Trip;

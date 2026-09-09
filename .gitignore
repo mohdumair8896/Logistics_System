@@ -44,5 +44,3 @@ next-env.d.ts
 # firecrawl cache
 .firecrawl/
 
-# agents & ide configs
-.agents/

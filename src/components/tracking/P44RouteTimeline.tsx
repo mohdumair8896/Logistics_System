@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import {
@@ -9,7 +9,8 @@ import {
   ChevronDown,
   ChevronUp
 } from 'lucide-react';
-import type { Trip, Order } from '@/lib/mockData';
+import type { Trip } from '@/features/trips/types';
+import type { Order } from '@/features/orders/types';
 
 interface Props {
   trip: Trip | null;

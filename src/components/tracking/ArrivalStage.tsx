@@ -1,6 +1,6 @@
-﻿'use client';
+'use client';
 import { CheckCircle, Clock } from 'lucide-react';
-import type { Trip } from '@/lib/mockData';
+import type { Trip } from '@/features/trips/types';
 
 interface Props {
   trip: Trip;

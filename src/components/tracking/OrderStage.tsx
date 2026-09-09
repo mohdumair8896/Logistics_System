@@ -1,7 +1,8 @@
-﻿'use client';
+'use client';
 import { CheckCircle, Package } from 'lucide-react';
-import type { Order, Customer } from '@/lib/mockData';
-import { initialProducts as products } from '@/lib/mockData';
+import type { Order } from '@/features/orders/types';
+import type { Customer } from '@/shared/types/common';
+import { initialProducts as products } from '@/shared/data/index';
 
 interface Props {
   order: Order | null;
