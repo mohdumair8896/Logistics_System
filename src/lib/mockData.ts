@@ -1,6 +1,6 @@
-/**
+﻿/**
  * TEMPORARY: Mock Data Layer
- * ─────────────────────────────────────────────────────────────────
+ * â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
  * This file is the interim data source for all dashboard pages and
  * API routes while a real backend database is not yet connected.
  *
@@ -141,7 +141,7 @@ export interface SystemAlert {
   description: string;
   severity: 'warning' | 'info' | 'critical';
   timestamp: string;
-  category: 'Weather' | 'Fleet' | 'Driver' | 'Route';
+  category: 'Weather' | 'Fleet' | 'Driver' | 'Route' | 'Warehouse' | 'Cold-Chain' | 'Geofence';
 }
 
 export interface HubNode {
@@ -163,7 +163,7 @@ export const initialVehicles: Vehicle[] = [
     currentLoad: 0,
     status: 'Available',
     driverId: 'D001',
-    location: 'Lucknow Central Hub',
+    location: 'Central Distribution Hub',
     lastService: '2026-08-15',
     odometerKm: 48250,
     fuelLevel: 88,
@@ -215,7 +215,7 @@ export const initialVehicles: Vehicle[] = [
     currentLoad: 0,
     status: 'Available',
     driverId: null,
-    location: 'Lucknow Central Hub',
+    location: 'Central Distribution Hub',
     lastService: '2026-08-10',
     odometerKm: 34100,
     fuelLevel: 75,
@@ -247,7 +247,7 @@ export const initialVehicles: Vehicle[] = [
     currentLoad: 0,
     status: 'Maintenance',
     driverId: null,
-    location: 'Lucknow Central Hub Workshop',
+    location: 'Central Distribution Hub Workshop',
     lastService: '2026-08-28',
     odometerKm: 185000,
     fuelLevel: 30,
@@ -296,7 +296,7 @@ export const initialOrders: Order[] = [
   {
     id: 'ORD-1001',
     customerId: 'C001',
-    origin: 'Lucknow Central Hub',
+    origin: 'Central Distribution Hub',
     destination: 'Kanpur Facility',
     items: [
       { productId: 'P001', quantity: 5000, batchCode: 'ST-2026-88', scanned: false },
@@ -315,7 +315,7 @@ export const initialOrders: Order[] = [
   {
     id: 'ORD-0998',
     customerId: 'C002',
-    origin: 'Lucknow Central Hub',
+    origin: 'Central Distribution Hub',
     destination: 'Agra Corridor',
     items: [
       { productId: 'P004', quantity: 4000, batchCode: 'SG-2026-11', scanned: true },
@@ -333,8 +333,8 @@ export const initialOrders: Order[] = [
   {
     id: 'ORD-0995',
     customerId: 'C003',
-    origin: 'Lucknow Central Hub',
-    destination: 'Delhi NCR Hub',
+    origin: 'Central Distribution Hub',
+    destination: 'East Distribution Center',
     items: [
       { productId: 'P001', quantity: 5000, batchCode: 'ST-2026-77', scanned: true },
       { productId: 'P005', quantity: 4000, batchCode: 'OL-2026-30', scanned: true },
@@ -352,7 +352,7 @@ export const initialOrders: Order[] = [
   {
     id: 'ORD-0992',
     customerId: 'C004',
-    origin: 'Lucknow Central Hub',
+    origin: 'Central Distribution Hub',
     destination: 'Prayagraj Logistics Depot',
     items: [{ productId: 'P003', quantity: 6000, batchCode: 'RC-2026-09', scanned: true }],
     totalWeight: 6000,
@@ -368,7 +368,7 @@ export const initialOrders: Order[] = [
   {
     id: 'ORD-0988',
     customerId: 'C005',
-    origin: 'Lucknow Central Hub',
+    origin: 'Central Distribution Hub',
     destination: 'Varanasi Industrial Hub',
     items: [{ productId: 'P006', quantity: 3000, batchCode: 'CB-2026-55', scanned: true }],
     totalWeight: 3000,
@@ -389,8 +389,8 @@ export const initialTrips: Trip[] = [
     orderId: 'ORD-0995',
     vehicleId: 'V002',
     driverId: 'D002',
-    origin: 'Lucknow Central Hub',
-    destination: 'Delhi NCR Hub',
+    origin: 'Central Distribution Hub',
+    destination: 'East Distribution Center',
     distance: 512,
     load: 9000,
     status: 'In Transit',
@@ -400,7 +400,7 @@ export const initialTrips: Trip[] = [
     completedAt: null,
     speedKmH: 68,
     fuelPercent: 64,
-    cargoTemp: '21.5°C Ambient',
+    cargoTemp: '21.5Â°C Ambient',
     geofenceStatus: 'Inside Corridor',
     checkpoints: [
       { name: 'Lucknow Dispatch Terminal', location: 'Lucknow Hub', passed: true, time: '06:00 AM' },
@@ -415,7 +415,7 @@ export const initialTrips: Trip[] = [
     orderId: 'ORD-0992',
     vehicleId: 'V003',
     driverId: 'D003',
-    origin: 'Lucknow Central Hub',
+    origin: 'Central Distribution Hub',
     destination: 'Prayagraj Logistics Depot',
     distance: 200,
     load: 6000,
@@ -426,7 +426,7 @@ export const initialTrips: Trip[] = [
     completedAt: '2026-08-25 13:45',
     speedKmH: 0,
     fuelPercent: 92,
-    cargoTemp: '22.0°C Ambient',
+    cargoTemp: '22.0Â°C Ambient',
     geofenceStatus: 'Arrived',
     checkpoints: [
       { name: 'Lucknow Dispatch Terminal', location: 'Lucknow Hub', passed: true, time: '07:00 AM' },
@@ -501,9 +501,9 @@ export const initialAlerts: SystemAlert[] = [
 ];
 
 export const initialHubNodes: HubNode[] = [
-  { id: 'HUB-LKO', name: 'Lucknow Central Hub', region: 'North', x: 48, y: 44, vehiclesCount: 18 },
+  { id: 'HUB-LKO', name: 'Central Distribution Hub', region: 'North', x: 48, y: 44, vehiclesCount: 18 },
   { id: 'HUB-KNP', name: 'Kanpur Logistics Depot', region: 'North', x: 44, y: 52, vehiclesCount: 12 },
-  { id: 'HUB-DEL', name: 'Delhi NCR Hub', region: 'North', x: 30, y: 32, vehiclesCount: 24, hasDelay: true },
+  { id: 'HUB-DEL', name: 'East Distribution Center', region: 'North', x: 30, y: 32, vehiclesCount: 24, hasDelay: true },
   { id: 'HUB-AGR', name: 'Agra Transit Terminal', region: 'North', x: 38, y: 42, vehiclesCount: 8 },
   { id: 'HUB-VNS', name: 'Varanasi Industrial Hub', region: 'East', x: 62, y: 56, vehiclesCount: 14 },
   { id: 'HUB-BOM', name: 'Mumbai Seaport Logistics', region: 'West', x: 26, y: 72, vehiclesCount: 35 },

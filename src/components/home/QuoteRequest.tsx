@@ -1,6 +1,8 @@
-﻿'use client';
+'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useStore } from '@/lib/store';
 import {
   PackageSearch,
   Calculator,
@@ -65,12 +67,15 @@ interface QuoteResult {
 }
 
 const QuoteRequest: React.FC = () => {
+  const router = useRouter();
+  const addShipperLead = useStore(s => s.addShipperLead);
+
   // Occam's Razor: removed Customer ID field — it added zero value to the user
   const [origin, setOrigin]           = useState('');
   const [destination, setDestination] = useState('');
   const [cargoType, setCargoType]     = useState('Refrigerated High-Value Freight');
   const [honeypot, setHoneypot]       = useState('');
-  const [loadTime]                    = useState<number>(Date.now());
+  const [loadTime]                    = useState<number>(() => Date.now());
 
   const [errors, setErrors]         = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -147,6 +152,32 @@ const QuoteRequest: React.FC = () => {
     setOrigin('');
     setDestination('');
     setErrors({});
+  };
+
+  const handleBookLoad = () => {
+    if (!quoteResult) return;
+    const leadId = addShipperLead({
+      shipperName: 'Inbound Spot Shipper',
+      companyName: `Freight Booking (${quoteResult.origin} ➔ ${quoteResult.destination})`,
+      phone: '+91 98200 11223',
+      email: 'dispatch.inbound@precisionlogistics.com',
+      originHub: quoteResult.origin,
+      destinationHub: quoteResult.destination,
+      cargoType: quoteResult.cargo.toLowerCase().includes('refrigerated') || quoteResult.cargo.toLowerCase().includes('cold') ? 'Cold-Chain Reefer' : 'Standard Freight',
+      estimatedWeightKg: Math.round(quoteResult.distanceMiles * 8),
+      freightQuote: Math.round(quoteResult.estCostUsd * 83),
+      targetDeliveryDate: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0],
+      isUrgent: true,
+      transcriptSnippet: `Spot freight rate quote #${quoteResult.quoteId} booked from public rate calculator for ${quoteResult.origin} ➔ ${quoteResult.destination}.`
+    });
+
+    toast.success('Freight Booking Confirmed!', {
+      description: `Quote #${quoteResult.quoteId} registered in dispatch CRM as ${leadId}. Transferring to dispatch...`,
+    });
+
+    setTimeout(() => {
+      router.push('/leads');
+    }, 700);
   };
 
   return (
@@ -261,17 +292,21 @@ const QuoteRequest: React.FC = () => {
                   <RotateCcw style={{ width: 15, height: 15 }} aria-hidden="true" />
                   New Quote
                 </button>
-                <a href="/orders" style={{
-                  flex: 1.5, height: 48,
-                  background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                  color: '#1c1917', borderRadius: 14, fontSize: 13, fontWeight: 700,
-                  textDecoration: 'none',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  boxShadow: '0 0 20px rgba(245,158,11,0.25)',
-                }}>
+                <button
+                  type="button"
+                  onClick={handleBookLoad}
+                  style={{
+                    flex: 1.5, height: 48,
+                    background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                    color: '#1c1917', borderRadius: 14, fontSize: 13, fontWeight: 700,
+                    border: 'none', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                    boxShadow: '0 0 20px rgba(245,158,11,0.25)',
+                  }}
+                >
                   <Truck style={{ width: 16, height: 16 }} aria-hidden="true" />
-                  Book This Load
-                </a>
+                  Book This Load →
+                </button>
               </div>
             </div>
           ) : (

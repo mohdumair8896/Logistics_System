@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { CheckCircle, Package } from 'lucide-react';
 import type { Order, Customer } from '@/lib/mockData';
 import { initialProducts as products } from '@/lib/mockData';
@@ -68,7 +68,7 @@ export default function OrderStage({ order, customer }: Props) {
                 borderRadius: 10,
                 padding: '12px 16px'
               }}>
-                <div style={{ fontSize: 9.5, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>
+                <div style={{ fontSize: 9.5, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>
                   Cargo Manifest
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -80,10 +80,10 @@ export default function OrderStage({ order, customer }: Props) {
                         fontSize: 12.5, paddingBottom: idx < order.items.length - 1 ? 8 : 0,
                         borderBottom: idx < order.items.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none'
                       }}>
-                        <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>
+                        <span style={{ color: 'var(--text-mid)', fontWeight: 500 }}>
                           {product?.name || item.productId}
                         </span>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, color: '#f59e0b' }}>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, color: 'var(--brand)' }}>
                           {item.quantity.toLocaleString()} kg
                         </span>
                       </div>
@@ -94,7 +94,7 @@ export default function OrderStage({ order, customer }: Props) {
             )}
           </>
         ) : (
-          <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>No order information available.</div>
+          <div style={{ color: 'var(--text-low)', fontSize: 13 }}>No order information available.</div>
         )}
       </div>
     </div>

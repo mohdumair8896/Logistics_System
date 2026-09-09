@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ArrowRight, Calculator, Radio } from 'lucide-react';
+import { ArrowRight, Calculator } from 'lucide-react';
 
 interface HeroOverlayProps {
   onScrollClick?: () => void;
@@ -51,15 +51,23 @@ export const HeroOverlay: React.FC<HeroOverlayProps> = ({ onScrollClick }) => {
 
         {/* Nav actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            padding: '6px 12px', borderRadius: 99,
-            background: 'rgba(6,78,59,0.5)', border: '1px solid rgba(52,211,153,0.35)',
-            fontSize: 11, fontFamily: 'monospace', color: '#34d399',
-          }}>
+          <Link
+            href="/tracking"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              padding: '6px 12px', borderRadius: 99,
+              background: 'rgba(6,78,59,0.5)', border: '1px solid rgba(52,211,153,0.35)',
+              fontSize: 11, fontFamily: 'monospace', color: '#34d399',
+              textDecoration: 'none',
+              transition: 'background 0.15s, border-color 0.15s',
+            }}
+            title="Inspect Live Fleet Telematics & GPS"
+            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(6,78,59,0.8)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'rgba(6,78,59,0.5)')}
+          >
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399', display: 'inline-block' }} />
-            <span>LIVE TELEMATICS</span>
-          </div>
+            <span>LIVE TELEMATICS →</span>
+          </Link>
 
           <Link
             href="/dashboard"
@@ -120,7 +128,7 @@ export const HeroOverlay: React.FC<HeroOverlayProps> = ({ onScrollClick }) => {
 
         {/* Unified Call to Action & Social proof */}
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 16 }}>
-          
+
           {/* PRIMARY CALL TO ACTION: Get Instant Quote */}
           <button
             onClick={scrollToQuote}

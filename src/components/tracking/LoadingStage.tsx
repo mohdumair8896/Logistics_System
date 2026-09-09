@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { CheckCircle, Warehouse, Scale } from 'lucide-react';
 import type { Order, Vehicle, Trip } from '@/lib/mockData';
 import { initialProducts as products } from '@/lib/mockData';
@@ -55,8 +55,8 @@ export default function LoadingStage({ order, vehicle, trip }: Props) {
               padding: '16px 18px'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-                <Scale size={14} color="#f59e0b" />
-                <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1 }}>
+                <Scale size={14} color="var(--brand)" />
+                <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase', letterSpacing: 1 }}>
                   Weight Distribution
                 </span>
               </div>
@@ -68,15 +68,15 @@ export default function LoadingStage({ order, vehicle, trip }: Props) {
                   return (
                     <div key={idx}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                        <span style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 500 }}>
+                        <span style={{ fontSize: 12, color: 'var(--text-mid)', fontWeight: 500 }}>
                           {product?.name || item.productId}
                         </span>
-                        <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', fontWeight: 700, color: '#f59e0b' }}>
+                        <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--brand)' }}>
                           {item.quantity.toLocaleString()} kg · {pct}%
                         </span>
                       </div>
                       <div className="progress-bar" style={{ height: 4 }}>
-                        <div className="progress-fill" style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #f59e0b, #fbbf24)' }} />
+                        <div className="progress-fill" style={{ width: `${pct}%`, background: 'linear-gradient(90deg, var(--brand), var(--brand))' }} />
                       </div>
                     </div>
                   );
@@ -87,8 +87,8 @@ export default function LoadingStage({ order, vehicle, trip }: Props) {
                 marginTop: 14, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.06)',
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center'
               }}>
-                <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>Total Loaded</span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 15, fontWeight: 800, color: '#34d399' }}>
+                <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-low)' }}>Total Loaded</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 15, fontWeight: 800, color: 'var(--brand)' }}>
                   {order.totalWeight.toLocaleString()} kg
                 </span>
               </div>
@@ -97,14 +97,14 @@ export default function LoadingStage({ order, vehicle, trip }: Props) {
             {!trip && (
               <div style={{
                 background: 'rgba(251,191,36,0.05)', border: '1px solid rgba(251,191,36,0.15)',
-                borderRadius: 8, padding: '10px 14px', fontSize: 12, color: '#fbbf24', textAlign: 'center'
+                borderRadius: 8, padding: '10px 14px', fontSize: 12, color: 'var(--brand)', textAlign: 'center'
               }}>
                 ⏳ Awaiting dispatch clearance
               </div>
             )}
           </div>
         ) : (
-          <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>No cargo information available.</div>
+          <div style={{ color: 'var(--text-low)', fontSize: 13 }}>No cargo information available.</div>
         )}
       </div>
     </div>

@@ -3,6 +3,8 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import CookieConsent from "@/components/ui/CookieConsent";
 import "./globals.css";
+import "leaflet/dist/leaflet.css";
+
 
 // Only load fonts that are actually referenced in globals.css
 const inter = Inter({

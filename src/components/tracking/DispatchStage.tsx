@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { Navigation, CheckCircle } from 'lucide-react';
 import type { Trip, Vehicle, Driver } from '@/lib/mockData';
 
@@ -53,19 +53,19 @@ export default function DispatchStage({ trip, vehicle, driver }: Props) {
             display: 'flex', alignItems: 'center', gap: 16
           }}>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>From</div>
-              <div style={{ fontSize: 13.5, fontWeight: 700, color: '#34d399' }}>{trip.origin}</div>
+              <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>From</div>
+              <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--brand)' }}>{trip.origin}</div>
             </div>
 
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6 }}>
               <div style={{ flex: 1, height: 1, background: 'linear-gradient(90deg, rgba(52,211,153,0.5), rgba(34,211,238,0.5))' }} />
-              <Navigation size={16} color="#22d3ee" />
+              <Navigation size={16} color="var(--brand)" />
               <div style={{ flex: 1, height: 1, background: 'linear-gradient(90deg, rgba(34,211,238,0.5), rgba(96,165,250,0.5))' }} />
             </div>
 
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>To</div>
-              <div style={{ fontSize: 13.5, fontWeight: 700, color: '#60a5fa' }}>{trip.destination}</div>
+              <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>To</div>
+              <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--brand)' }}>{trip.destination}</div>
             </div>
           </div>
 
@@ -76,7 +76,7 @@ export default function DispatchStage({ trip, vehicle, driver }: Props) {
             </div>
             <div className="journey-data-item">
               <span className="journey-data-label">ETA</span>
-              <span className="journey-data-value" style={{ color: '#34d399' }}>{trip.eta}</span>
+              <span className="journey-data-value" style={{ color: 'var(--brand)' }}>{trip.eta}</span>
             </div>
           </div>
         </div>

@@ -1,14 +1,14 @@
-﻿'use client';
+'use client';
 import { useStore } from '@/lib/store';
-import { initialCustomers as customers, initialProducts as products } from '@/lib/mockData';
-import { Navigation, Clock, MapPin, CheckCircle, Truck } from 'lucide-react';
+import { getStatusBadgeClass } from '@/lib/formatters';
+import { Navigation, Truck } from 'lucide-react';
 import Link from 'next/link';
+import { ListStack } from '@/components/ui/ListStack';
+import { LabeledProgress } from '@/components/ui/LabeledProgress';
+import { AlertBanner } from '@/components/ui/AlertBanner';
 
 export default function TripsPage() {
-  const { trips, vehicles, drivers, orders } = useStore();
-
-  const statusColor: Record<string, string> = { 'In Transit': 'badge-cyan', 'Delivered': 'badge-green', 'Cancelled': 'badge-red' };
-  const dotColor: Record<string, string> = { 'In Transit': 'dot-blue', 'Delivered': 'dot-green', 'Cancelled': 'dot-red' };
+  const { trips, vehicles, drivers, orders, customers } = useStore();
 
   const activeTrips = trips.filter(t => t.status === 'In Transit');
   const completedTrips = trips.filter(t => t.status !== 'In Transit');
@@ -25,10 +25,37 @@ export default function TripsPage() {
         </Link>
       </div>
 
-      {/* Active Trips */}
+      {/* Trips Corridor Alert */}
+      {activeTrips.length > 0 ? (
+        <AlertBanner variant="info" title={`${activeTrips.length} freight corridor trip(s) actively in transit`} compact dismissible />
+      ) : (
+        <AlertBanner variant="success" title="All trips completed and delivered" compact dismissible />
+      )}
+
+      {/* Active Trips ListStack � watermelon list-stack pattern */}
+      {activeTrips.length > 0 && (
+        <div className="card" style={{ padding: 16, marginBottom: 8 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 14 }}>
+            Live Active Trips ({activeTrips.length})
+          </div>
+          <ListStack
+            items={activeTrips.slice(0, 5).map(t => ({
+              id: t.id,
+              title: t.id,
+              subtitle: `${(t.origin || '').split(',')[0]} \u2192 ${(t.destination || '').split(',')[0]}`,
+              meta: t.eta ? `ETA ${t.eta}` : undefined,
+              badge: t.status,
+              badgeVariant: 'blue' as const,
+            }))}
+            cardHeight={60}
+          />
+        </div>
+      )}
+
+      {/* Active Trips Detail Cards */}
       {activeTrips.length > 0 && (
         <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Active Trips</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-mid)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Active Trips</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {activeTrips.map(trip => {
               const vehicle = vehicles.find(v => v.id === trip.vehicleId);
@@ -42,29 +69,35 @@ export default function TripsPage() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <span style={{ fontWeight: 800, fontSize: 15, color: 'var(--text-primary)', fontFamily: 'JetBrains Mono, monospace' }}>{trip.id}</span>
-                        <span className={`badge ${statusColor[trip.status] || 'badge-gray'}`}>{trip.status}</span>
+                        <span style={{ fontWeight: 800, fontSize: 15, color: 'var(--text-high)', fontFamily: 'JetBrains Mono, monospace' }}>{trip.id}</span>
+                        <span className={`badge ${getStatusBadgeClass(trip.status)}`}>{trip.status}</span>
                       </div>
-                      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
-                        {customer?.name} • {trip.origin} → {trip.destination}
+                      <div style={{ fontSize: 12, color: 'var(--text-low)', marginTop: 4 }}>
+                        {customer?.name} � {trip.origin} ? {trip.destination}
                       </div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>ETA</div>
+                      <div style={{ fontSize: 12, color: 'var(--text-low)' }}>ETA</div>
                       <div style={{ fontWeight: 700, color: 'var(--success)', fontSize: 13 }}>{trip.eta}</div>
                     </div>
                   </div>
 
                   <div style={{ marginBottom: 10 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-low)', marginBottom: 6 }}>
                       <span>{trip.origin}</span>
-                      <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{trip.progress}%</span>
+                      <span style={{ color: 'var(--brand)', fontWeight: 600 }}>{trip.progress}%</span>
                       <span>{trip.destination}</span>
                     </div>
-                    <div className="progress-bar">
-                      <div className="progress-fill" style={{ width: `${trip.progress}%` }} />
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
+                    <LabeledProgress
+                      progress={trip.progress}
+                      labels={[
+                        `Trip ${trip.id} En Route (${trip.progress}%)`,
+                        `${distDone} km done • ${distLeft} km remaining`,
+                        `Corridor ETA: ${trip.eta || 'On Schedule'}`
+                      ]}
+                      height={7}
+                    />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-low)', marginTop: 4 }}>
                       <span>{distDone} km done</span>
                       <span>{distLeft} km remaining</span>
                     </div>
@@ -72,15 +105,15 @@ export default function TripsPage() {
 
                   <div style={{ display: 'flex', gap: 16, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <Truck size={13} color="var(--text-muted)" />
-                      <span style={{ fontSize: 12, color: 'var(--text-secondary)', fontFamily: 'JetBrains Mono, monospace' }}>{vehicle?.vehicleNo}</span>
+                      <Truck size={13} color="var(--text-low)" />
+                      <span style={{ fontSize: 12, color: 'var(--text-mid)', fontFamily: 'JetBrains Mono, monospace' }}>{vehicle?.vehicleNo}</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--success)', animation: 'pulse 1.5s infinite' }} />
-                      <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{driver?.name}</span>
+                      <span style={{ fontSize: 12, color: 'var(--text-mid)' }}>{driver?.name}</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 'auto' }}>
-                      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{trip.load.toLocaleString()} kg</span>
+                      <span style={{ fontSize: 12, color: 'var(--text-low)' }}>{trip.load.toLocaleString()} kg</span>
                     </div>
                   </div>
                 </Link>
@@ -92,7 +125,7 @@ export default function TripsPage() {
 
       {/* All Trips Table */}
       <div>
-        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.5px' }}>All Trips</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-mid)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.5px' }}>All Trips</div>
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
           <div className="table-container">
             <table className="data-table">
@@ -105,13 +138,13 @@ export default function TripsPage() {
                   const driver = drivers.find(d => d.id === trip.driverId);
                   return (
                     <tr key={trip.id}>
-                      <td><span style={{ fontWeight: 700, fontFamily: 'JetBrains Mono', fontSize: 12, color: 'var(--accent)' }}>{trip.id}</span></td>
-                      <td><span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{trip.orderId}</span></td>
-                      <td style={{ fontSize: 12 }}>{trip.origin} → {trip.destination}</td>
-                      <td><span style={{ fontSize: 12, fontFamily: 'JetBrains Mono' }}>{vehicle?.vehicleNo || '—'}</span></td>
-                      <td style={{ fontSize: 12 }}>{driver?.name || '—'}</td>
+                      <td><span style={{ fontWeight: 700, fontFamily: 'JetBrains Mono', fontSize: 12, color: 'var(--brand)' }}>{trip.id}</span></td>
+                      <td><span style={{ fontSize: 12, color: 'var(--text-low)' }}>{trip.orderId}</span></td>
+                      <td style={{ fontSize: 12 }}>{trip.origin} ? {trip.destination}</td>
+                      <td><span style={{ fontSize: 12, fontFamily: 'JetBrains Mono' }}>{vehicle?.vehicleNo || '�'}</span></td>
+                      <td style={{ fontSize: 12 }}>{driver?.name || '�'}</td>
                       <td><span className="mono" style={{ fontSize: 12 }}>{trip.load.toLocaleString()} kg</span></td>
-                      <td><span className={`badge ${statusColor[trip.status] || 'badge-gray'}`}>{trip.status}</span></td>
+                      <td><span className={`badge ${getStatusBadgeClass(trip.status)}`}>{trip.status}</span></td>
                       <td>
                         {trip.status === 'In Transit' && (
                           <Link href="/tracking" className="btn btn-sm btn-ghost">Track</Link>

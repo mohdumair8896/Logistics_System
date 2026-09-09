@@ -49,6 +49,8 @@ export interface KnowledgeBaseItem {
 export interface AppState {
   vehicles: Vehicle[];
   drivers: Driver[];
+  customers: Customer[];
+  products: Product[];
   orders: Order[];
   trips: Trip[];
   invoices: Invoice[];
@@ -92,7 +94,10 @@ export interface AppState {
   updateInventory: (productId: string, delta: number) => void;
 
   dismissAlert: (alertId: string) => void;
+  addAlert: (alert: Omit<SystemAlert, 'id' | 'timestamp'>) => void;
+  clearAllAlerts: () => void;
   sendDriverMessage: (driverId: string, text: string) => void;
+  receiveDriverReply: (driverId: string, text: string) => void;
 }
 
 export const initialLeads: ShipperLead[] = [
@@ -204,6 +209,8 @@ export const useStore = create<AppState>()(
     (set, get) => ({
       vehicles: [...initialVehicles],
       drivers: [...initialDrivers],
+      customers: [...initialCustomers],
+      products: [...initialProducts],
       orders: [...initialOrders],
       trips: [...initialTrips],
       invoices: [...initialInvoices],
@@ -461,7 +468,7 @@ export const useStore = create<AppState>()(
     set(s => ({ trips: s.trips.map(t => t.id === id ? { ...t, ...updates } : t) }));
   },
 
-  completeDelivery: (tripId, deliveredQty, damagedQty = 0, receiverName = 'Verified Receiver', podSigned = true) => {
+  completeDelivery: (tripId) => {
     const state = get();
     const trip = state.trips.find(t => t.id === tripId);
     if (!trip) return;
@@ -533,6 +540,21 @@ export const useStore = create<AppState>()(
     set(s => ({ alerts: s.alerts.filter(a => a.id !== alertId) }));
   },
 
+  addAlert: (alert) => {
+    const id = `ALT-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`;
+    const timestamp = 'Just now';
+    const newAlert: SystemAlert = {
+      ...alert,
+      id,
+      timestamp
+    };
+    set(s => ({ alerts: [newAlert, ...s.alerts] }));
+  },
+
+  clearAllAlerts: () => {
+    set({ alerts: [] });
+  },
+
   sendDriverMessage: (driverId, text) => {
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     set(s => ({
@@ -541,6 +563,19 @@ export const useStore = create<AppState>()(
         [driverId]: [
           ...(s.messages[driverId] || []),
           { sender: 'dispatcher' as const, text, time }
+        ]
+      }
+    }));
+  },
+
+  receiveDriverReply: (driverId, text) => {
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    set(s => ({
+      messages: {
+        ...s.messages,
+        [driverId]: [
+          ...(s.messages[driverId] || []),
+          { sender: 'driver' as const, text, time }
         ]
       }
     }));

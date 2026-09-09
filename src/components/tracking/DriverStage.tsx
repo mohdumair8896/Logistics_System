@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { CheckCircle, User, Phone, CreditCard } from 'lucide-react';
 import type { Driver, Vehicle } from '@/lib/mockData';
 
@@ -54,10 +54,10 @@ export default function DriverStage({ driver, vehicle }: Props) {
                 borderRadius: 10, padding: '10px 14px',
                 display: 'flex', alignItems: 'center', gap: 10
               }}>
-                <Phone size={14} color="#34d399" />
+                <Phone size={14} color="var(--icon)" />
                 <div>
-                  <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.8 }}>Phone</div>
-                  <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', marginTop: 2 }}>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase', letterSpacing: 0.8 }}>Phone</div>
+                  <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--text-high)', fontFamily: 'var(--font-mono)', marginTop: 2 }}>
                     {driver.phone}
                   </div>
                 </div>
@@ -70,10 +70,10 @@ export default function DriverStage({ driver, vehicle }: Props) {
                 borderRadius: 10, padding: '10px 14px',
                 display: 'flex', alignItems: 'center', gap: 10
               }}>
-                <CreditCard size={14} color="#60a5fa" />
+                <CreditCard size={14} color="var(--brand)" />
                 <div>
-                  <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.8 }}>License</div>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', marginTop: 2 }}>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase', letterSpacing: 0.8 }}>License</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-high)', fontFamily: 'var(--font-mono)', marginTop: 2 }}>
                     {driver.licenseNo}
                   </div>
                 </div>
@@ -92,7 +92,7 @@ export default function DriverStage({ driver, vehicle }: Props) {
             </div>
           </div>
         ) : (
-          <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>No driver assigned yet.</div>
+          <div style={{ color: 'var(--text-low)', fontSize: 13 }}>No driver assigned yet.</div>
         )}
       </div>
     </div>

@@ -1,16 +1,17 @@
 'use client';
 import { useState } from 'react';
 import { useStore } from '@/lib/store';
-import { initialCustomers as customers, initialProducts as products } from '@/lib/mockData';
 import {
   CheckCircle, Truck,
   AlertTriangle, Clock, CheckCircle2, ShieldAlert
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { AlertBanner } from '@/components/ui/AlertBanner';
+import { LabeledProgress } from '@/components/ui/LabeledProgress';
 
 export default function AllocationPage() {
-  const { orders, vehicles, drivers, allocateVehicle } = useStore();
+  const { orders, vehicles, drivers, allocateVehicle, customers } = useStore();
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [allocated, setAllocated] = useState(false);
   const [allocatedVehNo, setAllocatedVehNo] = useState('');
@@ -71,7 +72,9 @@ export default function AllocationPage() {
     setAllocatedVehNo(veh?.vehicleNo || vehicleId);
     allocateVehicle(activeOrder.id, vehicleId, driverId);
     toast.success('Fleet Asset Dispatched & Assigned', {
-      description: `Order ${activeOrder.id} successfully paired with ${veh?.vehicleNo || vehicleId}. Transferred to Bay Staging.`
+      description: overrideReason
+        ? `Order ${activeOrder.id} override assigned (${overrideReason}). Transferred to Bay Staging.`
+        : `Order ${activeOrder.id} successfully paired with ${veh?.vehicleNo || vehicleId}. Transferred to Bay Staging.`
     });
     setAllocated(true);
     setOverrideModal(null);
@@ -91,17 +94,35 @@ export default function AllocationPage() {
         </div>
       </div>
 
+      {/* Allocation Alert — watermelon AlertBanner pattern */}
+      {pendingOrders.length > 0 ? (
+        <AlertBanner
+          variant="warning"
+          title={`${pendingOrders.length} order(s) awaiting fleet asset allocation`}
+          dismissible
+        >
+          Assign available vehicles and verified commercial drivers to prevent dispatch schedule delays.
+        </AlertBanner>
+      ) : (
+        <AlertBanner
+          variant="success"
+          title="All orders successfully allocated and staged"
+          compact
+          dismissible
+        />
+      )}
+
       <div className="responsive-split-2">
         {/* Left Column: Pending Orders Queue */}
         <div className="card" style={{ padding: 0, overflow: 'hidden', height: 'fit-content' }}>
-          <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', fontWeight: 700, fontSize: 13, color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', fontWeight: 700, fontSize: 13, color: 'var(--text-mid)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span>Pending Orders ({pendingOrders.length})</span>
             <span className="badge badge-yellow" style={{ fontSize: 10 }}>Action Required</span>
           </div>
 
           {pendingOrders.length === 0 ? (
-            <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
-              <CheckCircle2 size={36} color="#10b981" style={{ margin: '0 auto 10px' }} />
+            <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-low)', fontSize: 13 }}>
+              <CheckCircle2 size={36} color="var(--brand)" style={{ margin: '0 auto 10px' }} />
               All orders allocated!
             </div>
           ) : (
@@ -116,18 +137,18 @@ export default function AllocationPage() {
                     padding: '14px 16px',
                     borderBottom: '1px solid var(--border)',
                     cursor: 'pointer',
-                    background: isSelected ? 'var(--accent-glow)' : 'transparent',
-                    borderLeft: isSelected ? '3px solid var(--accent)' : '3px solid transparent',
+                    background: isSelected ? 'var(--brand-10)' : 'transparent',
+                    borderLeft: isSelected ? '3px solid var(--brand)' : '3px solid transparent',
                     transition: 'all 0.15s'
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span className="mono" style={{ fontWeight: 800, color: '#60a5fa', fontSize: 12.5 }}>{o.id}</span>
+                    <span className="mono" style={{ fontWeight: 800, color: 'var(--brand)', fontSize: 12.5 }}>{o.id}</span>
                     <span className="badge badge-yellow" style={{ fontSize: 10 }}>PENDING</span>
                   </div>
-                  <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 13, marginTop: 4 }}>{cust?.name}</div>
-                  <div style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 2 }}>
-                    {o.destination} • <strong style={{ color: 'var(--text-secondary)' }}>{o.totalWeight.toLocaleString()} kg</strong>
+                  <div style={{ fontWeight: 600, color: 'var(--text-high)', fontSize: 13, marginTop: 4 }}>{cust?.name}</div>
+                  <div style={{ fontSize: 11.5, color: 'var(--text-low)', marginTop: 2 }}>
+                    {o.destination} � <strong style={{ color: 'var(--text-mid)' }}>{o.totalWeight.toLocaleString()} kg</strong>
                   </div>
                 </div>
               );
@@ -139,54 +160,54 @@ export default function AllocationPage() {
         <div>
           {!activeOrder ? (
             <div className="card" style={{ textAlign: 'center', padding: 60 }}>
-              <CheckCircle size={44} color="#10b981" style={{ margin: '0 auto 12px' }} />
+              <CheckCircle size={44} color="var(--brand)" style={{ margin: '0 auto 12px' }} />
               <div style={{ fontSize: 16, fontWeight: 700 }}>Queue Clear</div>
-              <div style={{ fontSize: 12.5, color: 'var(--text-muted)', marginTop: 4 }}>No pending orders require allocation.</div>
+              <div style={{ fontSize: 12.5, color: 'var(--text-low)', marginTop: 4 }}>No pending orders require allocation.</div>
             </div>
           ) : allocated ? (
             <div className="card" style={{ textAlign: 'center', padding: 60 }}>
               <div style={{ animation: 'float 1s ease-in-out infinite' }}>
-                <CheckCircle size={56} color="#10b981" style={{ margin: '0 auto 16px' }} />
+                <CheckCircle size={56} color="var(--brand)" style={{ margin: '0 auto 16px' }} />
               </div>
-              <div style={{ fontSize: 20, fontWeight: 800, color: '#10b981' }}>Vehicle Allocated Successfully!</div>
-              <div style={{ fontSize: 13.5, color: 'var(--text-secondary)', marginTop: 8 }}>
+              <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--brand)' }}>Vehicle Allocated Successfully!</div>
+              <div style={{ fontSize: 13.5, color: 'var(--text-mid)', marginTop: 8 }}>
                 Assigned <strong style={{ color: 'white' }}>{allocatedVehNo}</strong> to {activeOrder.id}.
               </div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>Redirecting to warehouse bay loading...</div>
+              <div style={{ fontSize: 12, color: 'var(--text-low)', marginTop: 6 }}>Redirecting to warehouse bay loading...</div>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {/* Order Dossier + Recommendation Split Grid (Stitch Screen 7) */}
               <div className="grid-2" style={{ gap: 16 }}>
                 {/* Left Panel: Order Details */}
-                <div className="card" style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border)' }}>
+                <div className="card" style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                    <span className="mono" style={{ fontSize: 15, fontWeight: 800, color: '#60a5fa' }}>{activeOrder.id}</span>
+                    <span className="mono" style={{ fontSize: 15, fontWeight: 800, color: 'var(--brand)' }}>{activeOrder.id}</span>
                     <span className="badge badge-yellow">PENDING ALLOCATION</span>
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12.5 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: 6 }}>
-                      <span style={{ color: 'var(--text-muted)' }}>Customer</span>
-                      <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{customer?.name}</span>
+                      <span style={{ color: 'var(--text-low)' }}>Customer</span>
+                      <span style={{ fontWeight: 600, color: 'var(--text-high)' }}>{customer?.name}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: 6 }}>
-                      <span style={{ color: 'var(--text-muted)' }}>Corridor</span>
-                      <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{activeOrder.origin.split(' ')[0]} → {activeOrder.destination}</span>
+                      <span style={{ color: 'var(--text-low)' }}>Corridor</span>
+                      <span style={{ fontWeight: 600, color: 'var(--text-high)' }}>{activeOrder.origin.split(' ')[0]} ? {activeOrder.destination}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: 6 }}>
-                      <span style={{ color: 'var(--text-muted)' }}>Payload Required</span>
-                      <span className="mono" style={{ fontWeight: 800, color: '#38bdf8' }}>{activeOrder.totalWeight.toLocaleString()} kg</span>
+                      <span style={{ color: 'var(--text-low)' }}>Payload Required</span>
+                      <span className="mono" style={{ fontWeight: 800, color: 'var(--brand)' }}>{activeOrder.totalWeight.toLocaleString()} kg</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: 6 }}>
-                      <span style={{ color: 'var(--text-muted)' }}>SLA Deadline</span>
-                      <span style={{ fontWeight: 700, color: '#fbbf24', display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <span style={{ color: 'var(--text-low)' }}>SLA Deadline</span>
+                      <span style={{ fontWeight: 700, color: 'var(--brand)', display: 'flex', alignItems: 'center', gap: 4 }}>
                         <Clock size={12} /> {activeOrder.deadline || 'Today 18:00'}
                       </span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: 'var(--text-muted)' }}>Commodity Type</span>
-                      <span style={{ color: 'var(--text-secondary)' }}>Industrial Fasteners & Steel</span>
+                      <span style={{ color: 'var(--text-low)' }}>Commodity Type</span>
+                      <span style={{ color: 'var(--text-mid)' }}>Industrial Fasteners & Steel</span>
                     </div>
                   </div>
                 </div>
@@ -196,27 +217,27 @@ export default function AllocationPage() {
                   <div className="rec-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                        <span style={{ fontSize: 11, fontWeight: 800, color: '#38bdf8', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
-                          ⭐ RECOMMENDED MATCH
+                        <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+                          ? RECOMMENDED MATCH
                         </span>
                         <span className="badge badge-green" style={{ fontSize: 10 }}>Optimal Fit</span>
                       </div>
 
-                      <div style={{ fontWeight: 800, fontSize: 17, color: 'var(--text-primary)', fontFamily: 'JetBrains Mono, monospace' }}>
+                      <div style={{ fontWeight: 800, fontSize: 17, color: 'var(--text-high)', fontFamily: 'JetBrains Mono, monospace' }}>
                         {recommendedVehicle.vehicleNo}
                       </div>
-                      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }}>
-                        {recommendedVehicle.type} • {recommendedVehicle.capacity.toLocaleString()} kg Capacity
+                      <div style={{ fontSize: 12, color: 'var(--text-low)', marginTop: 1 }}>
+                        {recommendedVehicle.type} � {recommendedVehicle.capacity.toLocaleString()} kg Capacity
                       </div>
 
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, margin: '12px 0', padding: 10, background: 'rgba(0,0,0,0.25)', borderRadius: 8, fontSize: 12 }}>
                         <div>
-                          <div style={{ fontSize: 10.5, color: 'var(--text-muted)' }}>Utilization</div>
-                          <div style={{ fontWeight: 800, color: '#34d399', fontSize: 14 }}>{recommendedVehicle.utilization}%</div>
+                          <div style={{ fontSize: 10.5, color: 'var(--text-low)' }}>Utilization</div>
+                          <div style={{ fontWeight: 800, color: 'var(--brand)', fontSize: 14 }}>{recommendedVehicle.utilization}%</div>
                         </div>
                         <div>
-                          <div style={{ fontSize: 10.5, color: 'var(--text-muted)' }}>Assigned Driver</div>
-                          <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{recommendedVehicle.driver?.name || 'Ahmed Khan'}</div>
+                          <div style={{ fontSize: 10.5, color: 'var(--text-low)' }}>Assigned Driver</div>
+                          <div style={{ fontWeight: 700, color: 'var(--text-high)' }}>{recommendedVehicle.driver?.name || 'Ahmed Khan'}</div>
                         </div>
                       </div>
                     </div>
@@ -232,9 +253,9 @@ export default function AllocationPage() {
                 ) : (
                   <div className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: 24 }}>
                     <div>
-                      <AlertTriangle size={32} color="#f59e0b" style={{ margin: '0 auto 8px' }} />
+                      <AlertTriangle size={32} color="var(--brand)" style={{ margin: '0 auto 8px' }} />
                       <div style={{ fontWeight: 700, fontSize: 13 }}>No Exact 100% Fit</div>
-                      <div style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 2 }}>Review alternative fleet options below</div>
+                      <div style={{ fontSize: 11.5, color: 'var(--text-low)', marginTop: 2 }}>Review alternative fleet options below</div>
                     </div>
                   </div>
                 )}
@@ -242,11 +263,11 @@ export default function AllocationPage() {
 
               {/* Bottom Panel: Alternative Vehicles Table (Stitch Screen 7) */}
               <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                <div style={{ padding: '12px 18px', borderBottom: '1px solid var(--border)', background: 'var(--bg-tertiary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--text-secondary)' }}>
+                <div style={{ padding: '12px 18px', borderBottom: '1px solid var(--border)', background: 'var(--surface-2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--text-mid)' }}>
                     Alternative Fleet Vehicles & Feasibility Matrix
                   </span>
-                  <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Automated constraint solver</span>
+                  <span style={{ fontSize: 11, color: 'var(--text-low)' }}>Automated constraint solver</span>
                 </div>
 
                 <table className="data-table">
@@ -263,16 +284,16 @@ export default function AllocationPage() {
                     {alternativeVehicles.map(v => (
                       <tr key={v.id}>
                         <td>
-                          <div style={{ fontWeight: 700, fontFamily: 'JetBrains Mono', fontSize: 12.5, color: 'var(--text-primary)' }}>
+                          <div style={{ fontWeight: 700, fontFamily: 'JetBrains Mono', fontSize: 12.5, color: 'var(--text-high)' }}>
                             {v.vehicleNo}
                           </div>
-                          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{v.type}</div>
+                          <div style={{ fontSize: 11, color: 'var(--text-low)' }}>{v.type}</div>
                         </td>
                         <td>
                           <span className="mono" style={{ fontSize: 12 }}>{v.capacity.toLocaleString()} kg</span>
                         </td>
                         <td>
-                          <span style={{ fontSize: 12 }}>{v.driver?.name || <span style={{ color: 'var(--text-muted)' }}>Unassigned</span>}</span>
+                          <span style={{ fontSize: 12 }}>{v.driver?.name || <span style={{ color: 'var(--text-low)' }}>Unassigned</span>}</span>
                         </td>
                         <td>
                           {v.reason?.includes('Insufficient') ? (
@@ -294,7 +315,7 @@ export default function AllocationPage() {
                               Override
                             </button>
                           ) : (
-                            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Incompatible</span>
+                            <span style={{ fontSize: 11, color: 'var(--text-low)' }}>Incompatible</span>
                           )}
                         </td>
                       </tr>
@@ -312,13 +333,13 @@ export default function AllocationPage() {
         <div className="modal-overlay" onClick={() => setOverrideModal(null)}>
           <div className="modal" style={{ maxWidth: 440 }} onClick={e => e.stopPropagation()}>
             <div className="modal-title">
-              <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#f59e0b' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--brand)' }}>
                 <ShieldAlert size={18} />
                 Manager Allocation Override
               </span>
             </div>
-            <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 14 }}>
-              This vehicle has constraint warning: <strong style={{ color: '#ef4444' }}>{overrideModal.reason}</strong>.
+            <p style={{ fontSize: 13, color: 'var(--text-mid)', marginBottom: 14 }}>
+              This vehicle has constraint warning: <strong style={{ color: 'var(--brand-dark)' }}>{overrideModal.reason}</strong>.
               Confirm override to assign it anyway?
             </p>
             <div style={{ display: 'flex', gap: 10 }}>

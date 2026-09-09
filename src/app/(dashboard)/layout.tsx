@@ -1,9 +1,13 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useStore } from '@/lib/store';
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
+import LogiFlowChatbot from '@/components/layout/LogiFlowChatbot';
+import { startLiveNotificationFeed, stopLiveNotificationFeed } from '@/lib/liveNotifications';
+
+const emptySubscribe = () => () => {};
 
 const pageTitles: Record<string, { title: string; subtitle: string }> = {
   '/dashboard': { title: 'Fleet Operations Dashboard', subtitle: 'Live logistics intelligence & hub status' },
@@ -20,24 +24,33 @@ const pageTitles: Record<string, { title: string; subtitle: string }> = {
   '/knowledge-base': { title: 'Knowledge Base & Config', subtitle: 'Dispatcher training data & bot response library' },
 };
 
-
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const isLoggedIn = useStore(s => s.isLoggedIn);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [prevPathname, setPrevPathname] = useState(pathname);
 
-  useEffect(() => { setMounted(true); }, []);
+  // Close mobile drawer when route changes (React-idiomatic render-time state adjustment)
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
+    setIsMobileSidebarOpen(false);
+  }
 
   useEffect(() => {
     if (mounted && !isLoggedIn) router.replace('/login');
   }, [isLoggedIn, router, mounted]);
 
-  // Close mobile drawer when route changes
+  // Start live operational notification feed while dashboard is active
   useEffect(() => {
-    setIsMobileSidebarOpen(false);
-  }, [pathname]);
+    if (mounted && isLoggedIn) {
+      startLiveNotificationFeed(45000);
+    }
+    return () => {
+      stopLiveNotificationFeed();
+    };
+  }, [mounted, isLoggedIn]);
 
   if (!mounted || !isLoggedIn) return null;
 
@@ -65,6 +78,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         />
         <main className="page-content">{children}</main>
       </div>
+
+      {/* Global AI Dispatch Copilot / Chatbot */}
+      <LogiFlowChatbot />
     </div>
   );
 }

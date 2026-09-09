@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { PackageCheck, ExternalLink } from 'lucide-react';
 import type { Trip, Order, Invoice } from '@/lib/mockData';
 
@@ -25,7 +25,7 @@ export default function DeliveryStage({ trip, order, invoice, onNavigate }: Prop
         <div className="journey-stage-header">
           <div>
             <div className="journey-stage-kicker">Stage 09 — Delivery & e-POD</div>
-            <div className="journey-stage-id" style={{ color: delivered ? '#34d399' : 'var(--text-muted)' }}>
+            <div className="journey-stage-id" style={{ color: delivered ? 'var(--brand)' : 'var(--text-low)' }}>
               {delivered ? 'Delivered' : 'Awaiting Delivery'}
             </div>
           </div>
@@ -47,7 +47,7 @@ export default function DeliveryStage({ trip, order, invoice, onNavigate }: Prop
               </div>
               <div className="journey-data-item">
                 <span className="journey-data-label">Delivery Status</span>
-                <span className="journey-data-value" style={{ color: '#34d399' }}>{trip.status}</span>
+                <span className="journey-data-value" style={{ color: 'var(--brand)' }}>{trip.status}</span>
               </div>
               <div className="journey-data-item">
                 <span className="journey-data-label">Completed At</span>
@@ -55,7 +55,7 @@ export default function DeliveryStage({ trip, order, invoice, onNavigate }: Prop
               </div>
               <div className="journey-data-item">
                 <span className="journey-data-label">Digital POD</span>
-                <span className="journey-data-value" style={{ color: podSigned ? '#34d399' : '#fbbf24' }}>
+                <span className="journey-data-value" style={{ color: podSigned ? 'var(--brand)' : 'var(--brand)' }}>
                   {podSigned ? '✓ Signed' : 'Pending Signature'}
                 </span>
               </div>
@@ -68,18 +68,18 @@ export default function DeliveryStage({ trip, order, invoice, onNavigate }: Prop
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.8 }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase', letterSpacing: 0.8 }}>
                       Order Delivered
                     </div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 15, fontWeight: 800, color: '#34d399', marginTop: 3 }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 15, fontWeight: 800, color: 'var(--brand)', marginTop: 3 }}>
                       {order.totalWeight.toLocaleString()} kg
                     </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.8 }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase', letterSpacing: 0.8 }}>
                       Freight Value
                     </div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 15, fontWeight: 800, color: '#f59e0b', marginTop: 3 }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 15, fontWeight: 800, color: 'var(--brand)', marginTop: 3 }}>
                       ₹{order.freightRate.toLocaleString()}
                     </div>
                   </div>
@@ -97,7 +97,7 @@ export default function DeliveryStage({ trip, order, invoice, onNavigate }: Prop
             </button>
           </div>
         ) : (
-          <div style={{ padding: '16px 0', color: 'var(--text-muted)', fontSize: 13, textAlign: 'center' }}>
+          <div style={{ padding: '16px 0', color: 'var(--text-low)', fontSize: 13, textAlign: 'center' }}>
             Delivery confirmation and e-POD capture will be available once the shipment arrives at its destination.
           </div>
         )}

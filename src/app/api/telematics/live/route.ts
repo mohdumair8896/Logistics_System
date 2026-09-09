@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { initialTrips, initialVehicles, initialDrivers } from '@/lib/mockData';
-import { requireAuth, isAuthError } from '@/lib/apiAuth';
+import { requireAuth, isAuthError } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   // Auth guard — 401 if no valid session

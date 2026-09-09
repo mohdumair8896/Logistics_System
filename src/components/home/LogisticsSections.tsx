@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState } from 'react';
 import Link from 'next/link';
@@ -14,7 +14,6 @@ import {
   TrendingUp,
   Award,
   Send,
-  CheckCircle2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import QuoteRequest from './QuoteRequest';

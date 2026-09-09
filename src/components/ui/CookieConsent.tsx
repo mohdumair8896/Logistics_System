@@ -1,20 +1,21 @@
-'use client';
+﻿'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useSyncExternalStore } from 'react';
 import Link from 'next/link';
-import { ShieldCheck, Cookie, X, Check, SlidersHorizontal } from 'lucide-react';
+import { Cookie, X, Check, SlidersHorizontal } from 'lucide-react';
 
 const STORAGE_KEY = 'logiflow_cookie_consent_v1';
 
+const emptySubscribe = () => () => {};
+
 export default function CookieConsent() {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [isOpen, setIsOpen] = useState(false);
   const [showPreferences, setShowPreferences] = useState(false);
   // GDPR: analytics must default to FALSE (opt-in, not opt-out)
   const [analyticsConsent, setAnalyticsConsent] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (!saved) {
@@ -78,7 +79,7 @@ export default function CookieConsent() {
           background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
         }}>
-          <Cookie style={{ width: 20, height: 20, color: '#fbbf24' }} aria-hidden="true" />
+          <Cookie style={{ width: 20, height: 20, color: 'var(--brand)' }} aria-hidden="true" />
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -98,10 +99,10 @@ export default function CookieConsent() {
           </div>
           <p style={{ fontSize: 13, color: '#a8b8c8', margin: '8px 0 0', lineHeight: 1.6 }}>
             We use strictly necessary cookies to keep the platform secure. Optional analytics cookies help us improve performance — your choice.{' '}
-            <Link href="/cookies" style={{ color: '#fbbf24', textDecoration: 'underline' }}>
+            <Link href="/cookies" style={{ color: 'var(--brand)', textDecoration: 'underline' }}>
               Cookie Policy
             </Link>{' '}·{' '}
-            <Link href="/privacy" style={{ color: '#fbbf24', textDecoration: 'underline' }}>
+            <Link href="/privacy" style={{ color: 'var(--brand)', textDecoration: 'underline' }}>
               Privacy Policy
             </Link>
           </p>
@@ -124,7 +125,7 @@ export default function CookieConsent() {
                 Required for authentication and security (session cookie). Cannot be disabled.
               </p>
             </div>
-            <span style={{ fontSize: 11, color: '#34d399', fontWeight: 700, fontFamily: 'monospace', flexShrink: 0 }}>
+            <span style={{ fontSize: 11, color: 'var(--brand)', fontWeight: 700, fontFamily: 'monospace', flexShrink: 0 }}>
               ALWAYS ON
             </span>
           </div>
@@ -147,7 +148,7 @@ export default function CookieConsent() {
                 checked={analyticsConsent}
                 onChange={e => setAnalyticsConsent(e.target.checked)}
                 aria-label="Allow analytics cookies"
-                style={{ width: 18, height: 18, accentColor: '#f59e0b', cursor: 'pointer', flexShrink: 0, marginTop: 2 }}
+                style={{ width: 18, height: 18, accentColor: 'var(--brand)', cursor: 'pointer', flexShrink: 0, marginTop: 2 }}
               />
             </label>
           </div>
@@ -185,8 +186,8 @@ export default function CookieConsent() {
         <button
           onClick={() => saveConsent(true, showPreferences ? analyticsConsent : true)}
           style={{
-            background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-            border: 'none', color: '#1c1917', borderRadius: 10,
+            background: 'linear-gradient(135deg, var(--brand), #d97706)',
+            border: 'none', color: '#fff', borderRadius: 10,
             padding: '8px 18px', fontSize: 12, fontWeight: 700,
             cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
             boxShadow: '0 0 15px rgba(245,158,11,0.25)',

@@ -7,6 +7,9 @@
  * In production set AUTH_SECRET to a random 32+ char string.
  */
 
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
 export interface SessionPayload {
   userId: string;
   email: string;
@@ -49,15 +52,19 @@ async function hmacSign(data: string, secret: string): Promise<string> {
   return btoa(Array.from(new Uint8Array(buf), b => String.fromCharCode(b)).join(''));
 }
 
-async function hmacVerify(data: string, sig: string, secret: string): Promise<boolean> {
-  const expected = await hmacSign(data, secret);
-  // Constant-time comparison via XOR of char codes
-  if (expected.length !== sig.length) return false;
+/** Timing-safe string comparison via XOR of char codes to resist timing attacks */
+export function safeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
   let diff = 0;
-  for (let i = 0; i < expected.length; i++) {
-    diff |= expected.charCodeAt(i) ^ sig.charCodeAt(i);
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
   }
   return diff === 0;
+}
+
+async function hmacVerify(data: string, sig: string, secret: string): Promise<boolean> {
+  const expected = await hmacSign(data, secret);
+  return safeEqual(expected, sig);
 }
 
 /** Creates a signed session token string. */
@@ -102,3 +109,35 @@ export const COOKIE_OPTIONS = {
   path: '/',
   maxAge: SESSION_TTL_SECONDS,
 };
+
+/**
+ * Validates the session cookie in API route handlers.
+ * Returns SessionPayload if valid, or a ready-to-return 401 NextResponse.
+ */
+export async function requireAuth(
+  request: NextRequest
+): Promise<SessionPayload | NextResponse> {
+  const token = request.cookies.get(SESSION_COOKIE)?.value;
+  if (!token) {
+    return NextResponse.json(
+      { success: false, message: 'Authentication required' },
+      { status: 401 }
+    );
+  }
+
+  const payload = await verifySessionToken(token);
+  if (!payload) {
+    return NextResponse.json(
+      { success: false, message: 'Invalid or expired session. Please log in again.' },
+      { status: 401 }
+    );
+  }
+
+  return payload;
+}
+
+/** Type guard: returns true if requireAuth returned an error response. */
+export function isAuthError(v: SessionPayload | NextResponse): v is NextResponse {
+  return v instanceof NextResponse;
+}
+

@@ -4,13 +4,13 @@
  * Validates credentials, issues a signed HttpOnly session cookie.
  *
  * Demo credential set (replace with DB lookup + bcrypt in production):
- *   admin@precisionlogistics.com      / Logistics2026!
- *   dispatch@precisionlogistics.com   / Logistics2026!
- *   compliance@precisionlogistics.com / Logistics2026!
+ *   admin@precisionlogistics.com      / Logistics2026!   → Operations Director
+ *   dispatch@precisionlogistics.com   / Logistics2026!   → Fleet Dispatcher
+ *   compliance@precisionlogistics.com / Logistics2026!   → Compliance Officer
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createSessionToken, COOKIE_OPTIONS } from '@/lib/auth';
+import { createSessionToken, COOKIE_OPTIONS, safeEqual } from '@/lib/auth';
 
 interface DemoUser {
   email: string;
@@ -25,42 +25,25 @@ const DEMO_USERS: DemoUser[] = [
   {
     email: 'admin@precisionlogistics.com',
     password: 'Logistics2026!',
-    name: 'Rajesh Varma',
+    name: 'Alex Morgan',
     role: 'Operations Director',
-    facility: 'Lucknow Central Hub',
+    facility: 'Central Distribution Hub',
   },
   {
     email: 'dispatch@precisionlogistics.com',
     password: 'Logistics2026!',
-    name: 'Ananya Singh',
+    name: 'Sam Rivera',
     role: 'Fleet Dispatcher',
-    facility: 'Delhi NCR Corridor Terminal',
+    facility: 'North Corridor Terminal',
   },
   {
     email: 'compliance@precisionlogistics.com',
     password: 'Logistics2026!',
-    name: 'Vikram Rathore',
+    name: 'Jordan Patel',
     role: 'Compliance Officer',
-    facility: 'Kanpur Regional Terminal',
+    facility: 'West Regional Terminal',
   },
 ];
-
-/** Simulates constant-time string comparison to resist timing attacks. */
-function safeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) {
-    // Still iterate to avoid early-exit timing leak
-    let dummy = 0;
-    for (let i = 0; i < Math.max(a.length, b.length); i++) {
-      dummy |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
-    }
-    return false;
-  }
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) {
-    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  }
-  return diff === 0;
-}
 
 export async function POST(request: NextRequest) {
   try {

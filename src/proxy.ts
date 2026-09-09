@@ -1,5 +1,5 @@
 /**
- * Next.js Middleware (middleware.ts — standard Next.js naming convention)
+ * Next.js Edge Middleware (src/middleware.ts)
  * ─────────────────────────────────────────────────────────────────
  * Runs on EVERY request at the Edge before any page or route renders.
  *
@@ -35,7 +35,6 @@ const PROTECTED_PAGE_PREFIXES = [
 
 const CSP = [
   "default-src 'self'",
-  // Next.js requires unsafe-inline for injected styles; unsafe-eval needed in dev
   "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com data:",
@@ -50,7 +49,7 @@ const CSP = [
 
 // ── Middleware ────────────────────────────────────────────────────
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const proto = request.headers.get('x-forwarded-proto');
   const host = request.headers.get('host');
@@ -92,6 +91,9 @@ export async function proxy(request: NextRequest) {
 
   return response;
 }
+
+// Next.js 16 alias support
+export { middleware as proxy };
 
 export const config = {
   matcher: [

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { CheckCircle, Truck } from 'lucide-react';
 import type { Vehicle, Order } from '@/lib/mockData';
 
@@ -22,7 +22,7 @@ export default function AllocationStage({ vehicle, order }: Props) {
         <div className="journey-stage-header">
           <div>
             <div className="journey-stage-kicker">Stage 02 — Vehicle Allocated</div>
-            <div className="journey-stage-id" style={{ color: '#60a5fa' }}>
+            <div className="journey-stage-id" style={{ color: 'var(--brand)' }}>
               {vehicle?.vehicleNo || '—'}
             </div>
           </div>
@@ -59,10 +59,10 @@ export default function AllocationStage({ vehicle, order }: Props) {
             {/* Utilization bar */}
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.8 }}>
+                <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-low)', textTransform: 'uppercase', letterSpacing: 0.8 }}>
                   Load Utilization
                 </span>
-                <span style={{ fontSize: 12, fontWeight: 800, fontFamily: 'var(--font-mono)', color: utilization > 85 ? '#fb7185' : utilization > 60 ? '#f59e0b' : '#34d399' }}>
+                <span style={{ fontSize: 12, fontWeight: 800, fontFamily: 'var(--font-mono)', color: utilization > 85 ? '#fb7185' : utilization > 60 ? 'var(--brand)' : 'var(--brand)' }}>
                   {utilization}%
                 </span>
               </div>
@@ -74,8 +74,8 @@ export default function AllocationStage({ vehicle, order }: Props) {
                     background: utilization > 85
                       ? 'linear-gradient(90deg, #fb7185, #f43f5e)'
                       : utilization > 60
-                        ? 'linear-gradient(90deg, #f59e0b, #fbbf24)'
-                        : 'linear-gradient(90deg, #34d399, #10b981)'
+                        ? 'linear-gradient(90deg, var(--brand), var(--brand))'
+                        : 'linear-gradient(90deg, var(--brand), var(--brand))'
                   }}
                 />
               </div>
@@ -93,7 +93,7 @@ export default function AllocationStage({ vehicle, order }: Props) {
             </div>
           </div>
         ) : (
-          <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>No vehicle allocated yet.</div>
+          <div style={{ color: 'var(--text-low)', fontSize: 13 }}>No vehicle allocated yet.</div>
         )}
       </div>
     </div>

@@ -54,7 +54,7 @@ const breadcrumbSchema = {
 
 export default function CookiePolicyPage() {
   const essentialCookies: CookieRow[] = [
-    { name: 'lf_session', type: 'Essential', purpose: 'Secures your authenticated dispatch session using HMAC-SHA256 signing. Required for all dashboard functionality.', duration: '24 hours' },
+    { name: 'lms_session', type: 'Essential', purpose: 'Secures your authenticated dispatch session using HMAC-SHA256 signing. Required for all dashboard functionality.', duration: '8 hours' },
     { name: 'logiflow_cookie_consent_v1', type: 'Essential', purpose: 'Stores your cookie preferences so the banner does not reappear on every page load.', duration: '365 days' },
   ];
 

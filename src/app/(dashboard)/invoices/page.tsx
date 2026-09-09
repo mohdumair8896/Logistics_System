@@ -1,15 +1,16 @@
-﻿'use client';
+'use client';
 import { useState, useRef } from 'react';
 import { useStore } from '@/lib/store';
-import { initialCustomers as customers, initialProducts as products } from '@/lib/mockData';
+import { formatINR, getStatusBadgeClass } from '@/lib/formatters';
 import { FileText, Download, Building2, Printer, ShieldCheck } from 'lucide-react';
+import { AlertBanner } from '@/components/ui/AlertBanner';
+import { Pagination2 } from '@/components/ui/Pagination2';
+import { ShipmentQR } from '@/components/ui/ShipmentQR';
 
 export default function InvoicesPage() {
-  const { invoices, orders, vehicles, drivers } = useStore();
+  const { invoices, orders, vehicles, drivers, customers, products } = useStore();
   const [selectedInv, setSelectedInv] = useState<string | null>(invoices[0]?.id || null);
   const printRef = useRef<HTMLDivElement>(null);
-
-  const statusColor: Record<string, string> = { 'Paid': 'badge-green', 'Pending': 'badge-yellow' };
 
   const inv = invoices.find(i => i.id === (selectedInv || invoices[0]?.id)) || invoices[0] || null;
   const order = inv ? orders.find(o => o.id === inv.orderId) : null;
@@ -47,15 +48,25 @@ export default function InvoicesPage() {
         </div>
       </div>
 
+      {/* Pending invoice alert — watermelon Alert28 pattern */}
+      {invoices.filter(i => i.status === 'Pending').length > 0 && (
+        <AlertBanner variant="warning" title={`${invoices.filter(i => i.status === 'Pending').length} invoice(s) pending payment settlement`} dismissible>
+          Follow up with customers to clear outstanding payments and verify credit terms.
+        </AlertBanner>
+      )}
+      {invoices.filter(i => i.status === 'Paid').length > 0 && (
+        <AlertBanner variant="success" title={`${invoices.filter(i => i.status === 'Paid').length} invoice(s) cleared and reconciled`} compact dismissible />
+      )}
+
       <div className="responsive-split-2">
         {/* Invoice List Sidebar */}
         <div className="card" style={{ padding: 0, overflow: 'hidden', height: 'fit-content' }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', fontWeight: 700, fontSize: 13, color: 'var(--text-secondary)' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', fontWeight: 700, fontSize: 13, color: 'var(--text-mid)' }}>
             All Tax Invoices ({invoices.length})
           </div>
           {invoices.length === 0 ? (
-            <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
-              <FileText size={32} color="var(--text-muted)" style={{ margin: '0 auto 10px' }} />
+            <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-low)', fontSize: 13 }}>
+              <FileText size={32} color="var(--text-low)" style={{ margin: '0 auto 10px' }} />
               No invoices generated yet.
             </div>
           ) : (
@@ -71,16 +82,16 @@ export default function InvoicesPage() {
                     borderBottom: '1px solid var(--border)',
                     cursor: 'pointer',
                     background: isSelected ? 'rgba(59,130,246,0.12)' : 'transparent',
-                    borderLeft: isSelected ? '3px solid #3b82f6' : '3px solid transparent'
+                    borderLeft: isSelected ? '3px solid var(--brand)' : '3px solid transparent'
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span className="mono" style={{ fontWeight: 800, color: '#60a5fa', fontSize: 12.5 }}>{i.id}</span>
-                    <span className={`badge ${statusColor[i.status] || 'badge-gray'}`}>{i.status}</span>
+                    <span className="mono" style={{ fontWeight: 800, color: 'var(--brand)', fontSize: 12.5 }}>{i.id}</span>
+                    <span className={`badge ${getStatusBadgeClass(i.status)}`}>{i.status}</span>
                   </div>
-                  <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 13, marginTop: 4 }}>{cust?.name}</div>
-                  <div style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 2 }}>
-                    {i.createdAt} • <strong style={{ color: 'var(--text-primary)' }}>₹{i.total.toLocaleString()}</strong>
+                  <div style={{ fontWeight: 600, color: 'var(--text-high)', fontSize: 13, marginTop: 4 }}>{cust?.name}</div>
+                  <div style={{ fontSize: 11.5, color: 'var(--text-low)', marginTop: 2 }}>
+                    {i.createdAt} • <strong style={{ color: 'var(--text-high)' }}>{formatINR(i.total)}</strong>
                   </div>
                 </div>
               );
@@ -92,8 +103,8 @@ export default function InvoicesPage() {
         <div>
           {!inv ? (
             <div className="card" style={{ textAlign: 'center', padding: 48 }}>
-              <FileText size={40} color="var(--text-muted)" style={{ margin: '0 auto 12px' }} />
-              <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>Select an invoice to preview</div>
+              <FileText size={40} color="var(--text-low)" style={{ margin: '0 auto 12px' }} />
+              <div style={{ color: 'var(--text-low)', fontSize: 13 }}>Select an invoice to preview</div>
             </div>
           ) : (
             <div>
@@ -184,34 +195,34 @@ export default function InvoicesPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12.5, borderTop: '1px solid #e2e8f0', paddingTop: 12 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', color: '#475569' }}>
                     <span>Freight Corridor Charges</span>
-                    <span style={{ fontFamily: 'monospace', color: '#0f172a' }}>₹{inv.freight.toLocaleString()}</span>
+                    <span style={{ fontFamily: 'monospace', color: '#0f172a' }}>{formatINR(inv.freight)}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', color: '#475569' }}>
                     <span>Warehouse Loading & Staging</span>
-                    <span style={{ fontFamily: 'monospace', color: '#0f172a' }}>₹{inv.loading.toLocaleString()}</span>
+                    <span style={{ fontFamily: 'monospace', color: '#0f172a' }}>{formatINR(inv.loading)}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', color: '#475569' }}>
                     <span>Destination Unloading & Docking</span>
-                    <span style={{ fontFamily: 'monospace', color: '#0f172a' }}>₹{inv.unloading.toLocaleString()}</span>
+                    <span style={{ fontFamily: 'monospace', color: '#0f172a' }}>{formatINR(inv.unloading)}</span>
                   </div>
                   {inv.damageDeduction ? (
                     <div style={{ display: 'flex', justifyContent: 'space-between', color: '#dc2626' }}>
                       <span>Damaged/Shortage Goods Deduction</span>
-                      <span style={{ fontFamily: 'monospace' }}>-₹{inv.damageDeduction.toLocaleString()}</span>
+                      <span style={{ fontFamily: 'monospace' }}>-{formatINR(inv.damageDeduction)}</span>
                     </div>
                   ) : null}
                   <div style={{ display: 'flex', justifyContent: 'space-between', color: '#475569', borderTop: '1px solid #e2e8f0', paddingTop: 6 }}>
                     <span>Taxable Subtotal</span>
-                    <span style={{ fontFamily: 'monospace', fontWeight: 600, color: '#0f172a' }}>₹{inv.subtotal.toLocaleString()}</span>
+                    <span style={{ fontFamily: 'monospace', fontWeight: 600, color: '#0f172a' }}>{formatINR(inv.subtotal)}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', color: '#475569' }}>
                     <span>GST @ 18% (Integrated IGST)</span>
-                    <span style={{ fontFamily: 'monospace', color: '#0f172a' }}>₹{inv.gst.toLocaleString()}</span>
+                    <span style={{ fontFamily: 'monospace', color: '#0f172a' }}>{formatINR(inv.gst)}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '2px solid #0f172a', paddingTop: 8, marginTop: 4 }}>
                     <span style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>TOTAL PAYABLE</span>
                     <span style={{ fontSize: 18, fontWeight: 800, color: '#2a5c9a', fontFamily: 'monospace' }}>
-                      ₹{inv.total.toLocaleString()}
+                      {formatINR(inv.total)}
                     </span>
                   </div>
                 </div>

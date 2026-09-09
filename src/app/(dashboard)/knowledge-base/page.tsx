@@ -1,11 +1,12 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
 import { useStore, KnowledgeBaseItem } from '@/lib/store';
 import {
-  BookOpen, Plus, Search, Filter, Trash2,
+  BookOpen, Plus, Search, Trash2,
   Sparkles, X
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { AlertBanner } from '@/components/ui/AlertBanner';
 
 export default function KnowledgeBasePage() {
   const { knowledgeBase, addKnowledgeBaseItem, deleteKnowledgeBaseItem } = useStore();
@@ -73,7 +74,7 @@ export default function KnowledgeBasePage() {
       <div className="page-header">
         <div>
           <div className="page-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <BookOpen size={20} color="var(--accent)" />
+            <BookOpen size={20} color="var(--brand)" />
             Knowledge Base & Corridor Policy Portal
           </div>
           <div className="page-subtitle">
@@ -102,8 +103,8 @@ export default function KnowledgeBasePage() {
                   padding: '5px 12px',
                   borderRadius: 6,
                   border: '1px solid var(--border)',
-                  background: activeCategory === cat ? 'var(--accent-glow)' : 'var(--bg-tertiary)',
-                  color: activeCategory === cat ? 'var(--accent)' : 'var(--text-secondary)',
+                  background: activeCategory === cat ? 'var(--brand-10)' : 'var(--surface-2)',
+                  color: activeCategory === cat ? 'var(--brand)' : 'var(--text-mid)',
                   fontWeight: activeCategory === cat ? 700 : 500,
                   cursor: 'pointer'
                 }}
@@ -114,7 +115,7 @@ export default function KnowledgeBasePage() {
           </div>
 
           <div style={{ position: 'relative', width: 220 }}>
-            <Search size={13} color="var(--text-muted)" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)' }} />
+            <Search size={13} color="var(--text-low)" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)' }} />
             <input
               className="form-input"
               style={{ paddingLeft: 28, fontSize: 12 }}
@@ -149,16 +150,16 @@ export default function KnowledgeBasePage() {
                 <span className="badge badge-yellow" style={{ fontSize: 10.5 }}>
                   {item.category}
                 </span>
-                <span className="mono" style={{ fontSize: 10.5, color: 'var(--text-muted)' }}>
+                <span className="mono" style={{ fontSize: 10.5, color: 'var(--text-low)' }}>
                   {item.id}
                 </span>
               </div>
 
-              <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-primary)', marginBottom: 8, lineHeight: 1.3 }}>
+              <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-high)', marginBottom: 8, lineHeight: 1.3 }}>
                 {item.title}
               </div>
 
-              <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 12 }}>
+              <p style={{ fontSize: 12, color: 'var(--text-mid)', lineHeight: 1.5, marginBottom: 12 }}>
                 {item.content}
               </p>
             </div>
@@ -173,8 +174,8 @@ export default function KnowledgeBasePage() {
                       fontSize: 10,
                       padding: '2px 6px',
                       borderRadius: 4,
-                      background: 'var(--bg-tertiary)',
-                      color: 'var(--text-muted)'
+                      background: 'var(--surface-2)',
+                      color: 'var(--text-low)'
                     }}
                   >
                     #{kw}
@@ -189,12 +190,12 @@ export default function KnowledgeBasePage() {
                 borderTop: '1px solid var(--border)',
                 paddingTop: 8,
                 fontSize: 11,
-                color: 'var(--text-muted)'
+                color: 'var(--text-low)'
               }}>
                 <span>Updated: {item.lastUpdated}</span>
                 <button
                   onClick={() => handleDelete(item.id, item.title)}
-                  style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: 2 }}
+                  style={{ background: 'none', border: 'none', color: 'var(--brand-dark)', cursor: 'pointer', padding: 2 }}
                   title="Remove document"
                 >
                   <Trash2 size={13} />
@@ -211,9 +212,9 @@ export default function KnowledgeBasePage() {
           <div className="modal" style={{ maxWidth: 500 }} onClick={e => e.stopPropagation()}>
             <div className="modal-title">
               <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Sparkles size={16} color="var(--accent)" /> Add Knowledge Document
+                <Sparkles size={16} color="var(--brand)" /> Add Knowledge Document
               </span>
-              <button onClick={() => setShowAddModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+              <button onClick={() => setShowAddModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text-low)', cursor: 'pointer' }}>
                 <X size={18} />
               </button>
             </div>
@@ -235,7 +236,7 @@ export default function KnowledgeBasePage() {
                 <select
                   className="form-input"
                   value={form.category}
-                  onChange={e => setForm(f => ({ ...f, category: e.target.value as any }))}
+                  onChange={e => setForm(f => ({ ...f, category: e.target.value as KnowledgeBaseItem['category'] }))}
                 >
                   <option value="Hours & Operations">Hours & Operations</option>
                   <option value="Lane Rates">Lane Rates</option>

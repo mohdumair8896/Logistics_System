@@ -1,21 +1,28 @@
-﻿'use client';
+'use client';
 import { useState } from 'react';
 import { useStore } from '@/lib/store';
-import { initialCustomers as customers, initialProducts as products } from '@/lib/mockData';
-import type { Customer, Product } from '@/lib/store';
+import { getStatusBadgeClass } from '@/lib/formatters';
 import {
   ShoppingCart, Plus, X, Trash2, ArrowRight, Download, Search,
-  Clock, ArrowUpDown, ArrowUp, ArrowDown
+  Clock, ArrowUpDown, ArrowUp, ArrowDown, Navigation, Truck, QrCode
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { AlertBanner } from '@/components/ui/AlertBanner';
+import { ShipmentQR } from '@/components/ui/ShipmentQR';
+import { InlineDisclosureMenu } from '@/components/ui/InlineDisclosureMenu';
+import { Pagination2 } from '@/components/ui/Pagination2';
+import { AdaptiveSlider } from '@/components/ui/AdaptiveSlider';
+
 
 export default function OrdersPage() {
-  const { orders, addOrder } = useStore();
+  const { orders, addOrder, updateOrder, customers, products } = useStore();
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState<'All' | 'Pending' | 'Allocated' | 'In Transit' | 'Delivered'>('All');
   const [search, setSearch] = useState('');
+  const [maxWeight, setMaxWeight] = useState(25000);
+  const [showSlider, setShowSlider] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [sortField, setSortField] = useState<'id' | 'destination' | 'weight' | 'status'>('id');
   const [sortAsc, setSortAsc] = useState(true);
@@ -25,8 +32,8 @@ export default function OrdersPage() {
 
   const [form, setForm] = useState({
     customerId: 'C001',
-    destination: 'Kanpur Facility',
-    origin: 'Lucknow Central Hub',
+    destination: 'East Distribution Center',
+    origin: 'Central Distribution Hub',
     items: [
       { productId: 'P001', quantity: 5000 },
       { productId: 'P002', quantity: 2500 }
@@ -34,14 +41,6 @@ export default function OrdersPage() {
     distance: 82,
     freightRate: 2.4
   });
-
-  const statusColor: Record<string, string> = {
-    'Pending': 'badge-yellow',
-    'Allocated': 'badge-blue',
-    'In Transit': 'badge-cyan',
-    'Delivered': 'badge-green',
-    'Cancelled': 'badge-red'
-  };
 
   const totalWeight = form.items.reduce((s, i) => s + (i.quantity || 0), 0);
 
@@ -57,7 +56,7 @@ export default function OrdersPage() {
   const filteredOrders = orders
     .filter(o => {
       const matchesTab = activeTab === 'All' || o.status === activeTab;
-      const cust = customers.find((c: Customer) => c.id === o.customerId);
+      const cust = customers.find(c => c.id === o.customerId);
       const matchesSearch = !search ||
         o.id.toLowerCase().includes(search.toLowerCase()) ||
         o.destination.toLowerCase().includes(search.toLowerCase()) ||
@@ -95,7 +94,7 @@ export default function OrdersPage() {
     setTimeout(() => {
       const headers = 'Order ID,Customer,Origin,Destination,Weight (kg),Status,Created At\n';
       const rows = orders.map(o => {
-        const cust = customers.find((c: Customer) => c.id === o.customerId)?.name || o.customerId;
+        const cust = customers.find(c => c.id === o.customerId)?.name || o.customerId;
         return `${o.id},"${cust}","${o.origin}","${o.destination}",${o.totalWeight},${o.status},${o.createdAt}`;
       }).join('\n');
       const blob = new Blob([headers + rows], { type: 'text/csv' });
@@ -134,10 +133,20 @@ export default function OrdersPage() {
         </div>
       </div>
 
-      {/* Filter Tabs & Search Bar (matching Stitch Screen 6) */}
+      {/* Pending / Cancelled alerts — watermelon Alert20/Alert24 pattern */}
+      {orders.filter(o => o.status === 'Cancelled').length > 0 && (
+        <AlertBanner variant="error" title={`${orders.filter(o => o.status === 'Cancelled').length} order(s) cancelled`} dismissible>
+          Review cancelled freight bookings and verify inventory return status.
+        </AlertBanner>
+      )}
+      {orders.filter(o => o.status === 'Pending').length > 0 && (
+        <AlertBanner variant="warning" title={`${orders.filter(o => o.status === 'Pending').length} order(s) awaiting vehicle allocation`} compact dismissible />
+      )}
+
+      {/* Filter Tabs & Search Bar */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
         {/* Tab filters */}
-        <div style={{ display: 'flex', gap: 6, background: 'var(--bg-card)', padding: 4, borderRadius: 10, border: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', gap: 6, background: 'var(--surface-2)', padding: 4, borderRadius: 10, border: '1px solid var(--border)' }}>
           {(['All', 'Pending', 'Allocated', 'In Transit', 'Delivered'] as const).map(tab => {
             const count = tab === 'All' ? orders.length : orders.filter(o => o.status === tab).length;
             const active = activeTab === tab;
@@ -149,8 +158,8 @@ export default function OrdersPage() {
                   padding: '6px 12px',
                   borderRadius: 6,
                   border: 'none',
-                  background: active ? 'var(--accent-glow)' : 'transparent',
-                  color: active ? 'var(--accent)' : 'var(--text-secondary)',
+                  background: active ? 'var(--brand-10)' : 'transparent',
+                  color: active ? 'var(--brand)' : 'var(--text-mid)',
                   fontWeight: active ? 700 : 500,
                   fontSize: 12.5,
                   cursor: 'pointer',
@@ -164,8 +173,8 @@ export default function OrdersPage() {
                   fontSize: 10.5,
                   padding: '1px 5px',
                   borderRadius: 8,
-                  background: active ? 'var(--accent)' : 'var(--bg-tertiary)',
-                  color: active ? '#1C1917' : 'var(--text-muted)',
+                  background: active ? 'var(--brand)' : 'var(--border)',
+                  color: active ? '#fff' : 'var(--text-low)',
                   fontWeight: 700
                 }}>
                   {count}
@@ -177,7 +186,7 @@ export default function OrdersPage() {
 
         {/* Search */}
         <div style={{ position: 'relative', width: 260 }}>
-          <Search size={14} color="var(--text-muted)" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
+          <Search size={14} color="var(--icon)" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
           <input
             className="form-input"
             style={{ paddingLeft: 34, fontSize: 12.5 }}
@@ -197,27 +206,27 @@ export default function OrdersPage() {
               <th onClick={() => handleSort('id')} style={{ cursor: 'pointer', userSelect: 'none' }} aria-sort={sortField === 'id' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span>Order ID</span>
-                  {sortField === 'id' ? (sortAsc ? <ArrowUp size={12} color="var(--accent)" /> : <ArrowDown size={12} color="var(--accent)" />) : <ArrowUpDown size={11} color="var(--text-muted)" />}
+                  {sortField === 'id' ? (sortAsc ? <ArrowUp size={12} color="var(--icon)" /> : <ArrowDown size={12} color="var(--icon)" />) : <ArrowUpDown size={11} color="var(--text-low)" />}
                 </div>
               </th>
               <th>Customer</th>
               <th onClick={() => handleSort('destination')} style={{ cursor: 'pointer', userSelect: 'none' }} aria-sort={sortField === 'destination' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span>Route Corridor</span>
-                  {sortField === 'destination' ? (sortAsc ? <ArrowUp size={12} color="var(--accent)" /> : <ArrowDown size={12} color="var(--accent)" />) : <ArrowUpDown size={11} color="var(--text-muted)" />}
+                  {sortField === 'destination' ? (sortAsc ? <ArrowUp size={12} color="var(--icon)" /> : <ArrowDown size={12} color="var(--icon)" />) : <ArrowUpDown size={11} color="var(--text-low)" />}
                 </div>
               </th>
               <th onClick={() => handleSort('weight')} style={{ cursor: 'pointer', userSelect: 'none' }} aria-sort={sortField === 'weight' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span>Weight</span>
-                  {sortField === 'weight' ? (sortAsc ? <ArrowUp size={12} color="var(--accent)" /> : <ArrowDown size={12} color="var(--accent)" />) : <ArrowUpDown size={11} color="var(--text-muted)" />}
+                  {sortField === 'weight' ? (sortAsc ? <ArrowUp size={12} color="var(--icon)" /> : <ArrowDown size={12} color="var(--icon)" />) : <ArrowUpDown size={11} color="var(--text-low)" />}
                 </div>
               </th>
               <th>Deadline</th>
               <th onClick={() => handleSort('status')} style={{ cursor: 'pointer', userSelect: 'none' }} aria-sort={sortField === 'status' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span>Status</span>
-                  {sortField === 'status' ? (sortAsc ? <ArrowUp size={12} color="var(--accent)" /> : <ArrowDown size={12} color="var(--accent)" />) : <ArrowUpDown size={11} color="var(--text-muted)" />}
+                  {sortField === 'status' ? (sortAsc ? <ArrowUp size={12} color="var(--icon)" /> : <ArrowDown size={12} color="var(--icon)" />) : <ArrowUpDown size={11} color="var(--text-low)" />}
                 </div>
               </th>
               <th style={{ textAlign: 'right' }}>Action</th>
@@ -226,69 +235,94 @@ export default function OrdersPage() {
           <tbody>
             {filteredOrders.length === 0 ? (
               <tr>
-                <td colSpan={7} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>
+                <td colSpan={7} style={{ textAlign: 'center', padding: 40, color: 'var(--text-low)' }}>
                   No orders match current filter
                 </td>
               </tr>
             ) : (
               filteredOrders.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map(order => {
-                const cust = customers.find((c: Customer) => c.id === order.customerId);
+                const cust = customers.find(c => c.id === order.customerId);
                 return (
                   <tr key={order.id}>
                     <td>
-                      <span className="mono" style={{ color: '#60a5fa', fontWeight: 700, fontSize: 12.5 }}>
+                      <span className="mono" style={{ color: 'var(--mono-id)', fontWeight: 700, fontSize: 12.5, fontFamily: 'var(--font-mono)' }}>
                         {order.id}
                       </span>
                     </td>
                     <td>
-                      <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{cust?.name || order.customerId}</div>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{order.items.length} items manifest</div>
+                      <div style={{ fontWeight: 600, color: 'var(--text-high)' }}>{cust?.name || order.customerId}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-low)' }}>{order.items.length} items manifest</div>
                     </td>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}>
-                        <span style={{ color: 'var(--text-muted)' }}>{order.origin.split(' ')[0]}</span>
-                        <span style={{ color: '#60a5fa' }}>→</span>
-                        <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{order.destination}</span>
+                        <span style={{ color: 'var(--text-low)' }}>{order.origin.split(' ')[0]}</span>
+                        <span style={{ color: 'var(--brand)' }}>→</span>
+                        <span style={{ color: 'var(--text-high)', fontWeight: 600 }}>{order.destination}</span>
                       </div>
-                      <div style={{ fontSize: 10.5, color: 'var(--text-muted)' }}>{order.distance} km corridor</div>
+                      <div style={{ fontSize: 10.5, color: 'var(--text-low)' }}>{order.distance} km corridor</div>
                     </td>
                     <td>
-                      <span className="mono" style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+                      <span className="mono" style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-high)', fontFamily: 'var(--font-mono)' }}>
                         {order.totalWeight.toLocaleString()} kg
                       </span>
                     </td>
                     <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11.5, color: order.status === 'Pending' ? '#fbbf24' : 'var(--text-muted)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11.5, color: order.status === 'Pending' ? 'var(--brand)' : 'var(--text-low)' }}>
                         <Clock size={12} />
                         {order.deadline || 'Today 18:00'}
                       </div>
                     </td>
                     <td>
-                      <span className={`badge ${statusColor[order.status] || 'badge-gray'}`}>
+                      <span className={`badge ${getStatusBadgeClass(order.status)}`}>
                         {order.status}
                       </span>
                     </td>
                     <td style={{ textAlign: 'right' }}>
-                      {order.status === 'Pending' && (
-                        <button className="btn btn-sm btn-primary" onClick={() => router.push('/allocation')}>
-                          Allocate Truck <ArrowRight size={12} />
-                        </button>
-                      )}
-                      {order.status === 'Allocated' && (
-                        <button className="btn btn-sm btn-secondary" onClick={() => router.push('/warehouse')}>
-                          Load Bay <ArrowRight size={12} />
-                        </button>
-                      )}
-                      {order.status === 'In Transit' && (
-                        <button className="btn btn-sm btn-ghost" onClick={() => router.push('/tracking')}>
-                          Live Telematics
-                        </button>
-                      )}
-                      {order.status === 'Delivered' && (
-                        <button className="btn btn-sm btn-ghost" onClick={() => router.push('/invoices')}>
-                          Invoice
-                        </button>
-                      )}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6 }}>
+                        {order.status === 'Pending' && (
+                          <button className="btn btn-sm btn-primary" onClick={() => router.push('/allocation')}>
+                            Allocate <ArrowRight size={11} />
+                          </button>
+                        )}
+                        {order.status === 'Allocated' && (
+                          <button className="btn btn-sm btn-secondary" onClick={() => router.push('/warehouse')}>
+                            Bay <ArrowRight size={11} />
+                          </button>
+                        )}
+                        {order.status === 'In Transit' && (
+                          <button className="btn btn-sm btn-ghost" onClick={() => router.push('/tracking')}>
+                            Track
+                          </button>
+                        )}
+                        {order.status === 'Delivered' && (
+                          <button className="btn btn-sm btn-ghost" onClick={() => router.push('/invoices')}>
+                            Invoice
+                          </button>
+                        )}
+                        <InlineDisclosureMenu
+                          actions={[
+                            {
+                              id: 'track',
+                              label: 'Telematics',
+                              icon: <Navigation size={12} />,
+                              onClick: () => router.push('/tracking'),
+                            },
+                            {
+                              id: 'manifest',
+                              label: 'Bay Loading',
+                              icon: <Truck size={12} />,
+                              onClick: () => router.push('/warehouse'),
+                            },
+                            {
+                              id: 'cancel',
+                              label: 'Cancel Order',
+                              icon: <X size={12} />,
+                              variant: 'danger',
+                              onClick: () => updateOrder(order.id, { status: 'Cancelled' }),
+                            },
+                          ]}
+                        />
+                      </div>
                     </td>
                   </tr>
                 );
@@ -297,20 +331,14 @@ export default function OrdersPage() {
           </tbody>
         </table>
         </div>
-        {/* Pagination — Miller's Law: 10 rows per page */}
-        {filteredOrders.length > PAGE_SIZE && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 18px', borderTop: '1px solid var(--border)', fontSize: 12.5, color: 'var(--text-secondary)' }}>
-            <span>Showing {Math.min((page - 1) * PAGE_SIZE + 1, filteredOrders.length)}–{Math.min(page * PAGE_SIZE, filteredOrders.length)} of {filteredOrders.length} orders</span>
-            <div style={{ display: 'flex', gap: 6 }}>
-              <button className="btn btn-ghost btn-sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} aria-label="Previous page">← Prev</button>
-              {Array.from({ length: Math.ceil(filteredOrders.length / PAGE_SIZE) }, (_, i) => (
-                <button key={i} className={`btn btn-sm ${page === i + 1 ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setPage(i + 1)} aria-label={`Page ${i + 1}`} aria-current={page === i + 1 ? 'page' : undefined}>{i + 1}</button>
-              ))}
-              <button className="btn btn-ghost btn-sm" onClick={() => setPage(p => Math.min(Math.ceil(filteredOrders.length / PAGE_SIZE), p + 1))} disabled={page === Math.ceil(filteredOrders.length / PAGE_SIZE)} aria-label="Next page">Next →</button>
-            </div>
-          </div>
-        )}
-      </div>
+        <Pagination2
+            currentPage={page}
+            totalPages={Math.ceil(filteredOrders.length / PAGE_SIZE)}
+            totalItems={filteredOrders.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={setPage}
+          />
+        </div>
 
       {/* Create Order Modal */}
       {showCreate && (
@@ -318,7 +346,7 @@ export default function OrdersPage() {
           <div className="modal" style={{ maxWidth: 620 }} onClick={e => e.stopPropagation()}>
             <div className="modal-title">
               <span>Create New Dispatch Order</span>
-              <button onClick={() => setShowCreate(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+              <button onClick={() => setShowCreate(false)} style={{ background: 'none', border: 'none', color: 'var(--text-low)', cursor: 'pointer' }}>
                 <X size={20} />
               </button>
             </div>
@@ -333,14 +361,14 @@ export default function OrdersPage() {
                 </div>
                 <div className="form-group">
                   <label className="form-label">Origin Hub</label>
-                  <input className="form-input" value={form.origin} onChange={e => setForm({...form, origin: e.target.value})} placeholder="Lucknow Central Hub" />
+                  <input className="form-input" value={form.origin} onChange={e => setForm({...form, origin: e.target.value})} placeholder="Central Distribution Hub" />
                 </div>
               </div>
 
               <div className="grid-2">
                 <div className="form-group">
                   <label className="form-label">Destination</label>
-                  <input className="form-input" value={form.destination} onChange={e => setForm({...form, destination: e.target.value})} placeholder="Kanpur Facility" required />
+                  <input className="form-input" value={form.destination} onChange={e => setForm({...form, destination: e.target.value})} placeholder="East Distribution Center" required />
                 </div>
                 <div className="form-group">
                   <label className="form-label">Distance (km)</label>
@@ -363,9 +391,9 @@ export default function OrdersPage() {
                         {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                       </select>
                       <input className="form-input" type="number" placeholder="Qty (kg)" value={item.quantity || ''} onChange={e => updateItem(i, 'quantity', e.target.value)} style={{ flex: 1 }} />
-                      <span style={{ fontSize: 11, color: 'var(--text-muted)', minWidth: 24 }}>kg</span>
+                      <span style={{ fontSize: 11, color: 'var(--text-low)', minWidth: 24 }}>kg</span>
                       {form.items.length > 1 && (
-                        <button type="button" onClick={() => removeItem(i)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
+                        <button type="button" onClick={() => removeItem(i)} style={{ background: 'none', border: 'none', color: 'var(--brand)', cursor: 'pointer' }}>
                           <Trash2 size={15} />
                         </button>
                       )}
@@ -375,12 +403,12 @@ export default function OrdersPage() {
               </div>
 
               {/* Weight total calculation */}
-              <div style={{ background: 'var(--bg-tertiary)', borderRadius: 10, padding: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--border)' }}>
+              <div style={{ background: 'var(--surface-2)', borderRadius: 10, padding: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--border)' }}>
                 <div>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Estimated Total Payload</div>
-                  <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Calculates vehicle capacity required</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-low)' }}>Estimated Total Payload</div>
+                  <div style={{ fontSize: 13, color: 'var(--text-mid)' }}>Calculates vehicle capacity required</div>
                 </div>
-                <span className="mono" style={{ fontSize: 20, fontWeight: 800, color: '#60a5fa' }}>
+                <span className="mono" style={{ fontSize: 20, fontWeight: 800, color: 'var(--brand)', fontFamily: 'var(--font-mono)' }}>
                   {totalWeight.toLocaleString()} kg
                 </span>
               </div>

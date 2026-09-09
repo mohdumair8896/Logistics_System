@@ -2,11 +2,12 @@
 import { useState } from 'react';
 import { useStore } from '@/lib/store';
 import {
-  Search, Filter, Phone, Truck, CheckCircle,
+  Search, Truck, CheckCircle,
   Sparkles
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { AlertBanner } from '@/components/ui/AlertBanner';
 
 export default function LeadsCRMPage() {
   const { leads, updateLeadStatus, convertLeadToOrder } = useStore();
@@ -55,7 +56,7 @@ export default function LeadsCRMPage() {
       <div className="page-header">
         <div>
           <div className="page-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Sparkles size={20} color="var(--accent)" />
+            <Sparkles size={20} color="var(--brand)" />
             Inbound Shipper Leads & Spot Intake CRM
           </div>
           <div className="page-subtitle">
@@ -64,53 +65,64 @@ export default function LeadsCRMPage() {
         </div>
       </div>
 
+      {/* Inbound Leads Alert — watermelon AlertBanner pattern */}
+      {newLeadsCount > 0 && (
+        <AlertBanner
+          variant="warning"
+          title={`${newLeadsCount} new inbound shipper lead(s) awaiting freight review`}
+          dismissible
+        >
+          Review captured cargo specifications and convert verified spot leads to dispatch orders.
+        </AlertBanner>
+      )}
+
       {/* KPI Metrics Strip */}
       <div className="grid-4" style={{ marginBottom: 20 }}>
         <div className="stat-card">
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase' }}>
               Inbound Shipper Leads
             </div>
-            <div className="mono" style={{ fontSize: 26, fontWeight: 800, color: 'var(--text-primary)', marginTop: 4 }}>
+            <div className="mono" style={{ fontSize: 26, fontWeight: 800, color: 'var(--text-high)', marginTop: 4 }}>
               {leads.length}
             </div>
-            <div style={{ fontSize: 11, color: 'var(--accent)', marginTop: 2 }}>{newLeadsCount} Pending Review</div>
+            <div style={{ fontSize: 11, color: 'var(--brand)', marginTop: 2 }}>{newLeadsCount} Pending Review</div>
           </div>
         </div>
 
         <div className="stat-card">
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase' }}>
               Pipeline Freight Value
             </div>
-            <div className="mono" style={{ fontSize: 26, fontWeight: 800, color: '#10b981', marginTop: 4 }}>
-              ₹{totalPipelineValue.toLocaleString()}
+            <div className="mono" style={{ fontSize: 26, fontWeight: 800, color: 'var(--brand)', marginTop: 4 }}>
+              ?{totalPipelineValue.toLocaleString()}
             </div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>Spot tariff estimates</div>
+            <div style={{ fontSize: 11, color: 'var(--text-low)', marginTop: 2 }}>Spot tariff estimates</div>
           </div>
         </div>
 
         <div className="stat-card">
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase' }}>
               Dispatched & Allocated
             </div>
             <div className="mono" style={{ fontSize: 26, fontWeight: 800, color: 'var(--cyan)', marginTop: 4 }}>
               {allocatedCount}
             </div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>Active corridor dispatches</div>
+            <div style={{ fontSize: 11, color: 'var(--text-low)', marginTop: 2 }}>Active corridor dispatches</div>
           </div>
         </div>
 
         <div className="stat-card">
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase' }}>
               Conversion Rate
             </div>
             <div className="mono" style={{ fontSize: 26, fontWeight: 800, color: '#F59E0B', marginTop: 4 }}>
               {leads.length > 0 ? Math.round((allocatedCount / leads.length) * 100) : 0}%
             </div>
-            <div style={{ fontSize: 11, color: '#10b981', marginTop: 2 }}>Autonomous chat triage</div>
+            <div style={{ fontSize: 11, color: 'var(--brand)', marginTop: 2 }}>Autonomous chat triage</div>
           </div>
         </div>
       </div>
@@ -131,8 +143,8 @@ export default function LeadsCRMPage() {
                     padding: '4px 10px',
                     borderRadius: 6,
                     border: '1px solid var(--border)',
-                    background: activeTab === tab ? 'var(--accent-glow)' : 'var(--bg-tertiary)',
-                    color: activeTab === tab ? 'var(--accent)' : 'var(--text-secondary)',
+                    background: activeTab === tab ? 'var(--brand-10)' : 'var(--surface-2)',
+                    color: activeTab === tab ? 'var(--brand)' : 'var(--text-mid)',
                     fontWeight: activeTab === tab ? 700 : 500,
                     cursor: 'pointer'
                   }}
@@ -143,7 +155,7 @@ export default function LeadsCRMPage() {
             </div>
 
             <div style={{ position: 'relative', width: 170 }}>
-              <Search size={13} color="var(--text-muted)" style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)' }} />
+              <Search size={13} color="var(--text-low)" style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 className="form-input"
                 style={{ paddingLeft: 26, fontSize: 11.5, padding: '5px 8px 5px 26px' }}
@@ -169,7 +181,7 @@ export default function LeadsCRMPage() {
               <tbody>
                 {filteredLeads.length === 0 ? (
                   <tr>
-                    <td colSpan={5} style={{ textAlign: 'center', padding: 32, color: 'var(--text-muted)' }}>
+                    <td colSpan={5} style={{ textAlign: 'center', padding: 32, color: 'var(--text-low)' }}>
                       No leads matching filter criteria.
                     </td>
                   </tr>
@@ -184,22 +196,22 @@ export default function LeadsCRMPage() {
                       >
                         <td>
                           <div>
-                            <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{lead.shipperName}</div>
-                            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{lead.companyName}</div>
+                            <div style={{ fontWeight: 700, color: 'var(--text-high)' }}>{lead.shipperName}</div>
+                            <div style={{ fontSize: 11, color: 'var(--text-low)' }}>{lead.companyName}</div>
                           </div>
                         </td>
                         <td>
                           <div style={{ fontSize: 11.5 }}>
-                            {lead.originHub.split(' ')[0]} → {lead.destinationHub.split(' ')[0]}
+                            {lead.originHub.split(' ')[0]} ? {lead.destinationHub.split(' ')[0]}
                           </div>
-                          <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{lead.cargoType}</span>
+                          <span style={{ fontSize: 10, color: 'var(--text-low)' }}>{lead.cargoType}</span>
                         </td>
                         <td>
                           <span className="mono" style={{ fontSize: 12 }}>{lead.estimatedWeightKg.toLocaleString()} kg</span>
                         </td>
                         <td>
-                          <span className="mono" style={{ fontSize: 12, color: '#10b981', fontWeight: 700 }}>
-                            ₹{lead.freightQuote.toLocaleString()}
+                          <span className="mono" style={{ fontSize: 12, color: 'var(--brand)', fontWeight: 700 }}>
+                            ?{lead.freightQuote.toLocaleString()}
                           </span>
                         </td>
                         <td>
@@ -220,11 +232,11 @@ export default function LeadsCRMPage() {
             <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid var(--border)', paddingBottom: 12 }}>
                 <div>
-                  <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-high)' }}>
                     {selectedLead.shipperName}
                   </div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                    {selectedLead.companyName} • Reference: <span className="mono">{selectedLead.id}</span>
+                  <div style={{ fontSize: 12, color: 'var(--text-low)' }}>
+                    {selectedLead.companyName} � Reference: <span className="mono">{selectedLead.id}</span>
                   </div>
                 </div>
                 <span className={`badge ${statusColor[selectedLead.status] || 'badge-gray'}`}>
@@ -234,44 +246,44 @@ export default function LeadsCRMPage() {
 
               {/* Contact Credentials */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10, fontSize: 12 }}>
-                <div style={{ padding: '8px 10px', background: 'var(--bg-tertiary)', borderRadius: 8, border: '1px solid var(--border)' }}>
-                  <div style={{ color: 'var(--text-muted)', fontSize: 10.5, marginBottom: 2 }}>Direct Phone</div>
-                  <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{selectedLead.phone}</div>
+                <div style={{ padding: '8px 10px', background: 'var(--surface-2)', borderRadius: 8, border: '1px solid var(--border)' }}>
+                  <div style={{ color: 'var(--text-low)', fontSize: 10.5, marginBottom: 2 }}>Direct Phone</div>
+                  <div style={{ fontWeight: 600, color: 'var(--text-high)' }}>{selectedLead.phone}</div>
                 </div>
-                <div style={{ padding: '8px 10px', background: 'var(--bg-tertiary)', borderRadius: 8, border: '1px solid var(--border)' }}>
-                  <div style={{ color: 'var(--text-muted)', fontSize: 10.5, marginBottom: 2 }}>Corporate Email</div>
-                  <div style={{ fontWeight: 600, color: 'var(--text-primary)', textOverflow: 'ellipsis', overflow: 'hidden' }}>{selectedLead.email}</div>
+                <div style={{ padding: '8px 10px', background: 'var(--surface-2)', borderRadius: 8, border: '1px solid var(--border)' }}>
+                  <div style={{ color: 'var(--text-low)', fontSize: 10.5, marginBottom: 2 }}>Corporate Email</div>
+                  <div style={{ fontWeight: 600, color: 'var(--text-high)', textOverflow: 'ellipsis', overflow: 'hidden' }}>{selectedLead.email}</div>
                 </div>
               </div>
 
               {/* Haul Specifications */}
-              <div style={{ padding: 12, background: 'var(--bg-tertiary)', borderRadius: 8, border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12 }}>
+              <div style={{ padding: 12, background: 'var(--surface-2)', borderRadius: 8, border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Origin Hub:</span>
-                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{selectedLead.originHub}</span>
+                  <span style={{ color: 'var(--text-low)' }}>Origin Hub:</span>
+                  <span style={{ fontWeight: 600, color: 'var(--text-high)' }}>{selectedLead.originHub}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Destination:</span>
-                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{selectedLead.destinationHub}</span>
+                  <span style={{ color: 'var(--text-low)' }}>Destination:</span>
+                  <span style={{ fontWeight: 600, color: 'var(--text-high)' }}>{selectedLead.destinationHub}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Payload Weight:</span>
-                  <span className="mono" style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{selectedLead.estimatedWeightKg.toLocaleString()} kg</span>
+                  <span style={{ color: 'var(--text-low)' }}>Payload Weight:</span>
+                  <span className="mono" style={{ fontWeight: 700, color: 'var(--text-high)' }}>{selectedLead.estimatedWeightKg.toLocaleString()} kg</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Target Pickup:</span>
-                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{selectedLead.targetDeliveryDate}</span>
+                  <span style={{ color: 'var(--text-low)' }}>Target Pickup:</span>
+                  <span style={{ fontWeight: 600, color: 'var(--text-high)' }}>{selectedLead.targetDeliveryDate}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border)', paddingTop: 6 }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Estimated Tariff Quote:</span>
-                  <span className="mono" style={{ fontWeight: 800, color: '#10b981' }}>₹{selectedLead.freightQuote.toLocaleString()}</span>
+                  <span style={{ color: 'var(--text-low)' }}>Estimated Tariff Quote:</span>
+                  <span className="mono" style={{ fontWeight: 800, color: 'var(--brand)' }}>?{selectedLead.freightQuote.toLocaleString()}</span>
                 </div>
               </div>
 
               {/* Conversation Transcript Snippet */}
               {selectedLead.transcriptSnippet && (
                 <div>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 6 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase', marginBottom: 6 }}>
                     Conversation Transcript Snippet
                   </div>
                   <div style={{
@@ -297,7 +309,7 @@ export default function LeadsCRMPage() {
                     className="btn btn-primary w-full"
                     style={{ justifyContent: 'center', gap: 8, padding: '10px' }}
                   >
-                    <Truck size={15} /> Approve & Dispatch to Fleet Allocation →
+                    <Truck size={15} /> Approve & Dispatch to Fleet Allocation ?
                   </button>
                 ) : (
                   <div style={{
@@ -305,7 +317,7 @@ export default function LeadsCRMPage() {
                     background: 'rgba(16,185,129,0.1)',
                     border: '1px solid rgba(16,185,129,0.3)',
                     borderRadius: 8,
-                    color: '#10b981',
+                    color: 'var(--brand)',
                     fontSize: 12,
                     display: 'flex',
                     alignItems: 'center',
@@ -328,7 +340,7 @@ export default function LeadsCRMPage() {
                   <button
                     onClick={() => updateLeadStatus(selectedLead.id, 'Archived')}
                     className="btn btn-ghost btn-sm"
-                    style={{ flex: 1, justifyContent: 'center', color: 'var(--text-muted)' }}
+                    style={{ flex: 1, justifyContent: 'center', color: 'var(--text-low)' }}
                   >
                     Archive
                   </button>
@@ -336,7 +348,7 @@ export default function LeadsCRMPage() {
               </div>
             </div>
           ) : (
-            <div className="card" style={{ textAlign: 'center', padding: 48, color: 'var(--text-muted)' }}>
+            <div className="card" style={{ textAlign: 'center', padding: 48, color: 'var(--text-low)' }}>
               Select a lead from the CRM table to view specifications and dispatch status.
             </div>
           )}

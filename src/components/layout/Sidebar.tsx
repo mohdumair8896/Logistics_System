@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, Truck, Users, ShoppingCart, MapPin,
   Package, Navigation, PackageCheck, FileText, LogOut, Warehouse,
-  LucideIcon, X, Sparkles, BookOpen
+  LucideIcon, X, Sparkles, BookOpen, Search
 } from 'lucide-react';
 import { useStore } from '@/lib/store';
 import { toast } from 'sonner';
@@ -21,32 +21,31 @@ interface NavSection {
   items: NavItem[];
 }
 
-// Ordered by Pareto principle — most-used features first (80% of daily actions)
 const navItems: NavSection[] = [
   { label: 'OVERVIEW', items: [
     { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   ]},
   { label: 'OPERATIONS', items: [
-    { href: '/orders',      icon: ShoppingCart, label: 'Orders',           badge: 'orders' },
-    { href: '/allocation',  icon: MapPin,        label: 'Allocation',       badge: 'allocation' },
-    { href: '/warehouse',   icon: Warehouse,     label: 'Warehouse & Bays' },
-    { href: '/trips',       icon: Navigation,    label: 'Trips' },
+    { href: '/orders',     icon: ShoppingCart, label: 'Orders',           badge: 'orders' },
+    { href: '/allocation', icon: MapPin,        label: 'Allocation',       badge: 'allocation' },
+    { href: '/warehouse',  icon: Warehouse,     label: 'Warehouse & Bays' },
+    { href: '/trips',      icon: Navigation,    label: 'Trips' },
   ]},
   { label: 'DELIVERY & BILLING', items: [
-    { href: '/tracking',    icon: Package,      label: 'Live Tracking',    badge: 'activeTrips' },
-    { href: '/delivery',    icon: PackageCheck, label: 'Delivery & POD' },
-    { href: '/invoices',    icon: FileText,     label: 'Invoices' },
+    { href: '/tracking',   icon: Package,      label: 'Live Tracking',    badge: 'activeTrips' },
+    { href: '/track',      icon: Search,       label: 'Customer Tracking' },
+    { href: '/delivery',   icon: PackageCheck, label: 'Delivery & POD' },
+    { href: '/invoices',   icon: FileText,     label: 'Invoices' },
   ]},
   { label: 'FLEET & ROSTER', items: [
-    { href: '/vehicles',    icon: Truck,  label: 'Vehicles',    badge: 'vehicles' },
-    { href: '/drivers',     icon: Users,  label: 'Drivers' },
+    { href: '/vehicles', icon: Truck,  label: 'Vehicles', badge: 'vehicles' },
+    { href: '/drivers',  icon: Users,  label: 'Drivers' },
   ]},
   { label: 'TOOLS', items: [
-    { href: '/leads',          icon: Sparkles, label: 'Shipper Leads CRM', badge: 'leads' },
+    { href: '/leads',          icon: Sparkles, label: 'Leads CRM',     badge: 'leads' },
     { href: '/knowledge-base', icon: BookOpen, label: 'Knowledge Base' },
   ]},
 ];
-// Total: 12 items across 5 sections — DESIGN TOKENS removed from production
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -58,15 +57,14 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const router = useRouter();
   const { logout, orders, trips, leads } = useStore();
 
-  const pendingCount    = orders.filter(o => o.status === 'Pending').length;
+  const pendingCount     = orders.filter(o => o.status === 'Pending').length;
   const activeTripsCount = trips.filter(t => t.status === 'In Transit').length;
-  const newLeadsCount   = leads.filter(l => l.status === 'New').length;
+  const newLeadsCount    = leads.filter(l => l.status === 'New').length;
 
   const handleLogout = () => {
     logout();
-    // Peak-End Rule: end the session on a positive, reassuring note
-    toast.success('Signed out securely', {
-      description: 'Your session has been cleared. See you next time.',
+    toast.success('Signed out successfully', {
+      description: 'Your session has been cleared.',
       duration: 3000,
     });
     router.push('/login');
@@ -76,98 +74,108 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     if (onClose) onClose();
   };
 
+  const getBadgeCount = (badge?: string): number => {
+    if (badge === 'orders')      return pendingCount;
+    if (badge === 'activeTrips') return activeTripsCount;
+    if (badge === 'leads')       return newLeadsCount;
+    return 0;
+  };
+
   return (
-    <aside className={`sidebar ${isOpen ? 'drawer-open' : ''}`}>
-      <div className="sidebar-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div className="logo-mark">
-          <div className="logo-icon" style={{ fontWeight: 900, fontSize: 13, color: '#1c1917', letterSpacing: -0.5 }}>
-            LF
-          </div>
-          <div className="logo-text">
-            <div className="name">LogiFlow</div>
-            <div className="sub">Fleet Intelligence LMS</div>
+    <>
+      {/* Mobile backdrop */}
+      <div
+        className={`mobile-sidebar-backdrop${isOpen ? ' active' : ''}`}
+        onClick={onClose}
+      />
+
+      <aside className={`sidebar${isOpen ? ' drawer-open' : ''}`}>
+        {/* Logo */}
+        <div className="sidebar-logo">
+          <div className="logo-mark">
+            <div className="logo-icon">
+              <Truck size={18} color="#fff" />
+            </div>
+            <div className="logo-text">
+              <div className="name">LogiFlow</div>
+              <div className="sub">Logistics Platform</div>
+            </div>
           </div>
         </div>
 
-        {/* Mobile Close — Fitts's Law: min 44×44px touch target */}
-        {onClose && (
+        {/* Close button (mobile) */}
+        {isOpen && (
           <button
             onClick={onClose}
-            aria-label="Close navigation menu"
             style={{
-              background: 'transparent',
-              border: 'none',
-              color: 'var(--text-muted)',
-              cursor: 'pointer',
-              // Fitts's Law: minimum 44×44px touch target
-              minWidth: 44,
-              minHeight: 44,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: 8,
+              position: 'absolute', top: 16, right: 14,
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: 'var(--text-low)', display: 'flex', padding: 4,
             }}
-            className="mobile-close-btn"
           >
             <X size={18} />
           </button>
         )}
-      </div>
 
-      <nav className="sidebar-nav" aria-label="Main navigation">
-        {navItems.map(section => (
-          <div key={section.label}>
-            <div className="nav-section-label">{section.label}</div>
-            {section.items.map(item => {
-              const Icon = item.icon;
-              const active = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
+        {/* Navigation */}
+        <nav className="sidebar-nav">
+          {navItems.map(section => (
+            <div key={section.label}>
+              <div className="nav-section-label">{section.label}</div>
+              {section.items.map(item => {
+                const Icon = item.icon;
+                const isActive = pathname === item.href;
+                const count = getBadgeCount(item.badge);
+                const isLive = item.badge === 'activeTrips';
 
-              let badgeText: string | number | null = null;
-              if (item.badge === 'orders'     && pendingCount > 0)     badgeText = pendingCount;
-              if (item.badge === 'allocation' && pendingCount > 0)     badgeText = pendingCount;
-              if (item.badge === 'activeTrips' && activeTripsCount > 0) badgeText = 'LIVE';
-              if (item.badge === 'leads'      && newLeadsCount > 0)    badgeText = newLeadsCount;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`nav-item${isActive ? ' active' : ''}`}
+                    onClick={handleNavClick}
+                  >
+                    <Icon className="nav-icon" />
+                    <span style={{ flex: 1 }}>{item.label}</span>
+                    {count > 0 && (
+                      <span className={isLive ? 'nav-badge-live' : 'nav-badge'}>
+                        {count}
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
+        </nav>
 
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={handleNavClick}
-                  className={`nav-item ${active ? 'active' : ''}`}
-                  aria-current={active ? 'page' : undefined}
-                >
-                  <Icon className="nav-icon" aria-hidden="true" />
-                  <span>{item.label}</span>
-                  {badgeText && (
-                    <span className={item.badge === 'activeTrips' ? 'nav-badge-live' : 'nav-badge'}>
-                      {badgeText}
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
-          </div>
-        ))}
-      </nav>
-
-      <div className="sidebar-footer">
-        <button
-          onClick={handleLogout}
-          className="nav-item w-full"
-          style={{
-            background: 'none', border: 'none',
-            color: 'var(--text-secondary)', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', gap: 10,
-            // Fitts's Law: adequate touch target
-            padding: '10px 12px',
-            borderRadius: 8, width: '100%',
-            fontSize: 13, fontWeight: 500,
-          }}
-        >
-          <LogOut size={16} aria-hidden="true" />
-          Sign Out
-        </button>
-      </div>
-    </aside>
+        {/* Footer / Logout */}
+        <div className="sidebar-footer">
+          <button
+            onClick={handleLogout}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 9,
+              width: '100%', padding: '9px 12px', borderRadius: 8,
+              background: 'none', border: '1px solid var(--border)',
+              color: 'var(--text-mid)', fontSize: 13, fontWeight: 500,
+              cursor: 'pointer', transition: 'all 0.13s',
+            }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLButtonElement).style.background = 'var(--brand-10)';
+              (e.currentTarget as HTMLButtonElement).style.color = 'var(--brand)';
+              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--brand)';
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLButtonElement).style.background = 'none';
+              (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-mid)';
+              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border)';
+            }}
+          >
+            <LogOut size={15} />
+            Sign Out
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }
