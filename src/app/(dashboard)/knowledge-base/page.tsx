@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useState } from 'react';
 import { useStore, KnowledgeBaseItem } from '@/lib/store';
 import {
@@ -6,6 +6,7 @@ import {
   Sparkles, X
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { ModalPortal } from '@/components/ui/ModalPortal';
 import { AlertBanner } from '@/components/ui/AlertBanner';
 
 export default function KnowledgeBasePage() {
@@ -208,78 +209,80 @@ export default function KnowledgeBasePage() {
 
       {/* Add Document Modal */}
       {showAddModal && (
-        <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
-          <div className="modal" style={{ maxWidth: 500 }} onClick={e => e.stopPropagation()}>
-            <div className="modal-title">
-              <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Sparkles size={16} color="var(--brand)" /> Add Knowledge Document
-              </span>
-              <button onClick={() => setShowAddModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text-low)', cursor: 'pointer' }}>
-                <X size={18} />
-              </button>
+        <ModalPortal>
+          <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
+            <div className="modal" style={{ maxWidth: 500 }} onClick={e => e.stopPropagation()}>
+              <div className="modal-title">
+                <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Sparkles size={16} color="var(--brand)" /> Add Knowledge Document
+                </span>
+                <button onClick={() => setShowAddModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text-low)', cursor: 'pointer' }}>
+                  <X size={18} />
+                </button>
+              </div>
+
+              <form onSubmit={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 12 }}>
+                <div className="form-group">
+                  <label className="form-label">Article Title</label>
+                  <input
+                    className="form-input"
+                    value={form.title}
+                    onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+                    placeholder="e.g., Lucknow to Kanpur Reefer Temperature Guidelines"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Category</label>
+                  <select
+                    className="form-input"
+                    value={form.category}
+                    onChange={e => setForm(f => ({ ...f, category: e.target.value as KnowledgeBaseItem['category'] }))}
+                  >
+                    <option value="Hours & Operations">Hours &amp; Operations</option>
+                    <option value="Lane Rates">Lane Rates</option>
+                    <option value="Cold-Chain SLA">Cold-Chain SLA</option>
+                    <option value="Safety & HAZMAT">Safety &amp; HAZMAT</option>
+                    <option value="GST & Invoicing">GST &amp; Invoicing</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Knowledge Content &amp; Rules</label>
+                  <textarea
+                    className="form-input"
+                    rows={4}
+                    value={form.content}
+                    onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
+                    placeholder="Specify exact operating limits, demurrage charges, rates per ton-km, or safety steps..."
+                    required
+                    style={{ fontFamily: 'inherit' }}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Query Keywords (comma separated)</label>
+                  <input
+                    className="form-input"
+                    value={form.keywords}
+                    onChange={e => setForm(f => ({ ...f, keywords: e.target.value }))}
+                    placeholder="e.g., reefer, dairy, temp, ice, cold chain"
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                  <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setShowAddModal(false)}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn btn-primary" style={{ flex: 1.5 }}>
+                    Save &amp; Ingest
+                  </button>
+                </div>
+              </form>
             </div>
-
-            <form onSubmit={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 12 }}>
-              <div className="form-group">
-                <label className="form-label">Article Title</label>
-                <input
-                  className="form-input"
-                  value={form.title}
-                  onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                  placeholder="e.g., Lucknow to Kanpur Reefer Temperature Guidelines"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Category</label>
-                <select
-                  className="form-input"
-                  value={form.category}
-                  onChange={e => setForm(f => ({ ...f, category: e.target.value as KnowledgeBaseItem['category'] }))}
-                >
-                  <option value="Hours & Operations">Hours & Operations</option>
-                  <option value="Lane Rates">Lane Rates</option>
-                  <option value="Cold-Chain SLA">Cold-Chain SLA</option>
-                  <option value="Safety & HAZMAT">Safety & HAZMAT</option>
-                  <option value="GST & Invoicing">GST & Invoicing</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Knowledge Content & Rules</label>
-                <textarea
-                  className="form-input"
-                  rows={4}
-                  value={form.content}
-                  onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
-                  placeholder="Specify exact operating limits, demurrage charges, rates per ton-km, or safety steps..."
-                  required
-                  style={{ fontFamily: 'inherit' }}
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Query Keywords (comma separated)</label>
-                <input
-                  className="form-input"
-                  value={form.keywords}
-                  onChange={e => setForm(f => ({ ...f, keywords: e.target.value }))}
-                  placeholder="e.g., reefer, dairy, temp, ice, cold chain"
-                />
-              </div>
-
-              <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setShowAddModal(false)}>
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary" style={{ flex: 1.5 }}>
-                  Save & Ingest
-                </button>
-              </div>
-            </form>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </div>
   );

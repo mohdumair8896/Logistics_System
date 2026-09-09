@@ -129,17 +129,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <CookieConsent />
         <Toaster
           position="top-right"
-          theme="dark"
+          theme="light"
           richColors
           closeButton
           toastOptions={{
             style: {
-              background: '#0f172a',
-              border: '1px solid rgba(245, 158, 11, 0.3)',
-              color: '#FAFAF9',
-              fontFamily: 'var(--font-geist-sans, sans-serif)',
+              background: 'var(--surface-1, #fff)',
+              border: '1px solid var(--border, #E6E4DF)',
+              color: 'var(--text-high, #141414)',
+              fontFamily: 'Inter, sans-serif',
               fontSize: '13px',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.10)',
             }
           }}
         />

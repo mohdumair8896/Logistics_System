@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { AlertBanner } from '@/components/ui/AlertBanner';
 import { LabeledProgress } from '@/components/ui/LabeledProgress';
+import { ModalPortal } from '@/components/ui/ModalPortal';
 
 export default function AllocationPage() {
   const { orders, vehicles, drivers, allocateVehicle, customers } = useStore();
@@ -328,32 +329,38 @@ export default function AllocationPage() {
         </div>
       </div>
 
-      {/* Override Reason Modal */}
+      {/* Override Reason Modal — rendered at body level via portal */}
       {overrideModal && (
-        <div className="modal-overlay" onClick={() => setOverrideModal(null)}>
-          <div className="modal" style={{ maxWidth: 440 }} onClick={e => e.stopPropagation()}>
-            <div className="modal-title">
-              <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--brand)' }}>
-                <ShieldAlert size={18} />
-                Manager Allocation Override
-              </span>
-            </div>
-            <p style={{ fontSize: 13, color: 'var(--text-mid)', marginBottom: 14 }}>
-              This vehicle has constraint warning: <strong style={{ color: 'var(--brand-dark)' }}>{overrideModal.reason}</strong>.
-              Confirm override to assign it anyway?
-            </p>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setOverrideModal(null)}>Cancel</button>
-              <button
-                className="btn btn-warning"
-                style={{ flex: 1.5 }}
-                onClick={() => handleAllocate(overrideModal.vehicleId, 'D001', 'Manager Verified Override')}
-              >
-                Confirm Override
-              </button>
+        <ModalPortal>
+          <div className="modal-overlay" onClick={() => setOverrideModal(null)}>
+            <div
+              className="modal"
+              style={{ maxWidth: 440, background: 'var(--surface-1)' }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="modal-title">
+                <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--brand)' }}>
+                  <ShieldAlert size={18} />
+                  Manager Allocation Override
+                </span>
+              </div>
+              <p style={{ fontSize: 13, color: 'var(--text-mid)', marginBottom: 14 }}>
+                This vehicle has constraint warning: <strong style={{ color: 'var(--brand-dark)' }}>{overrideModal.reason}</strong>.
+                Confirm override to assign it anyway?
+              </p>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setOverrideModal(null)}>Cancel</button>
+                <button
+                  className="btn btn-warning"
+                  style={{ flex: 1.5 }}
+                  onClick={() => handleAllocate(overrideModal.vehicleId, 'D001', 'Manager Verified Override')}
+                >
+                  Confirm Override
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </div>
   );

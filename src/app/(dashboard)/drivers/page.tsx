@@ -8,6 +8,7 @@ import {
 import DriverChatModal from '@/components/layout/DriverChatModal';
 import { toast } from 'sonner';
 import { AlertBanner } from '@/components/ui/AlertBanner';
+import { ModalPortal } from '@/components/ui/ModalPortal';
 import { ListStack } from '@/components/ui/ListStack';
 import { AvatarStack } from '@/components/ui/AvatarStack';
 import { FileUpload } from '@/components/ui/FileUpload';
@@ -295,31 +296,33 @@ export default function DriversPage() {
 
       {/* Reassign Vehicle Modal (Stitch Screen 5) */}
       {reassignModal && selectedDriver && (
-        <div className="modal-overlay" onClick={() => setReassignModal(null)}>
-          <div className="modal" style={{ maxWidth: 440 }} onClick={e => e.stopPropagation()}>
-            <div className="modal-title">
-              <span>Reassign Vehicle for {selectedDriver.name}</span>
-              <button onClick={() => setReassignModal(null)} style={{ background: 'none', border: 'none', color: 'var(--text-low)', cursor: 'pointer' }}><X size={18} /></button>
+        <ModalPortal>
+          <div className="modal-overlay" onClick={() => setReassignModal(null)}>
+            <div className="modal" style={{ maxWidth: 440 }} onClick={e => e.stopPropagation()}>
+              <div className="modal-title">
+                <span>Reassign Vehicle for {selectedDriver.name}</span>
+                <button onClick={() => setReassignModal(null)} style={{ background: 'none', border: 'none', color: 'var(--text-low)', cursor: 'pointer' }}><X size={18} /></button>
+              </div>
+              <form onSubmit={handleReassign} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div className="form-group">
+                  <label className="form-label">Select Available Vehicle</label>
+                  <select className="form-select" value={newVehicleSelect} onChange={e => setNewVehicleSelect(e.target.value)}>
+                    <option value="">— Unassign / No Vehicle —</option>
+                    {vehicles.filter(v => v.status === 'Available' || v.id === selectedDriver.vehicleId).map(v => (
+                      <option key={v.id} value={v.id}>
+                        {v.vehicleNo} ({v.type} - {v.capacity.toLocaleString()} kg)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+                  <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setReassignModal(null)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Confirm Assignment</button>
+                </div>
+              </form>
             </div>
-            <form onSubmit={handleReassign} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <div className="form-group">
-                <label className="form-label">Select Available Vehicle</label>
-                <select className="form-select" value={newVehicleSelect} onChange={e => setNewVehicleSelect(e.target.value)}>
-                  <option value="">� Unassign / No Vehicle �</option>
-                  {vehicles.filter(v => v.status === 'Available' || v.id === selectedDriver.vehicleId).map(v => (
-                    <option key={v.id} value={v.id}>
-                      {v.vehicleNo} ({v.type} - {v.capacity.toLocaleString()} kg)
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
-                <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setReassignModal(null)}>Cancel</button>
-                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Confirm Assignment</button>
-              </div>
-            </form>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
       {/* Driver Chat Modal */}
@@ -329,49 +332,51 @@ export default function DriversPage() {
 
       {/* Add Driver Modal */}
       {showAdd && (
-        <div className="modal-overlay" onClick={() => setShowAdd(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-title">
-              <span>Add Fleet Personnel & Credentials</span>
-              <button onClick={() => setShowAdd(false)} style={{ background: 'none', border: 'none', color: 'var(--text-low)', cursor: 'pointer' }}><X size={20} /></button>
+        <ModalPortal>
+          <div className="modal-overlay" onClick={() => setShowAdd(false)}>
+            <div className="modal" onClick={e => e.stopPropagation()}>
+              <div className="modal-title">
+                <span>Add Fleet Personnel &amp; Credentials</span>
+                <button onClick={() => setShowAdd(false)} style={{ background: 'none', border: 'none', color: 'var(--text-low)', cursor: 'pointer' }}><X size={20} /></button>
+              </div>
+              <form onSubmit={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div className="form-group">
+                  <label className="form-label">Full Legal Name</label>
+                  <input className="form-input" placeholder="Driver Full Name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
+                </div>
+                <div className="grid-2">
+                  <div className="form-group">
+                    <label className="form-label">Contact Phone</label>
+                    <input className="form-input" placeholder="+91 9XXXXXXXXX" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} required />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Commercial License No.</label>
+                    <input className="form-input mono" placeholder="DL-982-XYZ" value={form.licenseNo} onChange={e => setForm({...form, licenseNo: e.target.value})} required />
+                  </div>
+                </div>
+                <div className="grid-2">
+                  <div className="form-group">
+                    <label className="form-label">License Expiry</label>
+                    <input className="form-input" type="date" value={form.licenseExpiry} onChange={e => setForm({...form, licenseExpiry: e.target.value})} required />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Assign Initial Vehicle</label>
+                    <select className="form-select" value={form.vehicleId || ''} onChange={e => setForm({...form, vehicleId: e.target.value || null})}>
+                      <option value="">— None —</option>
+                      {vehicles.filter(v => v.status === 'Available').map(v => (
+                        <option key={v.id} value={v.id}>{v.vehicleNo} ({v.type})</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 10, marginTop: 6 }}>
+                  <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setShowAdd(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Register &amp; Verify Driver</button>
+                </div>
+              </form>
             </div>
-            <form onSubmit={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <div className="form-group">
-                <label className="form-label">Full Legal Name</label>
-                <input className="form-input" placeholder="Driver Full Name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
-              </div>
-              <div className="grid-2">
-                <div className="form-group">
-                  <label className="form-label">Contact Phone</label>
-                  <input className="form-input" placeholder="+91 9XXXXXXXXX" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} required />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Commercial License No.</label>
-                  <input className="form-input mono" placeholder="DL-982-XYZ" value={form.licenseNo} onChange={e => setForm({...form, licenseNo: e.target.value})} required />
-                </div>
-              </div>
-              <div className="grid-2">
-                <div className="form-group">
-                  <label className="form-label">License Expiry</label>
-                  <input className="form-input" type="date" value={form.licenseExpiry} onChange={e => setForm({...form, licenseExpiry: e.target.value})} required />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Assign Initial Vehicle</label>
-                  <select className="form-select" value={form.vehicleId || ''} onChange={e => setForm({...form, vehicleId: e.target.value || null})}>
-                    <option value="">� None �</option>
-                    {vehicles.filter(v => v.status === 'Available').map(v => (
-                      <option key={v.id} value={v.id}>{v.vehicleNo} ({v.type})</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: 10, marginTop: 6 }}>
-                <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setShowAdd(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Register & Verify Driver</button>
-              </div>
-            </form>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </div>
   );

@@ -2,9 +2,9 @@
 import { useState } from 'react';
 import { useStore } from '@/lib/store';
 import {
-  Truck, Users, ShoppingCart, Navigation, PackageCheck, Clock,
-  TrendingUp, Plus, ArrowRight, MapPin, Activity, Weight,
-  AlertTriangle, CheckCircle2, XCircle,
+  Truck, Users, ShoppingCart, Navigation, Weight,
+  TrendingUp, Plus, ArrowRight, MapPin, Activity,
+  AlertTriangle, CheckCircle2, XCircle, Clock,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -366,27 +366,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ── Quick Action Row ── */}
-      <div style={{
-        display: 'flex', gap: 10, padding: '12px 16px',
-        background: 'var(--surface-1)', border: '1px solid var(--border)',
-        borderRadius: 12, flexWrap: 'wrap',
-      }}>
-        <span style={{ fontSize: 12, color: 'var(--text-low)', fontWeight: 600, marginRight: 4, alignSelf: 'center' }}>Quick Actions:</span>
-        {[
-          { label: 'New Order', href: '/orders', icon: Plus },
-          { label: 'Allocate Vehicle', href: '/allocation', icon: MapPin },
-          { label: 'Live Tracking', href: '/tracking', icon: Navigation },
-          { label: 'Generate Invoice', href: '/invoices', icon: TrendingUp },
-          { label: 'Record Delivery', href: '/delivery', icon: PackageCheck },
-        ].map(({ label, href, icon: Icon }) => (
-          <Link key={href} href={href} style={{ textDecoration: 'none' }}>
-            <button className="btn btn-ghost btn-sm" style={{ fontSize: 12 }}>
-              <Icon size={12} /> {label}
-            </button>
-          </Link>
-        ))}
-      </div>
+    
     </div>
   );
 }

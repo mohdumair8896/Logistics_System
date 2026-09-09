@@ -1,7 +1,8 @@
-﻿'use client';
+'use client';
 import { useState, useRef, useEffect } from 'react';
 import { useStore } from '@/lib/store';
 import { X, Send, Phone, CheckCheck, Truck } from 'lucide-react';
+import { ModalPortal } from '@/components/ui/ModalPortal';
 
 interface Props {
   driverId: string;
@@ -69,7 +70,8 @@ export default function DriverChatModal({ driverId, onClose }: Props) {
   ];
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <ModalPortal>
+      <div className="modal-overlay" onClick={onClose}>
       <div className="modal" style={{ maxWidth: 500, padding: 0, overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div style={{ background: 'var(--surface-2)', padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -189,5 +191,6 @@ export default function DriverChatModal({ driverId, onClose }: Props) {
         </form>
       </div>
     </div>
+    </ModalPortal>
   );
 }

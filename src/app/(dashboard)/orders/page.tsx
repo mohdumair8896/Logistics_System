@@ -13,6 +13,7 @@ import { ShipmentQR } from '@/components/ui/ShipmentQR';
 import { InlineDisclosureMenu } from '@/components/ui/InlineDisclosureMenu';
 import { Pagination2 } from '@/components/ui/Pagination2';
 import { AdaptiveSlider } from '@/components/ui/AdaptiveSlider';
+import { ModalPortal } from '@/components/ui/ModalPortal';
 
 
 export default function OrdersPage() {
@@ -342,86 +343,88 @@ export default function OrdersPage() {
 
       {/* Create Order Modal */}
       {showCreate && (
-        <div className="modal-overlay" onClick={() => setShowCreate(false)}>
-          <div className="modal" style={{ maxWidth: 620 }} onClick={e => e.stopPropagation()}>
-            <div className="modal-title">
-              <span>Create New Dispatch Order</span>
-              <button onClick={() => setShowCreate(false)} style={{ background: 'none', border: 'none', color: 'var(--text-low)', cursor: 'pointer' }}>
-                <X size={20} />
-              </button>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <div className="grid-2">
-                <div className="form-group">
-                  <label className="form-label">Customer Account</label>
-                  <select className="form-select" value={form.customerId} onChange={e => setForm({...form, customerId: e.target.value})}>
-                    {customers.map(c => <option key={c.id} value={c.id}>{c.name} ({c.address.split(',')[0]})</option>)}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Origin Hub</label>
-                  <input className="form-input" value={form.origin} onChange={e => setForm({...form, origin: e.target.value})} placeholder="Central Distribution Hub" />
-                </div>
+        <ModalPortal>
+          <div className="modal-overlay" onClick={() => setShowCreate(false)}>
+            <div className="modal" style={{ maxWidth: 620 }} onClick={e => e.stopPropagation()}>
+              <div className="modal-title">
+                <span>Create New Dispatch Order</span>
+                <button onClick={() => setShowCreate(false)} style={{ background: 'none', border: 'none', color: 'var(--text-low)', cursor: 'pointer' }}>
+                  <X size={20} />
+                </button>
               </div>
 
-              <div className="grid-2">
-                <div className="form-group">
-                  <label className="form-label">Destination</label>
-                  <input className="form-input" value={form.destination} onChange={e => setForm({...form, destination: e.target.value})} placeholder="East Distribution Center" required />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div className="grid-2">
+                  <div className="form-group">
+                    <label className="form-label">Customer Account</label>
+                    <select className="form-select" value={form.customerId} onChange={e => setForm({...form, customerId: e.target.value})}>
+                      {customers.map(c => <option key={c.id} value={c.id}>{c.name} ({c.address.split(',')[0]})</option>)}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Origin Hub</label>
+                    <input className="form-input" value={form.origin} onChange={e => setForm({...form, origin: e.target.value})} placeholder="Central Distribution Hub" />
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Distance (km)</label>
-                  <input className="form-input" type="number" value={form.distance} onChange={e => setForm({...form, distance: +e.target.value})} />
-                </div>
-              </div>
 
-              {/* Items & Quantities */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <label className="form-label" style={{ margin: 0 }}>Cargo Items</label>
-                  <button type="button" className="btn btn-sm btn-ghost" onClick={addItem}>
-                    <Plus size={12} /> Add Item
+                <div className="grid-2">
+                  <div className="form-group">
+                    <label className="form-label">Destination</label>
+                    <input className="form-input" value={form.destination} onChange={e => setForm({...form, destination: e.target.value})} placeholder="East Distribution Center" required />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Distance (km)</label>
+                    <input className="form-input" type="number" value={form.distance} onChange={e => setForm({...form, distance: +e.target.value})} />
+                  </div>
+                </div>
+
+                {/* Items & Quantities */}
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <label className="form-label" style={{ margin: 0 }}>Cargo Items</label>
+                    <button type="button" className="btn btn-sm btn-ghost" onClick={addItem}>
+                      <Plus size={12} /> Add Item
+                    </button>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {form.items.map((item, i) => (
+                      <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <select className="form-select" value={item.productId} onChange={e => updateItem(i, 'productId', e.target.value)} style={{ flex: 2 }}>
+                          {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                        </select>
+                        <input className="form-input" type="number" placeholder="Qty (kg)" value={item.quantity || ''} onChange={e => updateItem(i, 'quantity', e.target.value)} style={{ flex: 1 }} />
+                        <span style={{ fontSize: 11, color: 'var(--text-low)', minWidth: 24 }}>kg</span>
+                        {form.items.length > 1 && (
+                          <button type="button" onClick={() => removeItem(i)} style={{ background: 'none', border: 'none', color: 'var(--brand)', cursor: 'pointer' }}>
+                            <Trash2 size={15} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Weight total calculation */}
+                <div style={{ background: 'var(--surface-2)', borderRadius: 10, padding: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--border)' }}>
+                  <div>
+                    <div style={{ fontSize: 11, color: 'var(--text-low)' }}>Estimated Total Payload</div>
+                    <div style={{ fontSize: 13, color: 'var(--text-mid)' }}>Calculates vehicle capacity required</div>
+                  </div>
+                  <span className="mono" style={{ fontSize: 20, fontWeight: 800, color: 'var(--brand)', fontFamily: 'var(--font-mono)' }}>
+                    {totalWeight.toLocaleString()} kg
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+                  <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setShowCreate(false)}>Cancel</button>
+                  <button className="btn btn-primary" style={{ flex: 2 }} onClick={handleAdd} disabled={!form.destination || totalWeight === 0}>
+                    <ShoppingCart size={15} /> Create &amp; Proceed to Allocation
                   </button>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {form.items.map((item, i) => (
-                    <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                      <select className="form-select" value={item.productId} onChange={e => updateItem(i, 'productId', e.target.value)} style={{ flex: 2 }}>
-                        {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                      </select>
-                      <input className="form-input" type="number" placeholder="Qty (kg)" value={item.quantity || ''} onChange={e => updateItem(i, 'quantity', e.target.value)} style={{ flex: 1 }} />
-                      <span style={{ fontSize: 11, color: 'var(--text-low)', minWidth: 24 }}>kg</span>
-                      {form.items.length > 1 && (
-                        <button type="button" onClick={() => removeItem(i)} style={{ background: 'none', border: 'none', color: 'var(--brand)', cursor: 'pointer' }}>
-                          <Trash2 size={15} />
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Weight total calculation */}
-              <div style={{ background: 'var(--surface-2)', borderRadius: 10, padding: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--border)' }}>
-                <div>
-                  <div style={{ fontSize: 11, color: 'var(--text-low)' }}>Estimated Total Payload</div>
-                  <div style={{ fontSize: 13, color: 'var(--text-mid)' }}>Calculates vehicle capacity required</div>
-                </div>
-                <span className="mono" style={{ fontSize: 20, fontWeight: 800, color: 'var(--brand)', fontFamily: 'var(--font-mono)' }}>
-                  {totalWeight.toLocaleString()} kg
-                </span>
-              </div>
-
-              <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
-                <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setShowCreate(false)}>Cancel</button>
-                <button className="btn btn-primary" style={{ flex: 2 }} onClick={handleAdd} disabled={!form.destination || totalWeight === 0}>
-                  <ShoppingCart size={15} /> Create & Proceed to Allocation
-                </button>
               </div>
             </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </div>
   );

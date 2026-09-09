@@ -63,9 +63,10 @@ export default function DeliveryPage() {
 
     ctx.beginPath();
     ctx.moveTo(x, y);
-    ctx.strokeStyle = 'var(--brand)';
+    ctx.strokeStyle = '#1a1a2e';
     ctx.lineWidth = 2.5;
     ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
   };
 
   const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
@@ -289,12 +290,24 @@ export default function DeliveryPage() {
                   </div>
 
                   <div style={{
-                    background: '#0d1526',
-                    border: '1.5px dashed var(--border-mid)',
+                    background: '#ffffff',
+                    border: '1.5px solid var(--border)',
                     borderRadius: 10,
                     overflow: 'hidden',
-                    position: 'relative'
+                    position: 'relative',
+                    boxShadow: 'inset 0 1px 4px rgba(0,0,0,0.04)'
                   }}>
+                    {/* Ruled signature line */}
+                    <div style={{
+                      position: 'absolute',
+                      bottom: 28,
+                      left: 20,
+                      right: 20,
+                      height: 1,
+                      background: 'var(--border)',
+                      pointerEvents: 'none',
+                      zIndex: 1
+                    }} />
                     <canvas
                       ref={canvasRef}
                       width={520}
@@ -315,11 +328,13 @@ export default function DeliveryPage() {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        color: 'var(--text-low)',
-                        fontSize: 12,
-                        pointerEvents: 'none'
+                        color: 'var(--text-xlow)',
+                        fontSize: 12.5,
+                        pointerEvents: 'none',
+                        gap: 6
                       }}>
-                        ?? Draw customer signature here with mouse or touch
+                        <PenLine size={13} />
+                        Sign here using mouse or touch
                       </div>
                     )}
                   </div>

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/lib/store';
 import { Truck, Eye, EyeOff, LogIn, ShieldCheck, KeyRound, X } from 'lucide-react';
+import { ModalPortal } from '@/components/ui/ModalPortal';
 
 const demoRoles = [
   {
@@ -283,35 +284,37 @@ export default function LoginPage() {
 
       {/* Forgot Password Modal */}
       {forgotModal && (
-        <div className="modal-overlay" onClick={() => setForgotModal(false)}>
-          <div className="modal" style={{ maxWidth: 380 }} onClick={e => e.stopPropagation()}>
-            <div className="modal-title">
-              <span>Reset Password</span>
-              <button onClick={() => setForgotModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text-low)', cursor: 'pointer' }}>
-                <X size={17} />
-              </button>
-            </div>
-            {resetSent ? (
-              <div style={{ textAlign: 'center', padding: 12 }}>
-                <KeyRound size={32} color="var(--brand)" style={{ margin: '0 auto 10px' }} />
-                <div style={{ fontWeight: 700, color: 'var(--text-high)' }}>Email Sent</div>
-                <p style={{ fontSize: 12, color: 'var(--text-low)', marginTop: 4 }}>Check your inbox for the password reset link.</p>
-                <button className="btn btn-primary" style={{ marginTop: 14, width: '100%', justifyContent: 'center' }} onClick={() => setForgotModal(false)}>
-                  Back to Sign In
+        <ModalPortal>
+          <div className="modal-overlay" onClick={() => setForgotModal(false)}>
+            <div className="modal" style={{ maxWidth: 380 }} onClick={e => e.stopPropagation()}>
+              <div className="modal-title">
+                <span>Reset Password</span>
+                <button onClick={() => setForgotModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text-low)', cursor: 'pointer' }}>
+                  <X size={17} />
                 </button>
               </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <p style={{ fontSize: 12.5, color: 'var(--text-mid)' }}>Enter your registered email to receive a reset link.</p>
-                <input className="form-input" defaultValue={email} />
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button className="btn btn-ghost" style={{ flex: 1, justifyContent: 'center' }} onClick={() => setForgotModal(false)}>Cancel</button>
-                  <button className="btn btn-primary" style={{ flex: 1.5, justifyContent: 'center' }} onClick={() => setResetSent(true)}>Send Link</button>
+              {resetSent ? (
+                <div style={{ textAlign: 'center', padding: 12 }}>
+                  <KeyRound size={32} color="var(--brand)" style={{ margin: '0 auto 10px' }} />
+                  <div style={{ fontWeight: 700, color: 'var(--text-high)' }}>Email Sent</div>
+                  <p style={{ fontSize: 12, color: 'var(--text-low)', marginTop: 4 }}>Check your inbox for the password reset link.</p>
+                  <button className="btn btn-primary" style={{ marginTop: 14, width: '100%', justifyContent: 'center' }} onClick={() => setForgotModal(false)}>
+                    Back to Sign In
+                  </button>
                 </div>
-              </div>
-            )}
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <p style={{ fontSize: 12.5, color: 'var(--text-mid)' }}>Enter your registered email to receive a reset link.</p>
+                  <input className="form-input" defaultValue={email} />
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button className="btn btn-ghost" style={{ flex: 1, justifyContent: 'center' }} onClick={() => setForgotModal(false)}>Cancel</button>
+                    <button className="btn btn-primary" style={{ flex: 1.5, justifyContent: 'center' }} onClick={() => setResetSent(true)}>Send Link</button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </div>
   );
