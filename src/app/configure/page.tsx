@@ -777,8 +777,8 @@ export default function ConfigurePage() {
                 <p className="text-xs text-slate-300 max-w-lg">
                   {PLAN_PRICING[result.recommendedPlan].description}
                 </p>
-                <div className="text-sm font-semibold text-white pt-2">
-                  ₹{PLAN_PRICING[result.recommendedPlan].basePriceInr.toLocaleString()} / month
+                <div className="text-sm font-semibold text-white pt-2" suppressHydrationWarning>
+                  ₹{PLAN_PRICING[result.recommendedPlan].basePriceInr.toLocaleString('en-IN')} / month
                   <span className="text-xs text-slate-400 font-normal"> · All core modules + WhatsApp + GPS included</span>
                 </div>
               </div>

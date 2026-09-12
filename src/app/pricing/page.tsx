@@ -22,6 +22,10 @@ interface Plan {
   highlight?: boolean;
 }
 
+function formatPrice(amount: number): string {
+  return amount.toLocaleString('en-IN');
+}
+
 const PLANS: Plan[] = [
   {
     id: 'FLEX',
@@ -292,14 +296,14 @@ export default function PricingPage() {
 
                   <div className="mb-4">
                     <div className="flex items-baseline gap-1">
-                      <span className="text-3xl font-black text-white">
-                        {plan.currency}{price.toLocaleString()}
+                      <span className="text-3xl font-black text-white" suppressHydrationWarning>
+                        {plan.currency}{formatPrice(price)}
                       </span>
                       <span className="text-xs text-slate-400">/ month</span>
                     </div>
                     {billingCycle === 'annual' && (
-                      <p className="text-[11px] text-emerald-400 mt-0.5">
-                        Billed annually ({plan.currency}{(price * 12).toLocaleString()}/yr)
+                      <p className="text-[11px] text-emerald-400 mt-0.5" suppressHydrationWarning>
+                        Billed annually ({plan.currency}{formatPrice(price * 12)}/yr)
                       </p>
                     )}
                   </div>
@@ -380,9 +384,9 @@ export default function PricingPage() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-white">Subscribe to {selectedPlan.name} Plan</h3>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-slate-400" suppressHydrationWarning>
                   {selectedPlan.currency}
-                  {(billingCycle === 'monthly' ? selectedPlan.monthlyPrice : selectedPlan.annualPrice).toLocaleString()}
+                  {formatPrice(billingCycle === 'monthly' ? selectedPlan.monthlyPrice : selectedPlan.annualPrice)}
                   /mo · Billed {billingCycle}
                 </p>
               </div>
@@ -491,7 +495,7 @@ export default function PricingPage() {
 
               <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
                 <div className="text-xs text-slate-400">
-                  Total Due: <strong className="text-white text-sm">{selectedPlan.currency}{(billingCycle === 'monthly' ? selectedPlan.monthlyPrice : selectedPlan.annualPrice).toLocaleString()}</strong>
+                  Total Due: <strong className="text-white text-sm" suppressHydrationWarning>{selectedPlan.currency}{formatPrice(billingCycle === 'monthly' ? selectedPlan.monthlyPrice : selectedPlan.annualPrice)}</strong>
                 </div>
 
                 <button
