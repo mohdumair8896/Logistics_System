@@ -18,6 +18,11 @@ export interface SessionPayload {
   facility: string;
   avatar: string;
   exp: number; // Unix timestamp (seconds)
+  tenantId?: string;
+  isDemo?: boolean;
+  isConfigured?: boolean;
+  plan?: string;
+  companyName?: string;
 }
 
 /** Cookie name used for the session token */

@@ -16,5 +16,10 @@ export async function GET(request: NextRequest) {
     role: auth.role,
     facility: auth.facility,
     avatar: auth.avatar,
+    tenantId: auth.tenantId,
+    isDemo: !!auth.isDemo,
+    isConfigured: auth.isConfigured !== false,
+    plan: auth.plan || 'GROWTH',
+    companyName: auth.companyName || 'LogiFlow Demo Operations',
   });
 }

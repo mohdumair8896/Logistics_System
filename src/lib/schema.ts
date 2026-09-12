@@ -13,13 +13,14 @@ import { sql } from 'drizzle-orm';
 // USERS (replaces hardcoded DEMO_USERS array in auth/login/route.ts)
 // ─────────────────────────────────────────────────────────────────────────────
 export const users = pgTable('users', {
-  id: varchar('id', { length: 20 }).primaryKey(),
+  id: varchar('id', { length: 50 }).primaryKey(),
   email: varchar('email', { length: 255 }).unique().notNull(),
   passwordHash: text('password_hash').notNull(),
   name: varchar('name', { length: 100 }).notNull(),
   role: varchar('role', { length: 50 }).notNull(),  // 'Operations Director' | 'Fleet Dispatcher' | 'Compliance Officer'
   facility: varchar('facility', { length: 100 }),
   avatar: varchar('avatar', { length: 10 }),
+  tenantId: varchar('tenant_id', { length: 50 }),
   isActive: boolean('is_active').default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`),
 });
@@ -334,7 +335,7 @@ export const operationalEvents = pgTable('operational_events', {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const tenants = pgTable('tenants', {
-  id: varchar('id', { length: 36 }).primaryKey(), // e.g. 'ten_abc_transport'
+  id: varchar('id', { length: 50 }).primaryKey(), // e.g. 'ten_abc_transport'
   name: varchar('name', { length: 150 }).notNull(),
   slug: varchar('slug', { length: 80 }).unique().notNull(),
   archetype: varchar('archetype', { length: 40 }).notNull(), // 'FLEET_OWNER' | '3PL_PROVIDER' | 'COURIER_LAST_MILE' etc.
@@ -342,12 +343,13 @@ export const tenants = pgTable('tenants', {
   currency: varchar('currency', { length: 5 }).default('INR'),
   timezone: varchar('timezone', { length: 50 }).default('Asia/Kolkata'),
   complexityScore: integer('complexity_score').default(25),
+  isConfigured: boolean('is_configured').default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`),
 });
 
 export const tenantSubscriptions = pgTable('tenant_subscriptions', {
-  id: varchar('id', { length: 36 }).primaryKey(),
-  tenantId: varchar('tenant_id', { length: 36 }).references(() => tenants.id).notNull(),
+  id: varchar('id', { length: 60 }).primaryKey(),
+  tenantId: varchar('tenant_id', { length: 60 }).references(() => tenants.id).notNull(),
   plan: varchar('plan', { length: 30 }).notNull(), // 'FLEX' | 'GROWTH' | 'SCALE' | 'ENTERPRISE'
   status: varchar('status', { length: 20 }).default('ACTIVE'), // 'ACTIVE' | 'TRIAL' | 'PAST_DUE'
   maxVehicles: integer('max_vehicles').default(100),
@@ -359,8 +361,8 @@ export const tenantSubscriptions = pgTable('tenant_subscriptions', {
 });
 
 export const tenantModules = pgTable('tenant_modules', {
-  id: varchar('id', { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
-  tenantId: varchar('tenant_id', { length: 36 }).references(() => tenants.id).notNull(),
+  id: varchar('id', { length: 60 }).primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar('tenant_id', { length: 60 }).references(() => tenants.id).notNull(),
   moduleCode: varchar('module_code', { length: 50 }).notNull(), // 'FLEET', 'WAREHOUSE', 'TMS', etc.
   isEnabled: boolean('is_enabled').default(true),
   enabledAt: timestamp('enabled_at', { withTimezone: true }).default(sql`now()`),
@@ -369,7 +371,7 @@ export const tenantModules = pgTable('tenant_modules', {
 ]);
 
 export const tenantConfigs = pgTable('tenant_configs', {
-  tenantId: varchar('tenant_id', { length: 36 }).primaryKey().references(() => tenants.id),
+  tenantId: varchar('tenant_id', { length: 60 }).primaryKey().references(() => tenants.id),
   autonomyLevel: integer('autonomy_level').default(2), // 0 to 5
   autoApproveLimitAmount: decimal('auto_approve_limit_amount', { precision: 10, scale: 2 }).default('5000'),
   detentionGraceHours: integer('detention_grace_hours').default(2),
@@ -381,8 +383,8 @@ export const tenantConfigs = pgTable('tenant_configs', {
 });
 
 export const usageCounters = pgTable('usage_counters', {
-  id: varchar('id', { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
-  tenantId: varchar('tenant_id', { length: 36 }).references(() => tenants.id).notNull(),
+  id: varchar('id', { length: 60 }).primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar('tenant_id', { length: 60 }).references(() => tenants.id).notNull(),
   metricPeriod: varchar('metric_period', { length: 7 }).notNull(), // '2026-09'
   shipmentsCount: integer('shipments_count').default(0),
   aiActionsCount: integer('ai_actions_count').default(0),

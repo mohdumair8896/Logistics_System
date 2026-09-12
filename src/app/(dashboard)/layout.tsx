@@ -6,7 +6,8 @@ import Header from '@/components/layout/Header';
 import LogiFlowChatbot from '@/components/layout/LogiFlowChatbot';
 
 
-import { getCurrentUser } from '@/lib/useCurrentUser';
+import { getCurrentUser, CurrentUser } from '@/lib/useCurrentUser';
+import DemoBanner from '@/components/demo/DemoBanner';
 
 const emptySubscribe = () => () => {};
 
@@ -31,6 +32,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null); // null = loading
+  const [userProfile, setUserProfile] = useState<CurrentUser | null>(null);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [prevPathname, setPrevPathname] = useState(pathname);
 
@@ -79,8 +81,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     getCurrentUser()
       .then(user => {
-        if (user) setIsLoggedIn(true);
-        else { setIsLoggedIn(false); router.replace('/login'); }
+        if (user) {
+          setIsLoggedIn(true);
+          setUserProfile(user);
+        } else {
+          setIsLoggedIn(false);
+          router.replace('/login');
+        }
       })
       .catch(() => { setIsLoggedIn(false); router.replace('/login'); });
   }, [router]);
@@ -89,6 +96,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!isLoggedIn) return null; // redirect already triggered
 
   const info = pageTitles[pathname] || { title: 'LogiFlow', subtitle: 'Logistics Management' };
+  const isDemo = userProfile?.isDemo || (typeof window !== 'undefined' && window.location.search.includes('demo=true'));
 
   return (
     <div className="app-layout" data-collapsed={isSidebarCollapsed}>
@@ -107,6 +115,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       />
 
       <div className="main-content">
+        {isDemo && <DemoBanner />}
         <Header
           title={info.title}
           subtitle={info.subtitle}

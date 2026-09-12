@@ -79,6 +79,25 @@ export async function middleware(request: NextRequest) {
       loginUrl.searchParams.set('from', pathname);
       return NextResponse.redirect(loginUrl);
     }
+
+    // First-Time Login Guard: If customer has paid but hasn't completed 7-stage setup, hold at /setup
+    if (session.isConfigured === false && !session.isDemo && pathname !== '/setup') {
+      return NextResponse.redirect(new URL('/setup', request.url));
+    }
+  }
+
+  // Guard /setup: Must have an active session (or redirect to /login)
+  if (pathname === '/setup') {
+    const token = request.cookies.get(SESSION_COOKIE)?.value;
+    let session = null;
+    if (token) {
+      session = await verifySessionToken(token);
+    }
+    if (!session) {
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('from', '/setup');
+      return NextResponse.redirect(loginUrl);
+    }
   }
 
   // 3. Attach security headers to every response

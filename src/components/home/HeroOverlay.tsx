@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ArrowRight, Calculator } from 'lucide-react';
+import { ArrowRight, Calculator, Sparkles } from 'lucide-react';
 
 interface HeroOverlayProps {
   onScrollClick?: () => void;
@@ -52,38 +52,55 @@ export const HeroOverlay: React.FC<HeroOverlayProps> = ({ onScrollClick }) => {
         {/* Nav actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           <Link
-            href="/tracking"
+            href="/demo"
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
-              padding: '6px 12px', borderRadius: 99,
-              background: 'rgba(6,78,59,0.5)', border: '1px solid rgba(52,211,153,0.35)',
-              fontSize: 11, fontFamily: 'monospace', color: '#34d399',
+              padding: '7px 14px', borderRadius: 99,
+              background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.4)',
+              fontSize: 11.5, fontFamily: 'monospace', fontWeight: 700, color: '#fbbf24',
               textDecoration: 'none',
+              boxShadow: '0 0 15px rgba(245,158,11,0.2)',
               transition: 'background 0.15s, border-color 0.15s',
             }}
-            title="Inspect Live Fleet Telematics & GPS"
-            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(6,78,59,0.8)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'rgba(6,78,59,0.5)')}
+            title="Explore Interactive Demo Sandbox"
+            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(245,158,11,0.3)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'rgba(245,158,11,0.15)')}
           >
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399', display: 'inline-block' }} />
-            <span>LIVE TELEMATICS →</span>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fbbf24', display: 'inline-block' }} />
+            <span>LIVE DEMO SANDBOX →</span>
           </Link>
 
           <Link
-            href="/dashboard"
+            href="/pricing"
             style={{
-              padding: '9px 18px', borderRadius: 12,
-              background: '#f59e0b', color: '#1c1917',
-              fontSize: 13, fontWeight: 700, textDecoration: 'none',
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              padding: '7px 14px', borderRadius: 10,
+              background: 'rgba(15,23,42,0.7)', border: '1px solid rgba(255,255,255,0.15)',
+              fontSize: 12, fontWeight: 700, color: '#e2e8f0',
+              textDecoration: 'none',
+              transition: 'background 0.15s',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.1)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'rgba(15,23,42,0.7)')}
+          >
+            Pricing
+          </Link>
+
+          <Link
+            href="/login"
+            style={{
+              padding: '8px 18px', borderRadius: 10,
+              background: 'linear-gradient(135deg, #3b82f6, #2563eb)', color: '#fff',
+              fontSize: 12.5, fontWeight: 700, textDecoration: 'none',
               display: 'flex', alignItems: 'center', gap: 6,
-              boxShadow: '0 0 25px rgba(245,158,11,0.3)',
+              boxShadow: '0 0 20px rgba(59,130,246,0.3)',
               transition: 'background 0.15s, transform 0.15s',
               whiteSpace: 'nowrap',
             }}
-            onMouseEnter={e => (e.currentTarget.style.background = '#fbbf24')}
-            onMouseLeave={e => (e.currentTarget.style.background = '#f59e0b')}
+            onMouseEnter={e => (e.currentTarget.style.background = '#1d4ed8')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'linear-gradient(135deg, #3b82f6, #2563eb)')}
           >
-            Dashboard →
+            Sign In →
           </Link>
         </div>
       </header>
@@ -127,64 +144,95 @@ export const HeroOverlay: React.FC<HeroOverlayProps> = ({ onScrollClick }) => {
         </p>
 
         {/* Unified Call to Action & Social proof */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 16 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 14 }}>
 
-          {/* PRIMARY CALL TO ACTION: Get Instant Quote */}
-          <button
-            onClick={scrollToQuote}
+          {/* PRIMARY CALL TO ACTION: Try Live Interactive Demo */}
+          <Link
+            href="/demo"
             style={{
-              padding: '12px 24px',
+              padding: '13px 26px',
               borderRadius: 14,
               background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-              color: '#1c1917',
+              color: '#0f172a',
               fontSize: 14,
-              fontWeight: 800,
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
+              fontWeight: 900,
+              textDecoration: 'none',
+              display: 'inline-flex',
               alignItems: 'center',
               gap: 8,
-              boxShadow: '0 0 30px rgba(245,158,11,0.35)',
+              boxShadow: '0 0 35px rgba(245,158,11,0.45)',
               transition: 'transform 0.15s, box-shadow 0.15s',
+              cursor: 'pointer',
             }}
             onMouseEnter={e => {
               e.currentTarget.style.transform = 'translateY(-1px)';
-              e.currentTarget.style.boxShadow = '0 0 40px rgba(245,158,11,0.5)';
+              e.currentTarget.style.boxShadow = '0 0 45px rgba(245,158,11,0.6)';
             }}
             onMouseLeave={e => {
               e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 0 30px rgba(245,158,11,0.35)';
+              e.currentTarget.style.boxShadow = '0 0 35px rgba(245,158,11,0.45)';
             }}
           >
-            <Calculator style={{ width: 17, height: 17 }} />
-            Get Instant Quote
+            <Sparkles style={{ width: 17, height: 17 }} />
+            <span>Try Live Interactive Demo</span>
             <ArrowRight style={{ width: 16, height: 16 }} />
-          </button>
+          </Link>
 
-          {/* SECONDARY CALL TO ACTION: Scroll 3D Journey */}
-          <button
-            onClick={onScrollClick}
+          {/* SECONDARY CALL TO ACTION: View Pricing & Plans */}
+          <Link
+            href="/pricing"
             style={{
               padding: '12px 20px',
               borderRadius: 14,
-              border: '1px solid rgba(255,255,255,0.18)',
-              background: 'rgba(15,23,42,0.6)',
+              border: '1px solid rgba(245,158,11,0.4)',
+              background: 'rgba(15,23,42,0.8)',
               backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
-              color: '#f8fafc',
-              fontSize: 13,
-              fontWeight: 600,
-              display: 'flex',
+              color: '#fbbf24',
+              fontSize: 13.5,
+              fontWeight: 700,
+              textDecoration: 'none',
+              display: 'inline-flex',
               alignItems: 'center',
               gap: 8,
+              boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+              transition: 'background 0.15s, border-color 0.15s',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'rgba(245,158,11,0.15)';
+              e.currentTarget.style.borderColor = 'rgba(245,158,11,0.7)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'rgba(15,23,42,0.8)';
+              e.currentTarget.style.borderColor = 'rgba(245,158,11,0.4)';
+            }}
+          >
+            <span>Plans &amp; Pricing</span>
+            <ArrowRight style={{ width: 14, height: 14 }} />
+          </Link>
+
+          {/* TERTIARY CALL TO ACTION: Instant Quote */}
+          <button
+            onClick={scrollToQuote}
+            style={{
+              padding: '12px 18px',
+              borderRadius: 14,
+              border: '1px solid rgba(255,255,255,0.15)',
+              background: 'rgba(15,23,42,0.5)',
+              backdropFilter: 'blur(12px)',
+              color: '#cbd5e1',
+              fontSize: 13,
+              fontWeight: 600,
               cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
               transition: 'background 0.15s',
             }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.12)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'rgba(15,23,42,0.6)')}
+            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.1)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'rgba(15,23,42,0.5)')}
           >
-            Explore 3D Corridor
-            <span style={{ color: '#fbbf24', fontSize: 16, animation: 'bounce 1s infinite' }}>↓</span>
+            <Calculator style={{ width: 15, height: 15 }} />
+            <span>Rate Calculator</span>
           </button>
 
           {/* Social proof pill */}

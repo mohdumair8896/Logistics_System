@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -42,6 +42,17 @@ export default function ConfigurePage() {
     }
   };
 
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then(r => r.ok ? r.json() : null)
+      .then(user => {
+        if (user?.companyName) {
+          setState(prev => ({ ...prev, companyName: user.companyName }));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const startProvisioning = () => {
     setScreen('PROVISIONING');
     // Save tenant profile into localStorage so the dashboard and header can immediately read it
@@ -59,6 +70,20 @@ export default function ConfigurePage() {
     try {
       localStorage.setItem('logiflow_active_tenant', JSON.stringify(activeTenant));
     } catch {}
+
+    // Persist to server API and update session cookie
+    fetch('/api/tenants/configure', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        archetype: state.archetype,
+        complexityScore: result.totalScore,
+        enabledModules: result.recommendedModules,
+        autonomyLevel: state.autonomyLevel,
+        companyName: state.companyName,
+        activeIntegrations: state.integrations,
+      }),
+    }).catch(e => console.warn('[Provisioning API error]:', e));
 
     // Run simulated provisioning checklist
     let step = 0;

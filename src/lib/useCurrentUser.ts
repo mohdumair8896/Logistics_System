@@ -13,6 +13,11 @@ export interface CurrentUser {
   role: 'Operations Director' | 'Fleet Dispatcher' | 'Compliance Officer';
   facility: string;
   avatar: string;
+  tenantId?: string;
+  isDemo?: boolean;
+  isConfigured?: boolean;
+  plan?: string;
+  companyName?: string;
 }
 
 const FALLBACK: CurrentUser = {
