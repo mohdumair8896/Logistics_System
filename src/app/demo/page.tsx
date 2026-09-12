@@ -6,7 +6,7 @@ import { Truck, Sparkles } from 'lucide-react';
 export default function DemoPage() {
   useEffect(() => {
     // Forward to /api/demo which sets the signed guest JWT cookie and lands on /dashboard?demo=true
-    window.location.href = '/api/demo';
+    window.location.replace('/api/demo');
   }, []);
 
   return (

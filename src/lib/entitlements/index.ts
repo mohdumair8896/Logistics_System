@@ -1,7 +1,7 @@
 // ─── Composable Logistics OS: Entitlement Engine & Tenant Profiles ────────────
 // Enforces module gating, role-based visibility, and provides instant reference presets.
 
-import { LucideIcon, LayoutDashboard, Truck, Users, ShoppingCart, MapPin, Package, Navigation, PackageCheck, FileText, Warehouse, Sparkles, BookOpen, Search, Cpu, ShieldAlert } from 'lucide-react';
+import { LucideIcon, LayoutDashboard, Truck, Users, ShoppingCart, MapPin, Package, Navigation, PackageCheck, FileText, Warehouse, Sparkles, BookOpen, Search, Cpu } from 'lucide-react';
 import { ArchetypeCode, PlanTier } from '@/lib/onboarding/scoring';
 
 export interface TenantProfile {

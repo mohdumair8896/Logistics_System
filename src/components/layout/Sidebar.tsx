@@ -4,9 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
-  LayoutDashboard, Truck, Users, ShoppingCart, MapPin,
-  Package, Navigation, PackageCheck, FileText, LogOut, Warehouse,
-  LucideIcon, X, Sparkles, BookOpen, Search, Cpu,  PanelLeftClose, PanelLeftOpen
+  Truck, LogOut, X, PanelLeftClose, PanelLeftOpen
 } from 'lucide-react';
 import { invalidateUserCache } from '@/lib/useCurrentUser';
 import { toast } from 'sonner';
@@ -33,8 +31,9 @@ export default function Sidebar({
   const [navCounts, setNavCounts] = useState({ pendingOrders: 0, activeTrips: 0, newLeads: 0 });
 
   useEffect(() => {
-    const handleTenantChange = (e: any) => {
-      if (e.detail) setActiveTenantState(e.detail);
+    const handleTenantChange = (e: Event) => {
+      const customEvent = e as CustomEvent<TenantProfile>;
+      if (customEvent.detail) setActiveTenantState(customEvent.detail);
       else setActiveTenantState(getActiveTenant());
     };
     window.addEventListener('logiflow_tenant_changed', handleTenantChange);

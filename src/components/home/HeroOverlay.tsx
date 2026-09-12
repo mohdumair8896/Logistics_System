@@ -263,7 +263,19 @@ export const HeroOverlay: React.FC<HeroOverlayProps> = ({ onScrollClick }) => {
       </div>
 
       {/* ── Bottom hint ── */}
-      <div style={{ textAlign: 'center', fontSize: 11, color: '#94a3b8', fontFamily: 'monospace', letterSpacing: 3, textTransform: 'uppercase', paddingBottom: 8 }}>
+      <div
+        onClick={onScrollClick}
+        style={{
+          textAlign: 'center',
+          fontSize: 11,
+          color: '#94a3b8',
+          fontFamily: 'monospace',
+          letterSpacing: 3,
+          textTransform: 'uppercase',
+          paddingBottom: 8,
+          cursor: onScrollClick ? 'pointer' : 'default',
+        }}
+      >
         Scroll to inspect end-to-end autonomous journey
       </div>
     </div>

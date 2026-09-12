@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, isAuthError, createSessionToken, COOKIE_OPTIONS } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { tenants, tenantModules, tenantConfigs } from '@/lib/schema';
+import { tenants } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
 
 export async function POST(request: NextRequest) {
@@ -17,10 +17,7 @@ export async function POST(request: NextRequest) {
     const {
       archetype = 'FLEET_OWNER',
       complexityScore = 25,
-      enabledModules = [],
-      autonomyLevel = 2,
       companyName,
-      activeIntegrations = [],
     } = body;
 
     const tenantId = auth.tenantId || `ten_custom_${Date.now()}`;

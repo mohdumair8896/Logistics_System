@@ -2,13 +2,9 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Sparkles, ArrowRight, X, ShieldCheck, Zap } from 'lucide-react';
+import { Sparkles, ArrowRight } from 'lucide-react';
 
-interface DemoBannerProps {
-  onDismiss?: () => void;
-}
-
-export default function DemoBanner({ onDismiss }: DemoBannerProps) {
+export default function DemoBanner() {
   return (
     <div
       style={{

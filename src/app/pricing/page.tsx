@@ -4,8 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
-  Check, Sparkles, Truck, ShieldCheck, ArrowRight, Zap, Building2,
-  Lock, CreditCard, HelpCircle, PhoneCall, ChevronRight, X
+  Check, Sparkles, Truck, ArrowRight, Zap, Building2, CreditCard, X
 } from 'lucide-react';
 import { toast } from 'sonner';
 

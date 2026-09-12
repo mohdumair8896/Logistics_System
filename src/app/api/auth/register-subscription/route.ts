@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Invalid payload' }, { status: 400 });
     }
 
-    const { companyName, adminName, email, password, plan, billingCycle, paymentRail } = body;
+    const { companyName, adminName, email, password, plan } = body;
 
     if (!companyName || !adminName || !email || !password) {
       return NextResponse.json({ success: false, message: 'All fields are required' }, { status: 400 });

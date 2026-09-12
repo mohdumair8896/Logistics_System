@@ -4,14 +4,14 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-  Truck, Building2, Globe, Shield, Zap, Sparkles, Check, ArrowRight, ArrowLeft,
-  DollarSign, Clock, FileText, Phone, MessageSquare, AlertTriangle, Layers,
-  Compass, Cpu, CheckCircle2, ChevronRight, Activity, Terminal
+  Truck, Globe, Zap, Sparkles, Check, ArrowRight, ArrowLeft,
+  Layers, Compass, Cpu, CheckCircle2, Activity
 } from 'lucide-react';
 import {
   ARCHETYPES, ArchetypeCode, AVAILABLE_MODULES, calculateComplexityScore,
   DEFAULT_ONBOARDING_STATE, OnboardingState, PainPoint, CurrentSystem,
-  TransportMode, GeographyScope, AiAgentId, AutonomyScope, PLAN_PRICING
+  TransportMode, GeographyScope, AiAgentId, AutonomyScope, PLAN_PRICING,
+  OrderIntakeChannel, DriverCommChannel
 } from '@/lib/onboarding/scoring';
 
 type WizardScreen = 'WIZARD' | 'RECOMMENDATION' | 'PROVISIONING';
@@ -430,7 +430,7 @@ export default function ConfigurePage() {
                         <button
                           key={ch.id}
                           type="button"
-                          onClick={() => setState({ ...state, orderChannel: ch.id as any })}
+                          onClick={() => setState({ ...state, orderChannel: ch.id as OrderIntakeChannel })}
                           className={`h-9 text-xs rounded-lg border font-medium text-left px-3 transition-all ${
                             state.orderChannel === ch.id
                               ? 'bg-blue-600 border-blue-500 text-white'
@@ -455,7 +455,7 @@ export default function ConfigurePage() {
                         <button
                           key={ch.id}
                           type="button"
-                          onClick={() => setState({ ...state, driverChannel: ch.id as any })}
+                          onClick={() => setState({ ...state, driverChannel: ch.id as DriverCommChannel })}
                           className={`h-9 text-xs rounded-lg border font-medium text-left px-3 transition-all ${
                             state.driverChannel === ch.id
                               ? 'bg-blue-600 border-blue-500 text-white'
