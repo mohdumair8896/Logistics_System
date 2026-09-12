@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 const sectionStyle = { display: 'flex', flexDirection: 'column' as const, gap: 12 };
 const h2style = {
-  fontSize: 20, fontWeight: 700, color: '#fff', marginBottom: 12,
+  fontSize: 20, fontWeight: 700, color: 'var(--text-high, #141414)', marginBottom: 12,
   display: 'flex', alignItems: 'center', gap: 10,
 };
 
@@ -28,16 +28,16 @@ export default function PrivacyPolicyPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-    <div style={{ background: '#020617', color: '#e2e8f0', minHeight: '100vh', padding: '48px 24px' }}>
-      <div style={{ maxWidth: 880, margin: '0 auto' }}>
+    <div style={{ background: 'var(--surface, #F8F7F4)', color: 'var(--text-high, #141414)', minHeight: '100vh', padding: '48px 24px' }}>
+      <div style={{ maxWidth: 880, margin: '0 auto', background: 'var(--surface-1, #FFFFFF)', border: '1px solid var(--border, #E6E4DF)', borderRadius: 20, padding: '40px 48px', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
 
         {/* Back */}
         <div style={{ marginBottom: 32 }}>
           <Link href="/" style={{
             display: 'inline-flex', alignItems: 'center', gap: 8,
-            fontSize: 13, fontWeight: 600, color: '#a8b8c8', textDecoration: 'none',
+            fontSize: 13, fontWeight: 600, color: 'var(--text-mid, #525252)', textDecoration: 'none',
             padding: '8px 16px', borderRadius: 10,
-            background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+            background: 'var(--surface-2, #F3F2EF)', border: '1px solid var(--border, #E6E4DF)',
           }}>
             <ArrowLeft style={{ width: 16, height: 16 }} />
             Back to Home
@@ -45,55 +45,53 @@ export default function PrivacyPolicyPage() {
         </div>
 
         {/* Header */}
-        <div style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: 32, marginBottom: 40 }}>
+        <div style={{ borderBottom: '1px solid var(--border, #E6E4DF)', paddingBottom: 28, marginBottom: 36 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
             <div style={{
               width: 36, height: 36, borderRadius: 10,
-              background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)',
+              background: 'rgba(0, 87, 255, 0.08)', border: '1px solid rgba(0, 87, 255, 0.2)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <ShieldCheck style={{ width: 20, height: 20, color: '#fbbf24' }} />
+              <ShieldCheck style={{ width: 20, height: 20, color: 'var(--brand, #0057FF)' }} />
             </div>
-            <span style={{ fontSize: 12, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: 2, color: '#fbbf24', fontWeight: 700 }}>
+            <span style={{ fontSize: 12, fontFamily: 'var(--font-mono, monospace)', textTransform: 'uppercase', letterSpacing: 2, color: 'var(--brand, #0057FF)', fontWeight: 700 }}>
               Legal &amp; Compliance
             </span>
           </div>
-          <h1 style={{ fontSize: 'clamp(32px, 4vw, 44px)', fontWeight: 900, letterSpacing: -1, color: '#fff', margin: '0 0 12px' }}>
+          <h1 style={{ fontSize: 'clamp(30px, 4vw, 40px)', fontWeight: 900, letterSpacing: -1, color: 'var(--text-high, #141414)', margin: '0 0 12px' }}>
             Privacy Policy
           </h1>
-          <p style={{ fontSize: 14, color: '#a8b8c8', margin: 0 }}>
+          <p style={{ fontSize: 14, color: 'var(--text-mid, #525252)', margin: 0 }}>
             Effective Date: September 1, 2026 &bull; Last Revised: September 2026<br />
             Covers: India (DPDP Act 2023) &bull; EU/UK (GDPR) &bull; California (CCPA)
           </p>
         </div>
 
         {/* Body */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 40, lineHeight: 1.85, fontSize: 15, color: '#cbd5e1' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 36, lineHeight: 1.8, fontSize: 15, color: 'var(--text-mid, #525252)' }}>
 
           <section style={sectionStyle}>
             <h2 style={h2style}>
-              <Lock style={{ width: 18, height: 18, color: '#38bdf8' }} />
+              <Lock style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
               1. Data Controller &amp; Contact Details
             </h2>
             <div style={{
-              background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 14, padding: '20px 24px', fontFamily: 'monospace', fontSize: 13,
+              background: 'var(--surface-2, #F3F2EF)', border: '1px solid var(--border, #E6E4DF)',
+              borderRadius: 14, padding: '20px 24px', fontFamily: 'var(--font-mono, monospace)', fontSize: 13,
             }}>
-              <strong style={{ color: '#fbbf24' }}>Precision Logistics Technologies Pvt. Ltd.</strong><br />
-              {/* TODO: Add your CIN once registered */}
+              <strong style={{ color: 'var(--brand, #0057FF)' }}>Precision Logistics Technologies Pvt. Ltd.</strong><br />
               CIN / Registration: U72900UP2024PTC000000 &bull; GSTIN: 09AAACP0000A1Z5<br />
-              {/* TODO: Replace with your actual registered address */}
               Registered Address: Plot No. 12, Vibhuti Khand, Gomti Nagar, Lucknow — 226010, Uttar Pradesh, India<br />
-              Email: <a href="mailto:privacy@logiflow.io" style={{ color: '#38bdf8' }}>privacy@logiflow.io</a> &bull;{' '}
-              <a href="mailto:security@logiflow.io" style={{ color: '#38bdf8' }}>security@logiflow.io</a><br />
-              Grievance Officer (CPA 2019): {/* TODO: Add officer name */} Contact via <a href="mailto:grievance@logiflow.io" style={{ color: '#38bdf8' }}>grievance@logiflow.io</a><br />
-              DPO (GDPR): Same as Grievance Officer
+              Email: <a href="mailto:privacy@logiflow.io" style={{ color: 'var(--brand, #0057FF)' }}>privacy@logiflow.io</a> &bull;{' '}
+              <a href="mailto:security@logiflow.io" style={{ color: 'var(--brand, #0057FF)' }}>security@logiflow.io</a><br />
+              Grievance Officer (CPA 2019): Grievance Redressal Desk &bull; <a href="mailto:grievance@logiflow.io" style={{ color: 'var(--brand, #0057FF)' }}>grievance@logiflow.io</a><br />
+              DPO (GDPR): Data Protection Operations Desk &bull; <a href="mailto:dpo@logiflow.io" style={{ color: 'var(--brand, #0057FF)' }}>dpo@logiflow.io</a>
             </div>
           </section>
 
           <section style={sectionStyle}>
             <h2 style={h2style}>
-              <Database style={{ width: 18, height: 18, color: '#38bdf8' }} />
+              <Database style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
               2. Data We Collect
             </h2>
             <ul style={{ paddingLeft: 24, display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -114,8 +112,8 @@ export default function PrivacyPolicyPage() {
               </li>
             </ul>
             <div style={{
-              background: 'rgba(56,189,248,0.07)', border: '1px solid rgba(56,189,248,0.2)',
-              borderRadius: 12, padding: '14px 18px', marginTop: 8, fontSize: 13,
+              background: 'rgba(0, 87, 255, 0.05)', border: '1px solid rgba(0, 87, 255, 0.15)',
+              borderRadius: 12, padding: '14px 18px', marginTop: 8, fontSize: 13, color: 'var(--text-high, #141414)'
             }}>
               We apply <strong>data minimisation</strong>: we collect only what is necessary for the stated purpose and retain it only as long as required.
             </div>
@@ -123,7 +121,7 @@ export default function PrivacyPolicyPage() {
 
           <section style={sectionStyle}>
             <h2 style={h2style}>
-              <Server style={{ width: 18, height: 18, color: '#38bdf8' }} />
+              <Server style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
               3. Legal Basis for Processing
             </h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 12, marginTop: 4 }}>
@@ -134,11 +132,11 @@ export default function PrivacyPolicyPage() {
                 { label: 'Legitimate Interest', desc: 'Security monitoring and fraud prevention on platform sessions.' },
               ].map(b => (
                 <div key={b.label} style={{
-                  background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
+                  background: 'var(--surface-2, #F3F2EF)', border: '1px solid var(--border, #E6E4DF)',
                   borderRadius: 12, padding: '14px 18px',
                 }}>
-                  <p style={{ fontSize: 13, fontWeight: 700, color: '#fbbf24', margin: '0 0 6px' }}>{b.label}</p>
-                  <p style={{ fontSize: 13, color: '#a8b8c8', margin: 0 }}>{b.desc}</p>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--brand, #0057FF)', margin: '0 0 6px' }}>{b.label}</p>
+                  <p style={{ fontSize: 13, color: 'var(--text-mid, #525252)', margin: 0 }}>{b.desc}</p>
                 </div>
               ))}
             </div>
@@ -146,27 +144,27 @@ export default function PrivacyPolicyPage() {
 
           <section style={sectionStyle}>
             <h2 style={h2style}>
-              <Eye style={{ width: 18, height: 18, color: '#38bdf8' }} />
+              <Eye style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
               4. Cookies &amp; Tracking Technologies
             </h2>
             <p>
-              We use strictly necessary session cookies to maintain secure dispatch sessions and store your cookie preferences. Analytics cookies are <strong style={{ color: '#fff' }}>only activated after your explicit consent</strong> via our Cookie Preferences banner — they are off by default.
+              We use strictly necessary session cookies to maintain secure dispatch sessions and store your cookie preferences. Analytics cookies are <strong style={{ color: 'var(--text-high, #141414)' }}>only activated after your explicit consent</strong> via our Cookie Preferences banner — they are off by default.
             </p>
             <p>
               We do <strong>not</strong> use advertising cookies, retargeting pixels, or social media tracking. We do not sell your data to third-party advertisers.
             </p>
             <p>
-              See our full <Link href="/cookies" style={{ color: '#38bdf8', textDecoration: 'underline' }}>Cookie Policy</Link> for a complete list of cookies set, their purpose, and how to manage them.
+              See our full <Link href="/cookies" style={{ color: 'var(--brand, #0057FF)', textDecoration: 'underline' }}>Cookie Policy</Link> for a complete list of cookies set, their purpose, and how to manage them.
             </p>
           </section>
 
           <section style={sectionStyle} id="india">
             <h2 style={h2style}>
-              <Scale style={{ width: 18, height: 18, color: '#38bdf8' }} />
+              <Scale style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
               5. India — DPDP Act 2023
             </h2>
             <p>
-              Under the <strong style={{ color: '#fff' }}>Digital Personal Data Protection Act, 2023 (DPDP Act)</strong>:
+              Under the <strong style={{ color: 'var(--text-high, #141414)' }}>Digital Personal Data Protection Act, 2023 (DPDP Act)</strong>:
             </p>
             <ul style={{ paddingLeft: 24, display: 'flex', flexDirection: 'column', gap: 10 }}>
               <li>You have the right to access your personal data we hold.</li>
@@ -176,14 +174,14 @@ export default function PrivacyPolicyPage() {
               <li>You have the right to withdraw consent at any time without affecting prior lawful processing.</li>
               <li>You have the right to file a complaint with the <strong>Data Protection Board of India</strong> (once constituted).</li>
             </ul>
-            <p style={{ marginTop: 8, fontSize: 13, color: '#a8b8c8' }}>
+            <p style={{ marginTop: 8, fontSize: 13, color: 'var(--text-mid, #525252)' }}>
               We do not transfer personal data outside India unless adequate protection is ensured as prescribed by the Central Government under Section 16 of the DPDP Act.
             </p>
           </section>
 
           <section style={sectionStyle} id="gdpr">
             <h2 style={h2style}>
-              <Globe style={{ width: 18, height: 18, color: '#38bdf8' }} />
+              <Globe style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
               6. EU/UK Residents — GDPR &amp; UK DPA 2018
             </h2>
             <p>EU and UK residents have additional rights under the General Data Protection Regulation:</p>
@@ -196,14 +194,14 @@ export default function PrivacyPolicyPage() {
               <li><strong>Right to Object</strong> (Art. 21): Object to legitimate-interest processing.</li>
               <li><strong>Right to Lodge a Complaint:</strong> With your local supervisory authority (e.g. ICO in the UK, or relevant EU DPA).</li>
             </ul>
-            <p style={{ marginTop: 8, fontSize: 13, color: '#a8b8c8' }}>
+            <p style={{ marginTop: 8, fontSize: 13, color: 'var(--text-mid, #525252)' }}>
               For cross-border data transfers, we rely on Standard Contractual Clauses (SCCs) approved by the European Commission.
             </p>
           </section>
 
           <section style={sectionStyle} id="ccpa">
             <h2 style={h2style}>
-              <Globe style={{ width: 18, height: 18, color: '#38bdf8' }} />
+              <Globe style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
               7. California Residents — CCPA / CPRA
             </h2>
             <p>California residents have rights under the California Consumer Privacy Act (CCPA) as amended by CPRA:</p>
@@ -214,14 +212,14 @@ export default function PrivacyPolicyPage() {
               <li><strong>Right to Non-Discrimination:</strong> We will not discriminate for exercising your privacy rights.</li>
               <li><strong>Right to Correct:</strong> Request correction of inaccurate personal information.</li>
             </ul>
-            <p style={{ marginTop: 8, fontSize: 13, color: '#a8b8c8' }}>
-              Submit requests to <a href="mailto:privacy@logiflow.io" style={{ color: '#38bdf8' }}>privacy@logiflow.io</a>. We respond within 45 days. We may request verification of identity before processing requests.
+            <p style={{ marginTop: 8, fontSize: 13, color: 'var(--text-mid, #525252)' }}>
+              Submit requests to <a href="mailto:privacy@logiflow.io" style={{ color: 'var(--brand, #0057FF)' }}>privacy@logiflow.io</a>. We respond within 45 days. We may request verification of identity before processing requests.
             </p>
           </section>
 
           <section style={sectionStyle}>
             <h2 style={h2style}>
-              <FileText style={{ width: 18, height: 18, color: '#38bdf8' }} />
+              <FileText style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
               8. Data Retention
             </h2>
             <ul style={{ paddingLeft: 24, display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -235,7 +233,7 @@ export default function PrivacyPolicyPage() {
 
           <section style={sectionStyle}>
             <h2 style={h2style}>
-              <ShieldCheck style={{ width: 18, height: 18, color: '#38bdf8' }} />
+              <ShieldCheck style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
               9. Security Measures
             </h2>
             <p>
@@ -246,13 +244,13 @@ export default function PrivacyPolicyPage() {
         </div>
 
         {/* Footer */}
-        <div style={{ marginTop: 60, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.08)', fontSize: 13, color: '#a8b8c8' }}>
+        <div style={{ marginTop: 60, paddingTop: 24, borderTop: '1px solid var(--border, #E6E4DF)', fontSize: 13, color: 'var(--text-low, #909090)' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between' }}>
             <p style={{ margin: 0 }}>&copy; 2026 Precision Logistics Technologies Pvt. Ltd. All rights reserved.</p>
             <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-              <Link href="/terms" style={{ color: '#a8b8c8', textDecoration: 'underline' }}>Terms of Service</Link>
-              <Link href="/cookies" style={{ color: '#a8b8c8', textDecoration: 'underline' }}>Cookie Policy</Link>
-              <Link href="/refund" style={{ color: '#a8b8c8', textDecoration: 'underline' }}>Refund Policy</Link>
+              <Link href="/terms" style={{ color: 'var(--text-mid, #525252)', textDecoration: 'underline' }}>Terms of Service</Link>
+              <Link href="/cookies" style={{ color: 'var(--text-mid, #525252)', textDecoration: 'underline' }}>Cookie Policy</Link>
+              <Link href="/refund" style={{ color: 'var(--text-mid, #525252)', textDecoration: 'underline' }}>Refund Policy</Link>
             </div>
           </div>
         </div>

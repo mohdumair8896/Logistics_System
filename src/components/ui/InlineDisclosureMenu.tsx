@@ -11,6 +11,7 @@ export interface ActionItem {
   icon: ReactNode;
   onClick: () => void;
   variant?: 'default' | 'primary' | 'danger';
+  disabled?: boolean;
 }
 
 export interface InlineDisclosureMenuProps {
@@ -71,9 +72,11 @@ export const InlineDisclosureMenu: FC<InlineDisclosureMenuProps> = ({
               return (
                 <button
                   key={act.id}
-                  onClick={() => handleActionClick(act)}
+                  disabled={act.disabled}
+                  onClick={() => !act.disabled && handleActionClick(act)}
                   className={cn(
                     'flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap',
+                    act.disabled && 'opacity-40 cursor-not-allowed pointer-events-none',
                     isConfirming
                       ? 'bg-red-600 text-white shadow-xs animate-pulse'
                       : act.variant === 'primary'

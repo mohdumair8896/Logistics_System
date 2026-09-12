@@ -1,5 +1,7 @@
-﻿'use client';
+'use client';
 import { useEffect, useRef } from 'react';
+
+import type * as L from 'leaflet';
 
 // Waypoint type for map markers
 interface MapWaypoint {
@@ -15,6 +17,7 @@ interface P44CorridorMapProps {
   progress: number;          // 0-100
   waypoints?: MapWaypoint[];
   geofenceStatus?: string;
+  liveCoords?: { lat: number; lng: number }; // Real GPS from driver phone
 }
 
 // Deterministic lat/lng from a route origin/destination string hash
@@ -59,29 +62,59 @@ function routeCoords(origin: string, destination: string) {
   return { orig: findCoord(origin), dest: findCoord(destination) };
 }
 
-export default function P44CorridorMap({ origin, destination, progress, waypoints, geofenceStatus }: P44CorridorMapProps) {
-  const mapRef   = useRef<HTMLDivElement>(null);
-  const mapObjRef = useRef<unknown>(null);
+export default function P44CorridorMap({
+  origin,
+  destination,
+  progress,
+  waypoints,
+  geofenceStatus,
+  liveCoords,
+}: P44CorridorMapProps) {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapObjRef = useRef<L.Map | null>(null);
+  const truckMarkerRef = useRef<L.Marker | null>(null);
+  const progressLineRef = useRef<L.Polyline | null>(null);
 
   useEffect(() => {
-    if (!mapRef.current || mapObjRef.current) return;
+    let isMounted = true;
+    let localMap: L.Map | null = null;
+
+    if (!mapRef.current) return;
+    const container = mapRef.current as HTMLElement & { _leaflet_id?: number };
+
+    // Clean up existing map instance if any
+    if (mapObjRef.current) {
+      try {
+        mapObjRef.current.remove();
+      } catch {
+        // ignore
+      }
+      mapObjRef.current = null;
+    }
+    if (container._leaflet_id) {
+      delete container._leaflet_id;
+    }
 
     // Dynamic import to avoid SSR
-    import('leaflet').then(L => {
+    import('leaflet').then((L) => {
+      if (!isMounted || !mapRef.current) return;
+
       // Fix missing default icon paths in Next.js
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      delete (L.Icon.Default.prototype as any)._getIconUrl;
+      delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
       L.Icon.Default.mergeOptions({
         iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-        iconUrl:       'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-        shadowUrl:     'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
       });
 
-      const { orig, dest } = routeCoords(origin, destination);
-      const midLat = (orig[0] + dest[0]) / 2;
-      const midLng = (orig[1] + dest[1]) / 2;
+      // Ensure container has no residual leaflet id
+      if (container._leaflet_id) {
+        delete container._leaflet_id;
+      }
 
-      const map = L.map(mapRef.current!, { zoomControl: true, attributionControl: false });
+      const { orig, dest } = routeCoords(origin, destination);
+      const map = L.map(container, { zoomControl: true, attributionControl: false });
+      localMap = map;
       mapObjRef.current = map;
 
       // OpenStreetMap tiles (free, no API key)
@@ -90,7 +123,7 @@ export default function P44CorridorMap({ origin, destination, progress, waypoint
         maxZoom: 18,
       }).addTo(map);
 
-      // Route polyline
+      // Route polyline (base corridor)
       const routeLine = L.polyline([orig, dest], {
         color: '#E3E1DC',
         weight: 5,
@@ -99,14 +132,15 @@ export default function P44CorridorMap({ origin, destination, progress, waypoint
 
       // Progress segment (blue)
       const pct = Math.max(0, Math.min(1, progress / 100));
-      const truckLat = orig[0] + (dest[0] - orig[0]) * pct;
-      const truckLng = orig[1] + (dest[1] - orig[1]) * pct;
+      const truckLat = liveCoords?.lat ?? (orig[0] + (dest[0] - orig[0]) * pct);
+      const truckLng = liveCoords?.lng ?? (orig[1] + (dest[1] - orig[1]) * pct);
 
-      L.polyline([orig, [truckLat, truckLng]], {
+      const progLine = L.polyline([orig, [truckLat, truckLng]], {
         color: '#0057FF',
         weight: 5,
         opacity: 1,
       }).addTo(map);
+      progressLineRef.current = progLine;
 
       // Origin marker (blue circle)
       const originIcon = L.divIcon({
@@ -135,8 +169,9 @@ export default function P44CorridorMap({ origin, destination, progress, waypoint
         iconSize: [22, 22],
         iconAnchor: [11, 11],
       });
-      L.marker([truckLat, truckLng], { icon: truckIcon }).addTo(map)
+      const truckMarker = L.marker([truckLat, truckLng], { icon: truckIcon }).addTo(map)
         .bindTooltip(`In Transit — ${progress}% complete`, { permanent: false, direction: 'top' });
+      truckMarkerRef.current = truckMarker;
 
       // Waypoint markers
       if (waypoints && waypoints.length > 0) {
@@ -162,20 +197,46 @@ export default function P44CorridorMap({ origin, destination, progress, waypoint
     });
 
     return () => {
-      import('leaflet').then(L => {
-        if (mapObjRef.current) {
-          (mapObjRef.current as ReturnType<typeof L.map>).remove();
-          mapObjRef.current = null;
+      isMounted = false;
+      if (localMap) {
+        try {
+          localMap.remove();
+        } catch {
+          // ignore
         }
-      });
+        localMap = null;
+      } else if (mapObjRef.current) {
+        try {
+          mapObjRef.current.remove();
+        } catch {
+          // ignore
+        }
+      }
+      mapObjRef.current = null;
+      truckMarkerRef.current = null;
+      progressLineRef.current = null;
+      if (container && container._leaflet_id) {
+        delete container._leaflet_id;
+      }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [origin, destination]);
 
-  // Update truck position when progress changes (after map is created)
+  // Dynamically update truck position & polyline on progress/GPS updates without destroying map
   useEffect(() => {
-    // Map already mounted; progress changes are handled by re-mount on key change below
-  }, [progress]);
+    if (!truckMarkerRef.current) return;
+    const { orig, dest } = routeCoords(origin, destination);
+    const pct = Math.max(0, Math.min(1, progress / 100));
+    const truckLat = liveCoords?.lat ?? (orig[0] + (dest[0] - orig[0]) * pct);
+    const truckLng = liveCoords?.lng ?? (orig[1] + (dest[1] - orig[1]) * pct);
+
+    truckMarkerRef.current.setLatLng([truckLat, truckLng]);
+    truckMarkerRef.current.setTooltipContent(`In Transit — ${progress}% complete`);
+
+    if (progressLineRef.current) {
+      progressLineRef.current.setLatLngs([orig, [truckLat, truckLng]]);
+    }
+  }, [progress, liveCoords, origin, destination]);
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative', minHeight: 280 }}>

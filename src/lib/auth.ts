@@ -53,7 +53,7 @@ async function hmacSign(data: string, secret: string): Promise<string> {
 }
 
 /** Timing-safe string comparison via XOR of char codes to resist timing attacks */
-export function safeEqual(a: string, b: string): boolean {
+function safeEqual(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
   let diff = 0;
   for (let i = 0; i < a.length; i++) {

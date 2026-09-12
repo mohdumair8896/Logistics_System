@@ -12,23 +12,52 @@ import { AlertBanner } from '@/components/ui/AlertBanner';
 import { AvatarStack } from '@/components/ui/AvatarStack';
 import DriverChatModal from '@/components/layout/DriverChatModal';
 
-import { useDrivers, useDriverById } from '@/features/drivers/hooks';
+import { useDrivers, findDriverWithVehicle } from '@/features/drivers/hooks';
+import { useVehicles } from '@/features/vehicles/hooks';
 import DriversTable from '@/features/drivers/components/DriversTable';
 import DriverDossier from '@/features/drivers/components/DriverDossier';
 import AddDriverModal from '@/features/drivers/components/AddDriverModal';
 import ReassignVehicleModal from '@/features/drivers/components/ReassignVehicleModal';
 
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/Breadcrumb';
+
 export default function DriversPage() {
-  const { drivers, vehicles } = useDrivers();
+  const { drivers } = useDrivers();
+  const { vehicles } = useVehicles();
   const [selectedId, setSelectedId] = useState<string | null>(drivers[0]?.id ?? null);
   const [showAdd, setShowAdd] = useState(false);
   const [showReassign, setShowReassign] = useState(false);
   const [chatDriverId, setChatDriverId] = useState<string | null>(null);
 
-  const { driver: selectedDriver, assignedVehicle } = useDriverById(selectedId);
+  const { driver: selectedDriver, assignedVehicle } = findDriverWithVehicle(selectedId, drivers, vehicles);
 
   return (
     <div className="animate-slide-in">
+      <div className="mb-4">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">Dashboard</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/drivers">Fleet &amp; Roster</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Drivers</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
+
       <div className="page-header">
         <div>
           <div className="page-title">Driver Management &amp; Credentials</div>

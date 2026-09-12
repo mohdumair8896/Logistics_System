@@ -1,9 +1,10 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useStore } from '@/lib/store';
 import { Truck, Eye, EyeOff, LogIn, ShieldCheck, KeyRound, X } from 'lucide-react';
 import { ModalPortal } from '@/components/ui/ModalPortal';
+import { DotSpinner } from '@/components/ui/DotSpinner';
+import { Toggle } from '@/components/ui/Toggle';
 
 const demoRoles = [
   {
@@ -31,7 +32,7 @@ const demoRoles = [
 
 export default function LoginPage() {
   const router = useRouter();
-  const login = useStore(s => s.login);
+
   const [selectedRole, setSelectedRole] = useState(demoRoles[0]);
   const [email, setEmail] = useState(demoRoles[0].email);
   const [password, setPassword] = useState('Logistics2026!');
@@ -84,15 +85,10 @@ export default function LoginPage() {
         return;
       }
 
-      login({
-        email: data.user.email,
-        name: data.user.name,
-        role: data.user.role,
-        facility: data.user.facility,
-      });
 
       router.push('/dashboard');
-    } catch {
+    } catch (err) {
+      console.error('[Login] Authentication request error:', err);
       setError('Network error. Please check your connection and try again.');
     } finally {
       setLoading(false);
@@ -200,37 +196,34 @@ export default function LoginPage() {
                   Forgot Password?
                 </button>
               </div>
-              <div style={{ position: 'relative' }}>
+              <div className="input-group" style={{ height: 42 }}>
                 <input
-                  className="form-input"
                   type={showPass ? 'text' : 'password'}
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  style={{ paddingRight: 40 }}
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPass(!showPass)}
-                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-low)', cursor: 'pointer', display: 'flex' }}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-low)', cursor: 'pointer', display: 'flex', padding: 4 }}
+                  aria-label={showPass ? 'Hide password' : 'Show password'}
                 >
-                  {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
+                  {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 11.5, color: 'var(--text-mid)' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 7, cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={e => setRememberMe(e.target.checked)}
-                  style={{ accentColor: 'var(--brand)' }}
-                />
-                Keep me signed in
-              </label>
-              <span style={{ color: 'var(--text-low)', fontSize: 10.5 }}>SSL Encrypted</span>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '2px 0' }}>
+              <Toggle
+                size="sm"
+                checked={rememberMe}
+                onChange={setRememberMe}
+                label="Keep me signed in"
+                hint="Save workstation session credentials"
+              />
+              <span style={{ color: 'var(--text-low)', fontSize: 10.5, marginTop: 2 }}>SSL Encrypted</span>
             </div>
 
             {error && (
@@ -248,12 +241,12 @@ export default function LoginPage() {
               type="submit"
               className="btn btn-primary btn-lg"
               disabled={loading}
-              style={{ justifyContent: 'center', marginTop: 4, width: '100%' }}
+              style={{ justifyContent: 'center', marginTop: 4, width: '100%', gap: 10 }}
             >
               {loading ? (
                 <>
-                  <div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%' }} className="animate-spin" />
-                  Authenticating...
+                  <DotSpinner size={16} color="#ffffff" />
+                  Authenticating…
                 </>
               ) : (
                 <>
@@ -289,7 +282,7 @@ export default function LoginPage() {
             <div className="modal" style={{ maxWidth: 380 }} onClick={e => e.stopPropagation()}>
               <div className="modal-title">
                 <span>Reset Password</span>
-                <button onClick={() => setForgotModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text-low)', cursor: 'pointer' }}>
+                <button type="button" onClick={() => setForgotModal(false)} className="modal-close-btn" aria-label="Close modal">
                   <X size={17} />
                 </button>
               </div>

@@ -5,7 +5,10 @@
 
 import { useState } from 'react';
 import { Search } from 'lucide-react';
-import { getStatusBadgeClass } from '@/lib/formatters';
+import { Avatar } from '@/components/ui/Avatar';
+import { BadgeWithDot } from '@/components/ui/BadgeWithDot';
+import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/HoverCard';
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from '@/components/ui/Empty';
 import type { Vehicle } from '../types';
 import type { Driver } from '@/features/drivers/types';
 
@@ -45,8 +48,8 @@ export default function VehiclesTable({ vehicles, drivers, selectedId, onSelect 
               onClick={() => setFilterStatus(st)}
               style={{
                 fontSize: 11, padding: '4px 8px', borderRadius: 6,
-                border: '1px solid var(--border)',
-                background: filterStatus === st ? 'rgba(59,130,246,0.2)' : 'var(--surface-2)',
+                background: filterStatus === st ? 'var(--brand-10, rgba(0,87,255,0.08))' : 'var(--surface-2)',
+                border: filterStatus === st ? '1px solid var(--brand-20, rgba(0,87,255,0.2))' : '1px solid var(--border)',
                 color: filterStatus === st ? 'var(--brand)' : 'var(--text-mid)',
                 fontWeight: 600, cursor: 'pointer'
               }}
@@ -55,11 +58,9 @@ export default function VehiclesTable({ vehicles, drivers, selectedId, onSelect 
             </button>
           ))}
         </div>
-        <div style={{ position: 'relative', width: 160 }}>
-          <Search size={13} color="var(--text-low)" style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)' }} />
+        <div className="input-group input-group-sm" style={{ width: 180 }}>
+          <Search size={13} />
           <input
-            className="form-input"
-            style={{ paddingLeft: 26, fontSize: 11.5, padding: '5px 8px 5px 26px' }}
             placeholder="Search fleet..."
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -79,31 +80,92 @@ export default function VehiclesTable({ vehicles, drivers, selectedId, onSelect 
             </tr>
           </thead>
           <tbody>
-            {filtered.map(v => {
-              const drv = drivers.find(d => d.id === v.driverId);
-              return (
-                <tr
-                  key={v.id}
-                  onClick={() => onSelect(v.id)}
-                  style={{ background: selectedId === v.id ? 'rgba(59,130,246,0.12)' : '', cursor: 'pointer' }}
-                >
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span className={`status-dot ${DOT_COLOR[v.status] || 'dot-gray'}`} />
-                      <span className="mono" style={{ color: 'var(--text-high)', fontWeight: 700, fontSize: 12 }}>
-                        {v.vehicleNo}
-                      </span>
-                    </div>
-                  </td>
-                  <td style={{ fontSize: 12 }}>{v.type.split(' ')[0]}</td>
-                  <td><span className="mono" style={{ fontSize: 12 }}>{v.capacity.toLocaleString()} kg</span></td>
-                  <td><span className={`badge ${getStatusBadgeClass(v.status)}`}>{v.status}</span></td>
-                  <td style={{ fontSize: 12, color: drv ? 'var(--text-high)' : 'var(--text-low)' }}>
-                    {drv?.name || '—'}
-                  </td>
-                </tr>
-              );
-            })}
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan={5} style={{ padding: '36px 16px' }}>
+                  <Empty className="border-none bg-transparent">
+                    <EmptyHeader>
+                      <EmptyMedia variant="icon" />
+                      <EmptyTitle>No vehicles found</EmptyTitle>
+                      <EmptyDescription>
+                        No fleet vehicles match the active filter or search query.
+                      </EmptyDescription>
+                    </EmptyHeader>
+                  </Empty>
+                </td>
+              </tr>
+            ) : (
+              filtered.map(v => {
+                const drv = drivers.find(d => d.id === v.driverId);
+                return (
+                  <tr
+                    key={v.id}
+                    onClick={() => onSelect(v.id)}
+                    style={{ background: selectedId === v.id ? 'var(--brand-10, rgba(0,87,255,0.08))' : '', cursor: 'pointer' }}
+                  >
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span className={`status-dot ${DOT_COLOR[v.status] || 'dot-gray'}`} />
+                        <span className="mono" style={{ color: 'var(--text-high)', fontWeight: 700, fontSize: 12 }}>
+                          {v.vehicleNo}
+                        </span>
+                      </div>
+                    </td>
+                    <td style={{ fontSize: 12 }}>{v.type ? v.type.split(' ')[0] : 'Truck'}</td>
+                    <td><span className="mono" style={{ fontSize: 12 }}>{(v.capacity ?? 0).toLocaleString()} kg</span></td>
+                    <td>
+                      <BadgeWithDot
+                        color={
+                          v.status === 'Available' ? 'success' :
+                          v.status === 'In Transit' ? 'brand' : 'error'
+                        }
+                        size="sm"
+                        pulse={v.status === 'In Transit'}
+                      >
+                        {v.status}
+                      </BadgeWithDot>
+                    </td>
+                    <td style={{ fontSize: 12 }}>
+                      {drv ? (
+                        <HoverCard>
+                          <HoverCardTrigger>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                              <Avatar
+                                name={drv.name}
+                                size="xs"
+                                status={
+                                  drv.status === 'Available' ? 'online' :
+                                  drv.status === 'On Trip' ? 'busy' : 'offline'
+                                }
+                              />
+                              <span style={{ color: 'var(--text-high)', fontWeight: 500, textDecoration: 'underline decoration-dotted underline-offset-2' }}>
+                                {drv.name}
+                              </span>
+                            </div>
+                          </HoverCardTrigger>
+                          <HoverCardContent className="w-60">
+                            <div className="flex items-center gap-3 mb-2">
+                              <Avatar name={drv.name} size="sm" status={drv.status === 'Available' ? 'online' : 'busy'} />
+                              <div>
+                                <div className="font-bold text-xs text-[var(--text-high)]">{drv.name}</div>
+                                <div className="text-[10px] text-[var(--text-low)]">{drv.licenseNo || 'Commercial HMV'}</div>
+                              </div>
+                            </div>
+                            <div className="text-[11px] text-[var(--text-mid)] space-y-1">
+                              <div>Phone: {drv.phone || '+91 98765 43210'}</div>
+                              <div>Completed Trips: {drv.trips ?? 0}</div>
+                              <div>Safety Rating: ★ {drv.rating ?? 4.9}</div>
+                            </div>
+                          </HoverCardContent>
+                        </HoverCard>
+                      ) : (
+                        <span style={{ color: 'var(--text-low)' }}>—</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>

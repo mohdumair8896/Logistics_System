@@ -27,4 +27,8 @@ export interface Trip {
   cargoTemp?: string;
   geofenceStatus?: 'Inside Corridor' | 'Deviated' | 'Arrived';
   checkpoints?: Waypoint[];
+  // Live GPS from driver phone (set by /api/gps/ping)
+  lat?: string | null;
+  lng?: string | null;
+  updatedAt?: string | null;
 }

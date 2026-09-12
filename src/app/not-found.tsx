@@ -11,8 +11,8 @@ export const metadata: Metadata = {
 export default function NotFound() {
   return (
     <div style={{
-      background: '#020617',
-      color: '#f8fafc',
+      background: 'var(--surface, #F8F7F4)',
+      color: 'var(--text-high, #141414)',
       minHeight: '100vh',
       display: 'flex',
       flexDirection: 'column',
@@ -30,46 +30,44 @@ export default function NotFound() {
         transform: 'translate(-50%, -50%)',
         width: 600,
         height: 600,
-        background: 'radial-gradient(circle, rgba(245,158,11,0.08) 0%, rgba(34,211,238,0.04) 50%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(0, 87, 255, 0.05) 0%, rgba(0, 87, 255, 0.02) 50%, transparent 70%)',
         pointerEvents: 'none',
       }} />
 
       <div style={{
         position: 'relative',
         zIndex: 1,
-        maxWidth: 600,
+        maxWidth: 580,
         width: '100%',
         textAlign: 'center',
-        background: 'rgba(15,23,42,0.7)',
-        backdropFilter: 'blur(24px)',
-        WebkitBackdropFilter: 'blur(24px)',
-        border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: 28,
-        padding: 'clamp(32px, 5vw, 56px)',
-        boxShadow: '0 25px 60px rgba(0,0,0,0.6)',
+        background: 'var(--surface-1, #FFFFFF)',
+        border: '1px solid var(--border, #E6E4DF)',
+        borderRadius: 24,
+        padding: 'clamp(32px, 5vw, 52px)',
+        boxShadow: '0 8px 30px rgba(0, 0, 0, 0.05)',
       }}>
         
         {/* Radar / Lost Signal Badge */}
-        <div style={{ position: 'relative', width: 80, height: 80, margin: '0 auto 24px' }}>
+        <div style={{ position: 'relative', width: 72, height: 72, margin: '0 auto 20px' }}>
           <div style={{
             position: 'absolute',
-            inset: -8,
+            inset: -6,
             borderRadius: '50%',
-            background: 'rgba(245,158,11,0.15)',
-            filter: 'blur(12px)',
+            background: 'rgba(0, 87, 255, 0.12)',
+            filter: 'blur(10px)',
           }} />
           <div style={{
             position: 'relative',
-            width: 80,
-            height: 80,
-            borderRadius: 24,
-            background: 'rgba(245,158,11,0.1)',
-            border: '1px solid rgba(245,158,11,0.35)',
+            width: 72,
+            height: 72,
+            borderRadius: 20,
+            background: 'rgba(0, 87, 255, 0.08)',
+            border: '1px solid rgba(0, 87, 255, 0.25)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-            <Radio style={{ width: 36, height: 36, color: '#fbbf24', animation: 'pulse 2s infinite' }} />
+            <Radio style={{ width: 32, height: 32, color: 'var(--brand, #0057FF)', animation: 'pulse 2s infinite' }} />
           </div>
         </div>
 
@@ -77,14 +75,14 @@ export default function NotFound() {
         <div style={{
           display: 'inline-block',
           fontSize: 12,
-          fontFamily: 'monospace',
+          fontFamily: 'var(--font-mono, monospace)',
           fontWeight: 700,
-          color: '#fbbf24',
-          letterSpacing: 3,
+          color: 'var(--brand, #0057FF)',
+          letterSpacing: 2,
           textTransform: 'uppercase',
           marginBottom: 12,
-          background: 'rgba(245,158,11,0.1)',
-          border: '1px solid rgba(245,158,11,0.25)',
+          background: 'rgba(0, 87, 255, 0.08)',
+          border: '1px solid rgba(0, 87, 255, 0.2)',
           padding: '4px 14px',
           borderRadius: 99,
         }}>
@@ -92,22 +90,22 @@ export default function NotFound() {
         </div>
 
         <h1 style={{
-          fontSize: 'clamp(28px, 4vw, 38px)',
+          fontSize: 'clamp(26px, 4vw, 34px)',
           fontWeight: 900,
           letterSpacing: -1,
-          color: '#fff',
-          margin: '0 0 16px',
+          color: 'var(--text-high, #141414)',
+          margin: '0 0 14px',
         }}>
           Route Diverted or Waybill Missing
         </h1>
 
         <p style={{
           fontSize: 15,
-          color: '#94a3b8',
+          color: 'var(--text-mid, #525252)',
           lineHeight: 1.7,
-          margin: '0 0 36px',
+          margin: '0 0 32px',
         }}>
-          The coordinate or dispatch manifest you are navigating to does not exist on our corridor network. The trailer may have been rerouted or the link is expired.
+          The coordinate or dispatch manifest you are navigating to does not exist on our corridor network. The trailer may have been rerouted or the link has expired.
         </p>
 
         {/* Quick Recovery Navigation Actions */}
@@ -119,15 +117,15 @@ export default function NotFound() {
               alignItems: 'center',
               justifyContent: 'center',
               gap: 10,
-              padding: '14px 24px',
-              borderRadius: 14,
-              background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-              color: '#1c1917',
+              padding: '13px 24px',
+              borderRadius: 12,
+              background: 'var(--brand, #0057FF)',
+              color: '#ffffff',
               fontSize: 14,
               fontWeight: 700,
               textDecoration: 'none',
-              boxShadow: '0 0 25px rgba(245,158,11,0.25)',
-              transition: 'transform 0.15s',
+              boxShadow: '0 4px 14px rgba(0, 87, 255, 0.25)',
+              transition: 'opacity 0.15s',
             }}
           >
             <Home style={{ width: 18, height: 18 }} />
@@ -136,7 +134,7 @@ export default function NotFound() {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 4 }}>
             <Link
-              href="/tracking"
+              href="/track"
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -144,15 +142,15 @@ export default function NotFound() {
                 gap: 8,
                 padding: '12px 18px',
                 borderRadius: 12,
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: '#cbd5e1',
+                background: 'var(--surface-2, #F3F2EF)',
+                border: '1px solid var(--border, #E6E4DF)',
+                color: 'var(--text-high, #141414)',
                 fontSize: 13,
                 fontWeight: 600,
                 textDecoration: 'none',
               }}
             >
-              <Search style={{ width: 15, height: 15, color: '#38bdf8' }} />
+              <Search style={{ width: 15, height: 15, color: 'var(--brand, #0057FF)' }} />
               Live Tracker
             </Link>
 
@@ -165,15 +163,15 @@ export default function NotFound() {
                 gap: 8,
                 padding: '12px 18px',
                 borderRadius: 12,
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: '#cbd5e1',
+                background: 'var(--surface-2, #F3F2EF)',
+                border: '1px solid var(--border, #E6E4DF)',
+                color: 'var(--text-high, #141414)',
                 fontSize: 13,
                 fontWeight: 600,
                 textDecoration: 'none',
               }}
             >
-              <Truck style={{ width: 15, height: 15, color: '#fbbf24' }} />
+              <Truck style={{ width: 15, height: 15, color: 'var(--brand, #0057FF)' }} />
               Operations Center
             </Link>
           </div>
@@ -182,7 +180,7 @@ export default function NotFound() {
       </div>
 
       {/* Footer hint */}
-      <div style={{ marginTop: 32, fontSize: 12, color: '#94a3b8', fontFamily: 'monospace' }}>
+      <div style={{ marginTop: 28, fontSize: 12, color: 'var(--text-low, #909090)', fontFamily: 'var(--font-mono, monospace)' }}>
         LogiFlow Autonomous Mesh Gateway &bull; Node ID #ERR-404-GEO
       </div>
     </div>

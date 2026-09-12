@@ -1,130 +1,76 @@
 'use client';
 
-import { useStore, SystemAlert } from './store';
+// ─── Real Alert Hook ──────────────────────────────────────────────────────────
+// Polls /api/alerts for live system alerts from the database.
+// Alerts are created by real events:
+//   - GPS geofence webhooks (Phase 3: Traccar)
+//   - License expiry cron job (Phase 5: Vercel Cron)
+//   - Manual alerts posted by Operations Director
+//
+// ❌ REMOVED: startLiveNotificationFeed() — fake setInterval simulation
+// ❌ REMOVED: OPERATIONAL_ALERT_POOL — hardcoded fake event pool
+// ❌ REMOVED: simulateAlert() — random alert trigger
+
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
+import type { SystemAlert } from '@/shared/types/common';
 
-export interface OperationalEvent {
-  title: string;
-  description: string;
-  severity: 'critical' | 'warning' | 'info';
-  category: 'Fleet' | 'Driver' | 'Weather' | 'Warehouse' | 'Cold-Chain' | 'Geofence';
-}
-
-export const OPERATIONAL_ALERT_POOL: OperationalEvent[] = [
-  {
-    title: 'Geofence Entry: UP32 AB 1234 Arrived at Kanpur Terminal',
-    description: 'Vehicle V001 cleared perimeter RFID scanner. Directing to Bay 2 for scheduled unloading.',
-    severity: 'info',
-    category: 'Geofence',
-  },
-  {
-    title: 'Cold-Chain Alert: Reefer V002 (+5.6°C Threshold Exceeded)',
-    description: 'Corridor telematics detected +1.8°C spike in dairy cargo zone on NH-19. Automated compressor boost activated.',
-    severity: 'warning',
-    category: 'Cold-Chain',
-  },
-  {
-    title: 'Warehouse Bay 4 Staging Completed for ORD-1002',
-    description: '12,500 kg industrial cargo weighed and secured. Axle weight balance: 99.2% optimal. Ready for driver ingate.',
-    severity: 'info',
-    category: 'Warehouse',
-  },
-  {
-    title: 'Expressway Traffic Advisory: NH-19 Corridor Congestion',
-    description: 'Bridge maintenance near Agra toll plaza. Estimated delay +18 mins. Dynamic reroute suggestion sent to active drivers.',
-    severity: 'warning',
-    category: 'Weather',
-  },
-  {
-    title: 'Speed Advisory Violation: UP32 KL 5678 (78 km/h in 60 zone)',
-    description: 'Vehicle V004 exceeded corridor speed threshold on rain-slicked bypass. Speed advisory dispatch sent to driver.',
-    severity: 'critical',
-    category: 'Fleet',
-  },
-  {
-    title: 'Inbound Spot Quote Request: 14T Pharma Freight',
-    description: 'New high-priority cold-chain freight enquiry received for Lucknow ➔ Delhi NCR. Dispatched to CRM pipeline.',
-    severity: 'info',
-    category: 'Fleet',
-  },
-  {
-    title: 'Geofence Departure: UP32 EF 9012 En Route to Varanasi',
-    description: 'Trip TRP-1004 departed Lucknow Central Hub. Real-time telemetry tracking and temperature monitoring engaged.',
-    severity: 'info',
-    category: 'Geofence',
-  },
-];
-
-let liveFeedInterval: NodeJS.Timeout | null = null;
-let alertIndex = 0;
+let lastAlertIds = new Set<string>();
 
 /**
- * Triggers a simulated operational notification immediately.
- * Adds the alert to the Zustand store and displays an interactive Sonner toast.
+ * Fetches real system alerts from DB and optionally polls for new ones.
+ * Displays a toast when a brand-new alert arrives.
  */
-export function triggerLiveAlert(customEvent?: OperationalEvent): SystemAlert {
-  const event = customEvent || OPERATIONAL_ALERT_POOL[alertIndex % OPERATIONAL_ALERT_POOL.length];
-  alertIndex++;
+export function useSystemAlerts(pollIntervalMs = 30000) {
+  const [alerts, setAlerts] = useState<SystemAlert[]>([]);
 
-  const newAlert = {
-    title: event.title,
-    description: event.description,
-    severity: event.severity,
-    category: event.category,
-  };
+  const fetchAlerts = useCallback(async () => {
+    try {
+      const res = await fetch('/api/alerts');
+      if (!res.ok) return;
+      const data: SystemAlert[] = await res.json();
 
-  useStore.getState().addAlert(newAlert);
+      // Show toast for any brand-new alert IDs since last poll
+      data.forEach(alert => {
+        if (!lastAlertIds.has(alert.id)) {
+          const toastOpts = { description: alert.description, duration: 5000 };
+          if (alert.severity === 'critical') toast.error(`🚨 ${alert.title}`, toastOpts);
+          else if (alert.severity === 'warning') toast.warning(`⚠️ ${alert.title}`, toastOpts);
+          else toast.info(`🔔 ${alert.title}`, toastOpts);
+        }
+      });
 
-  // Trigger interactive toast alert
-  const toastOptions = {
-    description: event.description,
-    duration: 5000,
-  };
-
-  if (event.severity === 'critical') {
-    toast.error(`🚨 ${event.title}`, toastOptions);
-  } else if (event.severity === 'warning') {
-    toast.warning(`⚠️ ${event.title}`, toastOptions);
-  } else {
-    toast.info(`🔔 ${event.title}`, toastOptions);
-  }
-
-  return {
-    ...newAlert,
-    id: `ALT-${Date.now()}`,
-    timestamp: 'Just now',
-  };
-}
-
-/**
- * Starts the continuous live background alert simulator.
- * Automatically dispatches realistic fleet events every 35-45 seconds.
- */
-export function startLiveNotificationFeed(intervalMs = 40000) {
-  if (typeof window === 'undefined') return;
-  if (liveFeedInterval) return; // already active
-
-  liveFeedInterval = setInterval(() => {
-    // Only fire if the user is logged in
-    if (useStore.getState().isLoggedIn) {
-      triggerLiveAlert();
+      lastAlertIds = new Set(data.map(a => a.id));
+      setAlerts(data);
+    } catch (err) {
+      console.error('[useSystemAlerts] fetch error', err);
     }
-  }, intervalMs);
-}
+  }, []);
 
-/**
- * Stops the live background alert simulator.
- */
-export function stopLiveNotificationFeed() {
-  if (liveFeedInterval) {
-    clearInterval(liveFeedInterval);
-    liveFeedInterval = null;
-  }
-}
+  useEffect(() => {
+    fetchAlerts();
+    const interval = setInterval(fetchAlerts, pollIntervalMs);
+    return () => clearInterval(interval);
+  }, [fetchAlerts, pollIntervalMs]);
 
-/**
- * Checks if the live feed heartbeat is currently active.
- */
-export function isLiveFeedActive(): boolean {
-  return liveFeedInterval !== null;
+  const dismissAlert = useCallback(async (alertId: string) => {
+    await fetch(`/api/alerts/${alertId}`, { method: 'DELETE' });
+    setAlerts(prev => prev.filter(a => a.id !== alertId));
+  }, []);
+
+  const clearAll = useCallback(async () => {
+    await fetch('/api/alerts', { method: 'DELETE' });
+    setAlerts([]);
+  }, []);
+
+  const postAlert = useCallback(async (alert: Omit<SystemAlert, 'id' | 'timestamp'>) => {
+    const res = await fetch('/api/alerts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(alert),
+    });
+    if (res.ok) await fetchAlerts();
+  }, [fetchAlerts]);
+
+  return { alerts, dismissAlert, clearAll, postAlert, refetch: fetchAlerts };
 }

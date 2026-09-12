@@ -1,6 +1,8 @@
 'use client';
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useSyncExternalStore, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+
+const emptySubscribe = () => () => {};
 
 /**
  * ModalPortal — renders children directly into document.body via a React portal.
@@ -8,22 +10,12 @@ import { createPortal } from 'react-dom';
  * any parent element's overflow, transform, or z-index stacking context.
  */
 export function ModalPortal({ children }: { children: ReactNode }) {
-  const elRef = useRef<HTMLDivElement | null>(null);
+  const isMounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
 
-  if (!elRef.current) {
-    elRef.current = document.createElement('div');
-  }
-
-  useEffect(() => {
-    const el = elRef.current!;
-    document.body.appendChild(el);
-    // Prevent body scroll while modal is open
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.removeChild(el);
-      document.body.style.overflow = '';
-    };
-  }, []);
-
-  return createPortal(children, elRef.current);
+  if (!isMounted || typeof document === 'undefined') return null;
+  return createPortal(children, document.body);
 }

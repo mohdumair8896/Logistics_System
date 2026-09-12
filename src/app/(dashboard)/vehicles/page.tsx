@@ -11,18 +11,20 @@ import { Plus, Truck } from 'lucide-react';
 import { AlertBanner } from '@/components/ui/AlertBanner';
 import DriverChatModal from '@/components/layout/DriverChatModal';
 
-import { useVehicles, useVehicleById } from '@/features/vehicles/hooks';
+import { useVehicles, findVehicleWithDriver } from '@/features/vehicles/hooks';
+import { useDrivers } from '@/features/drivers/hooks';
 import VehiclesTable from '@/features/vehicles/components/VehiclesTable';
 import VehicleDossier from '@/features/vehicles/components/VehicleDossier';
 import AddVehicleModal from '@/features/vehicles/components/AddVehicleModal';
 
 export default function VehiclesPage() {
-  const { vehicles, drivers } = useVehicles();
+  const { vehicles } = useVehicles();
+  const { drivers } = useDrivers();
   const [selectedId, setSelectedId] = useState<string | null>(vehicles[0]?.id ?? null);
   const [showAdd, setShowAdd] = useState(false);
   const [chatDriverId, setChatDriverId] = useState<string | null>(null);
 
-  const { vehicle: selectedVehicle, assignedDriver } = useVehicleById(selectedId);
+  const { vehicle: selectedVehicle, assignedDriver } = findVehicleWithDriver(selectedId, vehicles, drivers);
 
   return (
     <div className="animate-slide-in">

@@ -5,7 +5,8 @@
 
 import { X } from 'lucide-react';
 import { ModalPortal } from '@/components/ui/ModalPortal';
-import { useStore } from '@/lib/store';
+import { useDrivers } from '@/features/drivers/hooks';
+import { useVehicles } from '@/features/vehicles/hooks';
 import type { Driver } from '../types';
 
 interface Props {
@@ -14,12 +15,13 @@ interface Props {
 }
 
 export default function ReassignVehicleModal({ driver, onClose }: Props) {
-  const { vehicles, reassignDriverVehicle } = useStore();
+  const { reassignDriverVehicle } = useDrivers();
+  const { vehicles } = useVehicles();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    reassignDriverVehicle(driver.id, (fd.get('vehicleId') as string) || null);
+    await reassignDriverVehicle(driver.id, (fd.get('vehicleId') as string) || null);
     onClose();
   };
 
@@ -29,7 +31,9 @@ export default function ReassignVehicleModal({ driver, onClose }: Props) {
         <div className="modal" style={{ maxWidth: 440 }} onClick={e => e.stopPropagation()}>
           <div className="modal-title">
             <span>Reassign Vehicle for {driver.name}</span>
-            <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-low)', cursor: 'pointer' }}><X size={18} /></button>
+            <button type="button" onClick={onClose} className="modal-close-btn" aria-label="Close modal">
+              <X size={18} />
+            </button>
           </div>
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div className="form-group">
@@ -37,7 +41,7 @@ export default function ReassignVehicleModal({ driver, onClose }: Props) {
               <select className="form-select" name="vehicleId" defaultValue={driver.vehicleId || ''}>
                 <option value="">— Unassign / No Vehicle —</option>
                 {vehicles.filter(v => v.status === 'Available' || v.id === driver.vehicleId).map(v => (
-                  <option key={v.id} value={v.id}>{v.vehicleNo} ({v.type} - {v.capacity.toLocaleString()} kg)</option>
+                  <option key={v.id} value={v.id}>{v.vehicleNo} ({v.type} - {(v.capacity ?? 0).toLocaleString()} kg)</option>
                 ))}
               </select>
             </div>

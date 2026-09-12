@@ -1,75 +1,31 @@
 'use client';
 import { useState } from 'react';
-import { useStore } from '@/lib/store';
+import { useAllocation } from '@/features/allocation/hooks';
 import {
   CheckCircle, Truck,
-  AlertTriangle, Clock, CheckCircle2, ShieldAlert
+  AlertTriangle, Clock, CheckCircle2, ShieldAlert, Sparkles
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { AlertBanner } from '@/components/ui/AlertBanner';
-import { LabeledProgress } from '@/components/ui/LabeledProgress';
 import { ModalPortal } from '@/components/ui/ModalPortal';
+import { DotPulse } from '@/components/ui/DotPulse';
+import { Avatar } from '@/components/ui/Avatar';
+import { BadgeWithDot } from '@/components/ui/BadgeWithDot';
 
 export default function AllocationPage() {
-  const { orders, vehicles, drivers, allocateVehicle, customers } = useStore();
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
+  const { pendingOrders, activeOrder, customer, evaluatedVehicles, recommendedVehicle, alternativeVehicles, allocateVehicle } = useAllocation(selectedOrder);
   const [allocated, setAllocated] = useState(false);
   const [allocatedVehNo, setAllocatedVehNo] = useState('');
   const [overrideModal, setOverrideModal] = useState<{ vehicleId: string; reason: string } | null>(null);
   const router = useRouter();
 
-  const pendingOrders = orders.filter(o => o.status === 'Pending');
-  const activeOrder = orders.find(o => o.id === (selectedOrder || pendingOrders[0]?.id)) || null;
-  const customer = activeOrder ? customers.find(c => c.id === activeOrder.customerId) : null;
 
-  // Calculate matching & alternative vehicles for activeOrder
-  const evaluatedVehicles = vehicles.map(v => {
-    const assignedDriver = drivers.find(d => d.id === v.driverId);
-    const availableCap = v.capacity - v.currentLoad;
-    const reqWeight = activeOrder ? activeOrder.totalWeight : 0;
-    const diff = availableCap - reqWeight;
-    const isFit = diff >= 0;
-    const isMaintenance = v.status === 'Maintenance';
-    const isBusy = v.status === 'In Transit';
-    const utilization = isFit && availableCap > 0 ? Math.round((reqWeight / v.capacity) * 100) : 0;
-
-    let reason: string | null = null;
-    let canOverride = false;
-
-    if (isMaintenance) {
-      reason = 'In Maintenance';
-    } else if (isBusy) {
-      reason = 'In Transit (ETA > 4hrs)';
-      canOverride = true;
-    } else if (!isFit) {
-      reason = `Insufficient Capacity (${diff.toLocaleString()} kg)`;
-    } else if (!assignedDriver || assignedDriver.status !== 'Available') {
-      reason = 'Driver off duty or unavailable';
-      canOverride = true;
-    }
-
-    const isRecommended = isFit && !isMaintenance && !isBusy && assignedDriver && assignedDriver.status === 'Available';
-
-    return {
-      ...v,
-      driver: assignedDriver,
-      availableCap,
-      diff,
-      isFit,
-      utilization,
-      reason,
-      canOverride,
-      isRecommended
-    };
-  });
-
-  const recommendedVehicle = evaluatedVehicles.find(v => v.isRecommended);
-  const alternativeVehicles = evaluatedVehicles.filter(v => v.id !== recommendedVehicle?.id);
 
   const handleAllocate = (vehicleId: string, driverId: string, overrideReason?: string) => {
     if (!activeOrder) return;
-    const veh = vehicles.find(v => v.id === vehicleId);
+    const veh = evaluatedVehicles.find(v => v.id === vehicleId);
     setAllocatedVehNo(veh?.vehicleNo || vehicleId);
     allocateVehicle(activeOrder.id, vehicleId, driverId);
     toast.success('Fleet Asset Dispatched & Assigned', {
@@ -128,7 +84,7 @@ export default function AllocationPage() {
             </div>
           ) : (
             pendingOrders.map(o => {
-              const cust = customers.find(c => c.id === o.customerId);
+              const cust = o.customerId === customer?.id ? customer : null;
               const isSelected = (activeOrder?.id === o.id);
               return (
                 <div
@@ -145,11 +101,11 @@ export default function AllocationPage() {
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span className="mono" style={{ fontWeight: 800, color: 'var(--brand)', fontSize: 12.5 }}>{o.id}</span>
-                    <span className="badge badge-yellow" style={{ fontSize: 10 }}>PENDING</span>
+                    <BadgeWithDot color="warning" size="sm" pulse>PENDING</BadgeWithDot>
                   </div>
                   <div style={{ fontWeight: 600, color: 'var(--text-high)', fontSize: 13, marginTop: 4 }}>{cust?.name}</div>
                   <div style={{ fontSize: 11.5, color: 'var(--text-low)', marginTop: 2 }}>
-                    {o.destination} � <strong style={{ color: 'var(--text-mid)' }}>{o.totalWeight.toLocaleString()} kg</strong>
+                    {o.destination} · <strong style={{ color: 'var(--text-mid)' }}>{(o.totalWeight ?? 0).toLocaleString()} kg</strong>
                   </div>
                 </div>
               );
@@ -172,9 +128,12 @@ export default function AllocationPage() {
               </div>
               <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--brand)' }}>Vehicle Allocated Successfully!</div>
               <div style={{ fontSize: 13.5, color: 'var(--text-mid)', marginTop: 8 }}>
-                Assigned <strong style={{ color: 'white' }}>{allocatedVehNo}</strong> to {activeOrder.id}.
+                Assigned <strong style={{ color: 'var(--text-high)' }}>{allocatedVehNo}</strong> to {activeOrder.id}.
               </div>
-              <div style={{ fontSize: 12, color: 'var(--text-low)', marginTop: 6 }}>Redirecting to warehouse bay loading...</div>
+              <div style={{ fontSize: 12, color: 'var(--text-low)', marginTop: 10, display: 'inline-flex', alignItems: 'center', gap: 7, background: 'var(--surface-2)', padding: '5px 12px', borderRadius: 20 }}>
+                <span>Redirecting to warehouse bay loading</span>
+                <DotPulse size={4} color="var(--brand)" />
+              </div>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -184,7 +143,7 @@ export default function AllocationPage() {
                 <div className="card" style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                     <span className="mono" style={{ fontSize: 15, fontWeight: 800, color: 'var(--brand)' }}>{activeOrder.id}</span>
-                    <span className="badge badge-yellow">PENDING ALLOCATION</span>
+                    <BadgeWithDot color="warning" size="sm" pulse>PENDING ALLOCATION</BadgeWithDot>
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12.5 }}>
@@ -194,11 +153,11 @@ export default function AllocationPage() {
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: 6 }}>
                       <span style={{ color: 'var(--text-low)' }}>Corridor</span>
-                      <span style={{ fontWeight: 600, color: 'var(--text-high)' }}>{activeOrder.origin.split(' ')[0]} ? {activeOrder.destination}</span>
+                      <span style={{ fontWeight: 600, color: 'var(--text-high)' }}>{activeOrder.origin.split(' ')[0]} → {activeOrder.destination}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: 6 }}>
                       <span style={{ color: 'var(--text-low)' }}>Payload Required</span>
-                      <span className="mono" style={{ fontWeight: 800, color: 'var(--brand)' }}>{activeOrder.totalWeight.toLocaleString()} kg</span>
+                      <span className="mono" style={{ fontWeight: 800, color: 'var(--brand)' }}>{(activeOrder.totalWeight ?? 0).toLocaleString()} kg</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: 6 }}>
                       <span style={{ color: 'var(--text-low)' }}>SLA Deadline</span>
@@ -217,35 +176,63 @@ export default function AllocationPage() {
                 {recommendedVehicle ? (
                   <div className="rec-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                        <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
-                          ? RECOMMENDED MATCH
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+                          <Sparkles size={12} /> RECOMMENDED MATCH
                         </span>
-                        <span className="badge badge-green" style={{ fontSize: 10 }}>Optimal Fit</span>
+                        <span className="badge badge-green" style={{ fontSize: 10, fontWeight: 700 }}>Optimal Fit</span>
                       </div>
 
-                      <div style={{ fontWeight: 800, fontSize: 17, color: 'var(--text-high)', fontFamily: 'JetBrains Mono, monospace' }}>
+                      <div style={{ fontWeight: 800, fontSize: 18, color: 'var(--text-high)', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '-0.3px' }}>
                         {recommendedVehicle.vehicleNo}
                       </div>
-                      <div style={{ fontSize: 12, color: 'var(--text-low)', marginTop: 1 }}>
-                        {recommendedVehicle.type} � {recommendedVehicle.capacity.toLocaleString()} kg Capacity
+                      <div style={{ fontSize: 12, color: 'var(--text-mid)', marginTop: 2 }}>
+                        {recommendedVehicle.type} · {(recommendedVehicle.capacity ?? 0).toLocaleString()} kg Capacity
                       </div>
 
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, margin: '12px 0', padding: 10, background: 'rgba(0,0,0,0.25)', borderRadius: 8, fontSize: 12 }}>
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1fr',
+                        gap: 12,
+                        margin: '14px 0',
+                        padding: '12px 14px',
+                        background: 'var(--surface-2, #F3F2EF)',
+                        border: '1px solid var(--border, #E6E4DF)',
+                        borderRadius: 10,
+                        fontSize: 12
+                      }}>
                         <div>
-                          <div style={{ fontSize: 10.5, color: 'var(--text-low)' }}>Utilization</div>
-                          <div style={{ fontWeight: 800, color: 'var(--brand)', fontSize: 14 }}>{recommendedVehicle.utilization}%</div>
+                          <div style={{ fontSize: 10.5, color: 'var(--text-mid, #525252)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Utilization</div>
+                          <div style={{ fontWeight: 800, color: 'var(--brand, #0057FF)', fontSize: 16, marginTop: 2 }}>{recommendedVehicle.utilization}%</div>
                         </div>
                         <div>
-                          <div style={{ fontSize: 10.5, color: 'var(--text-low)' }}>Assigned Driver</div>
-                          <div style={{ fontWeight: 700, color: 'var(--text-high)' }}>{recommendedVehicle.driver?.name || 'Ahmed Khan'}</div>
+                          <div style={{ fontSize: 10.5, color: 'var(--text-mid, #525252)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Assigned Driver</div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginTop: 4 }}>
+                            <Avatar name={recommendedVehicle.driver?.name || 'Ahmed Khan'} size="xs" status="online" />
+                            <span style={{ fontWeight: 700, color: 'var(--text-high, #141414)', fontSize: 13.5 }}>{recommendedVehicle.driver?.name || 'Ahmed Khan'}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
 
                     <button
-                      className="btn btn-success w-full btn-lg"
-                      style={{ justifyContent: 'center' }}
+                      className="btn btn-primary w-full btn-lg"
+                      style={{
+                        justifyContent: 'center',
+                        background: 'linear-gradient(135deg, #0057FF, #0040CC)',
+                        color: '#ffffff',
+                        fontWeight: 700,
+                        fontSize: 13,
+                        letterSpacing: '0.5px',
+                        boxShadow: '0 4px 14px rgba(0, 87, 255, 0.25)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        borderRadius: 10,
+                        border: 'none',
+                        padding: '12px 18px',
+                        cursor: 'pointer',
+                      }}
                       onClick={() => handleAllocate(recommendedVehicle.id, recommendedVehicle.driver?.id || 'D001')}
                     >
                       <Truck size={16} /> ALLOCATE THIS TRUCK
@@ -291,21 +278,29 @@ export default function AllocationPage() {
                           <div style={{ fontSize: 11, color: 'var(--text-low)' }}>{v.type}</div>
                         </td>
                         <td>
-                          <span className="mono" style={{ fontSize: 12 }}>{v.capacity.toLocaleString()} kg</span>
+                          <span className="mono" style={{ fontSize: 12 }}>{(v.capacity ?? 0).toLocaleString()} kg</span>
                         </td>
                         <td>
-                          <span style={{ fontSize: 12 }}>{v.driver?.name || <span style={{ color: 'var(--text-low)' }}>Unassigned</span>}</span>
-                        </td>
-                        <td>
-                          {v.reason?.includes('Insufficient') ? (
-                            <span className="badge badge-red" style={{ fontSize: 11 }}>{v.reason}</span>
-                          ) : v.reason?.includes('Maintenance') ? (
-                            <span className="badge badge-yellow" style={{ fontSize: 11 }}>{v.reason}</span>
-                          ) : v.reason?.includes('In Transit') ? (
-                            <span className="badge badge-purple" style={{ fontSize: 11 }}>{v.reason}</span>
+                          {v.driver ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                              <Avatar name={v.driver.name} size="xs" status="online" />
+                              <span style={{ fontSize: 12, color: 'var(--text-high)' }}>{v.driver.name}</span>
+                            </div>
                           ) : (
-                            <span className="badge badge-gray" style={{ fontSize: 11 }}>{v.reason || 'Sub-optimal'}</span>
+                            <span style={{ fontSize: 12, color: 'var(--text-low)' }}>Unassigned</span>
                           )}
+                        </td>
+                        <td>
+                          <BadgeWithDot
+                            color={
+                              v.reason?.includes('Insufficient') ? 'error' :
+                              v.reason?.includes('Maintenance') ? 'warning' :
+                              v.reason?.includes('In Transit') ? 'brand' : 'gray'
+                            }
+                            size="sm"
+                          >
+                            {v.reason || 'Sub-optimal'}
+                          </BadgeWithDot>
                         </td>
                         <td style={{ textAlign: 'right' }}>
                           {v.canOverride ? (

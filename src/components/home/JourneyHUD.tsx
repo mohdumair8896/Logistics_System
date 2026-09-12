@@ -66,8 +66,8 @@ export const JOURNEY_STAGES: StageData[] = [
     sub: 'Corridor Alpha • Dynamic Rerouting',
     tag: 'IN TRANSIT',
     desc: 'Long-haul high-speed corridor engaged. Real-time telematics monitors weather, traffic bottlenecks, and battery reserve.',
-    color: '#38BDF8',
-    icon: <CloudSun style={{ width: 20, height: 20, color: '#38bdf8' }} />,
+    color: '#0057FF',
+    icon: <CloudSun style={{ width: 20, height: 20, color: '#0057FF' }} />,
     metrics: [
       { label: 'Cruise Velocity', value: '64 mph' },
       { label: 'ETA Variance', value: '-12 min' },

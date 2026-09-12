@@ -1,26 +1,39 @@
 'use client';
 import { useState } from 'react';
-import { useStore } from '@/lib/store';
+import { useVehicles } from '@/features/vehicles/hooks';
+import { useDrivers } from '@/features/drivers/hooks';
+import { useOrders } from '@/features/orders/hooks';
+import { useCustomers } from '@/features/customers/hooks';
+import { useTrips } from '@/features/trips/hooks';
+import { useSystemAlerts } from '@/lib/liveNotifications';
 import {
   Truck, Users, ShoppingCart, Navigation, Weight,
-  TrendingUp, Plus, ArrowRight, MapPin, Activity,
+  Plus, ArrowRight, MapPin, Activity,
   AlertTriangle, CheckCircle2, XCircle, Clock,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AlertBanner } from '@/components/ui/AlertBanner';
 import { ListStack } from '@/components/ui/ListStack';
+import { Avatar } from '@/components/ui/Avatar';
+import { BadgeWithDot } from '@/components/ui/BadgeWithDot';
+import { FleetActivityAreaChart } from '@/components/charts/FleetActivityAreaChart';
+import { FleetPerformanceGradientChart } from '@/components/charts/FleetPerformanceGradientChart';
 
 
 export default function DashboardPage() {
-  const { vehicles, drivers, orders, trips, alerts, customers } = useStore();
+  const { vehicles } = useVehicles();
+  const { drivers } = useDrivers();
+  const { orders } = useOrders();
+  const { customers } = useCustomers();
+  const { trips } = useTrips();
+  const { alerts } = useSystemAlerts(30000);
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'all' | 'active' | 'delivered'>('all');
 
   // ---- Live metrics ----
   const pendingOrders    = orders.filter(o => o.status === 'Pending');
   const activeTrips      = trips.filter(t => t.status === 'In Transit');
-  const deliveredTrips   = trips.filter(t => t.status === 'Delivered');
   const availableVehicles = vehicles.filter(v => v.status === 'Available');
   const availableDrivers  = drivers.filter(d => d.status === 'Available');
 
@@ -47,30 +60,8 @@ export default function DashboardPage() {
     return true;
   });
 
-  const recentOrders  = [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5);
+  const recentOrders  = [...orders].sort((a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime()).slice(0, 5);
   const activeAlerts  = alerts.slice(0, 4);
-
-  const statusBadge = (status: string) => {
-    const map: Record<string, string> = {
-      'In Transit': 'badge-blue',
-      'Delivered':  'badge-green',
-      'Cancelled':  'badge-gray',
-      'Pending':    'badge-yellow',
-      'Allocated':  'badge-blue',
-    };
-    return map[status] || 'badge-gray';
-  };
-
-  const orderStatusBadge = (status: string) => {
-    const map: Record<string, string> = {
-      'Pending':    'badge-yellow',
-      'Allocated':  'badge-blue',
-      'In Transit': 'badge-blue',
-      'Delivered':  'badge-green',
-      'Cancelled':  'badge-gray',
-    };
-    return map[status] || 'badge-gray';
-  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -123,9 +114,15 @@ export default function DashboardPage() {
         </AlertBanner>
       ))}
 
+      {/* ── Real-Time Fleet Telemetry & Performance (Shadcn Recharts Area Charts) ── */}
+      <div className="grid-2">
+        <FleetActivityAreaChart />
+        <FleetPerformanceGradientChart />
+      </div>
+
       {/* ── Active trips + recent orders stacked lists (watermelon list-stack pattern) ── */}
       {(activeTrips.length > 0 || recentOrders.length > 0) && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div className="grid-2">
           {activeTrips.length > 0 && (
             <div className="card" style={{ padding: 16 }}>
               <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 14 }}>
@@ -252,7 +249,16 @@ export default function DashboardPage() {
                         </div>
                         <div style={{ fontSize: 10.5, color: 'var(--text-low)' }}>{trip.distance} km</div>
                       </td>
-                      <td style={{ color: 'var(--text-mid)', fontSize: 12.5 }}>{driver?.name || '—'}</td>
+                      <td style={{ color: 'var(--text-mid)', fontSize: 12.5 }}>
+                        {driver ? (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <Avatar name={driver.name} size="xs" status={driver.status === 'Available' ? 'online' : 'busy'} />
+                            <span>{driver.name}</span>
+                          </div>
+                        ) : (
+                          <span>—</span>
+                        )}
+                      </td>
                       <td style={{ color: 'var(--text-mid)', fontSize: 12.5, fontFamily: 'var(--font-mono)' }}>
                         {vehicle?.vehicleNo || '—'}
                       </td>
@@ -271,7 +277,13 @@ export default function DashboardPage() {
                         {trip.eta || (trip.status === 'Delivered' ? 'Arrived' : '—')}
                       </td>
                       <td>
-                        <span className={`badge ${statusBadge(trip.status)}`}>{trip.status}</span>
+                        <BadgeWithDot
+                          color={trip.status === 'In Transit' ? 'brand' : trip.status === 'Delivered' ? 'success' : 'gray'}
+                          pulse={trip.status === 'In Transit'}
+                          size="sm"
+                        >
+                          {trip.status}
+                        </BadgeWithDot>
                       </td>
                     </tr>
                   );
@@ -316,7 +328,17 @@ export default function DashboardPage() {
                       {customer?.name || 'Unknown'} · {order.destination.split(',')[0]}
                     </div>
                   </div>
-                  <span className={`badge ${orderStatusBadge(order.status)}`}>{order.status}</span>
+                  <BadgeWithDot
+                    color={
+                      order.status === 'Pending' ? 'warning' :
+                      order.status === 'Delivered' ? 'success' :
+                      order.status === 'Allocated' ? 'brand' : 'gray'
+                    }
+                    pulse={order.status === 'Pending'}
+                    size="sm"
+                  >
+                    {order.status}
+                  </BadgeWithDot>
                 </div>
               );
             })}

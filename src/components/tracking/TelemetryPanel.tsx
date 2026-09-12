@@ -30,7 +30,7 @@ export default function TelemetryPanel({
             Vehicle HUD
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-            <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--brand)', display: 'inline-block', animation: 'pulse 2s infinite' }} />
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--brand)', display: 'inline-block', animation: 'dotPulse 1.4s infinite ease-in-out' }} />
             <span className="badge badge-blue" style={{ fontSize: 9, padding: '1px 7px' }}>LIVE</span>
           </div>
         </div>
@@ -97,7 +97,7 @@ export default function TelemetryPanel({
               <span className="telemetry-cell-label">Geofence</span>
               <ShieldCheck size={10} color="var(--brand)" />
             </div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 800, color: trip.geofenceStatus === 'Deviated' ? '#334F99' : 'var(--brand)', marginTop: 2 }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 800, color: trip.geofenceStatus === 'Deviated' ? 'var(--status-warn, #D97706)' : 'var(--brand)', marginTop: 2 }}>
               {trip.geofenceStatus || 'In Corridor'}
             </div>
           </div>

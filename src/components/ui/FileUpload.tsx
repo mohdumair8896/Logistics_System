@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useRef, type ChangeEvent, type FC } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { UploadCloud, FileCheck, X, Check, FileText } from 'lucide-react';
+import { motion } from 'motion/react';
+import { UploadCloud, X, Check, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface FileUploadProps {

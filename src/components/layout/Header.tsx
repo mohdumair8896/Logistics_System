@@ -1,13 +1,15 @@
 'use client';
 import { useState } from 'react';
-import { Bell, Check, X, ShieldAlert, Sparkles, Menu, Trash2 } from 'lucide-react';
-import { useStore } from '@/lib/store';
-import { triggerLiveAlert } from '@/lib/liveNotifications';
+import { Bell, Check, X, ShieldAlert, Menu, Trash2, Bug, Sliders } from 'lucide-react';
+import { useSystemAlerts } from '@/lib/liveNotifications';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
-import { DropdownMenu } from '@/components/ui/DropdownMenu';
-import { User, LogOut, Settings, Shield } from 'lucide-react';
-
+import { ExpandableSearch } from '@/components/ui/ExpandableSearch';
+import { DotPulse } from '@/components/ui/DotPulse';
+import { AccountDropdown } from '@/components/layout/AccountDropdown';
+import { ModalPortal } from '@/components/ui/ModalPortal';
+import { BugReportForm } from '@/components/forms/BugReportForm';
+import { FormRhfCheckbox } from '@/components/forms/FormRhfCheckbox';
 
 interface HeaderProps {
   title: string;
@@ -15,17 +17,23 @@ interface HeaderProps {
   onToggleMobileMenu?: () => void;
 }
 
-export default function Header({ title, subtitle, onToggleMobileMenu }: HeaderProps) {
-  const { alerts, dismissAlert, clearAllAlerts, currentUser } = useStore();
+export default function Header({
+  title,
+  subtitle,
+  onToggleMobileMenu,
+}: HeaderProps) {
+  const { alerts, dismissAlert, clearAll } = useSystemAlerts(30000);
   const [showAlerts, setShowAlerts] = useState(false);
+  const [showBugModal, setShowBugModal] = useState(false);
+  const [showPrefsModal, setShowPrefsModal] = useState(false);
   const now = new Date().toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
 
   const severityColor = (s: string) =>
-    s === 'critical' ? '#334F99' : s === 'warning' ? '#3366CC' : 'var(--brand)';
+    s === 'critical' ? 'var(--status-error, #DC2626)' : s === 'warning' ? 'var(--status-warn, #D97706)' : 'var(--brand)';
 
   return (
     <header className="header">
-      <div className="header-left">
+      <div className="header-left flex items-center gap-3">
         {/* Mobile hamburger */}
         {onToggleMobileMenu && (
           <button
@@ -47,6 +55,9 @@ export default function Header({ title, subtitle, onToggleMobileMenu }: HeaderPr
       </div>
 
       <div className="header-right" style={{ position: 'relative' }}>
+        {/* Quick global waybill lookup */}
+        <ExpandableSearch placeholder="Lookup waybill / trip..." />
+
         {/* Live indicator */}
         <Link
           href="/tracking"
@@ -58,7 +69,7 @@ export default function Header({ title, subtitle, onToggleMobileMenu }: HeaderPr
             textDecoration: 'none', fontFamily: 'var(--font-mono)',
           }}
         >
-          <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--brand)', display: 'inline-block', animation: 'pulse 2s infinite' }} />
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--brand)', display: 'inline-block', animation: 'dotPulse 1.4s infinite ease-in-out' }} />
           <span>LIVE</span>
         </Link>
 
@@ -112,7 +123,7 @@ export default function Header({ title, subtitle, onToggleMobileMenu }: HeaderPr
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                     {alerts.length > 0 && (
                       <button
-                        onClick={clearAllAlerts}
+                        onClick={clearAll}
                         style={{ background: 'none', border: 'none', color: 'var(--text-low)', cursor: 'pointer', fontSize: 11, display: 'flex', alignItems: 'center', gap: 3, padding: '3px 6px', borderRadius: 4 }}
                       >
                         <Trash2 size={11} /> Clear
@@ -133,21 +144,11 @@ export default function Header({ title, subtitle, onToggleMobileMenu }: HeaderPr
                   padding: '7px 10px', background: 'var(--surface-2)', borderRadius: 7,
                   marginBottom: 10, border: '1px solid var(--border)', fontSize: 11,
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--brand)', fontWeight: 600 }}>
-                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--brand)', animation: 'pulse 2s infinite', display: 'inline-block' }} />
-                    Stream: Active
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, color: 'var(--brand)', fontWeight: 600 }}>
+                    <DotPulse size={4} color="var(--brand)" />
+                    <span>Stream: Live</span>
                   </div>
-                  <button
-                    onClick={() => triggerLiveAlert()}
-                    style={{
-                      background: 'var(--brand-10)', border: '1px solid var(--brand-20)',
-                      color: 'var(--brand)', borderRadius: 5, padding: '2px 7px',
-                      fontSize: 10, fontWeight: 700, cursor: 'pointer',
-                      display: 'flex', alignItems: 'center', gap: 3,
-                    }}
-                  >
-                    <Sparkles size={10} /> Simulate
-                  </button>
+
                 </div>
 
                 {/* Alert list */}
@@ -194,17 +195,93 @@ export default function Header({ title, subtitle, onToggleMobileMenu }: HeaderPr
           </AnimatePresence>
         </div>
 
-        {/* User profile */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingLeft: 8, borderLeft: '1px solid var(--border)' }}>
-          <div className="user-avatar">
-            {currentUser?.avatar || 'OP'}
-          </div>
-          <div style={{ fontSize: 11.5, lineHeight: 1.2 }}>
-            <div style={{ fontWeight: 700, color: 'var(--text-high)' }}>{currentUser?.name || 'Operations Admin'}</div>
-            <div style={{ fontSize: 10, color: 'var(--text-low)' }}>{currentUser?.role || 'Fleet Operations'}</div>
-          </div>
+        {/* Quick Bug Report */}
+        <button
+          className="header-btn"
+          title="Report Bug (React Hook Form + Zod)"
+          onClick={() => setShowBugModal(true)}
+          aria-label="Report Bug"
+        >
+          <Bug size={15} />
+        </button>
+
+        {/* Quick Notification Preferences */}
+        <button
+          className="header-btn"
+          title="Notification Preferences (RHF Checkbox)"
+          onClick={() => setShowPrefsModal(true)}
+          aria-label="Notification Preferences"
+        >
+          <Sliders size={15} />
+        </button>
+
+        {/* Interactive Account & Role Switcher */}
+        <div style={{ paddingLeft: 8, borderLeft: '1px solid var(--border)' }}>
+          <AccountDropdown />
         </div>
       </div>
+
+      {/* Bug Report Modal */}
+      {showBugModal && (
+        <ModalPortal>
+          <div
+            style={{
+              position: 'fixed', inset: 0, zIndex: 9999,
+              background: 'rgba(0, 0, 0, 0.45)', backdropFilter: 'blur(4px)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: 16,
+            }}
+            onClick={() => setShowBugModal(false)}
+          >
+            <div onClick={(e) => e.stopPropagation()} style={{ position: 'relative' }}>
+              <button
+                type="button"
+                onClick={() => setShowBugModal(false)}
+                className="modal-close-btn"
+                style={{
+                  position: 'absolute', top: 14, right: 14,
+                  zIndex: 10,
+                }}
+                aria-label="Close Bug Report Modal"
+              >
+                <X size={16} />
+              </button>
+              <BugReportForm />
+            </div>
+          </div>
+        </ModalPortal>
+      )}
+
+      {/* Notification Preferences Modal */}
+      {showPrefsModal && (
+        <ModalPortal>
+          <div
+            style={{
+              position: 'fixed', inset: 0, zIndex: 9999,
+              background: 'rgba(0, 0, 0, 0.45)', backdropFilter: 'blur(4px)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: 16,
+            }}
+            onClick={() => setShowPrefsModal(false)}
+          >
+            <div onClick={(e) => e.stopPropagation()} style={{ position: 'relative' }}>
+              <button
+                type="button"
+                onClick={() => setShowPrefsModal(false)}
+                className="modal-close-btn"
+                style={{
+                  position: 'absolute', top: 14, right: 14,
+                  zIndex: 10,
+                }}
+                aria-label="Close Notification Preferences Modal"
+              >
+                <X size={16} />
+              </button>
+              <FormRhfCheckbox />
+            </div>
+          </div>
+        </ModalPortal>
+      )}
     </header>
   );
 }

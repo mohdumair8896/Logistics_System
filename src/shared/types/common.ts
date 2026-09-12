@@ -11,14 +11,6 @@ export interface Customer {
   gstin: string;
 }
 
-export interface Product {
-  id: string;
-  name: string;
-  unit: string;
-  category: string;
-  pricePerKg: number;
-}
-
 export interface SystemAlert {
   id: string;
   title: string;
@@ -26,12 +18,4 @@ export interface SystemAlert {
   severity: 'warning' | 'info' | 'critical';
   timestamp: string;
   category: 'Weather' | 'Fleet' | 'Driver' | 'Route' | 'Warehouse' | 'Cold-Chain' | 'Geofence';
-}
-
-
-export interface InventoryItem {
-  productId: string;
-  warehouseId: string;
-  quantity: number;
-  bay: string;
 }

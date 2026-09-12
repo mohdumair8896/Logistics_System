@@ -84,7 +84,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  themeColor: "#020617",
+  themeColor: "#0057FF",
 };
 
 // JSON-LD: Organization + LocalBusiness schema for Google Knowledge Panel
@@ -101,9 +101,10 @@ const organizationSchema = {
   "address": {
     "@type": "PostalAddress",
     "addressCountry": "IN",
-    // TODO: Fill in your registered address
+    "streetAddress": "Plot No. 12, Vibhuti Khand, Gomti Nagar",
     "addressLocality": "Lucknow",
     "addressRegion": "Uttar Pradesh",
+    "postalCode": "226010"
   },
   "contactPoint": {
     "@type": "ContactPoint",

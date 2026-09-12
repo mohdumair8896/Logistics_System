@@ -3,16 +3,13 @@
 // The driver profile detail panel (right side).
 // To change the driver profile UI → edit ONLY this file.
 
-import { Star, ShieldCheck, ShieldAlert, Phone, MessageSquare, Plus, RotateCcw } from 'lucide-react';
+import { Star, Phone, MessageSquare, Plus, RotateCcw } from 'lucide-react';
 import { FileUpload } from '@/components/ui/FileUpload';
+import { Avatar } from '@/components/ui/Avatar';
+import { BadgeWithDot } from '@/components/ui/BadgeWithDot';
+import { BadgeGroup } from '@/components/ui/BadgeGroup';
 import type { Driver } from '../types';
 import type { Vehicle } from '@/features/vehicles/types';
-
-const STATUS_COLOR: Record<string, string> = {
-  'Available': 'badge-green',
-  'On Trip': 'badge-blue',
-  'Off Duty': 'badge-gray'
-};
 
 interface Props {
   driver: Driver;
@@ -26,35 +23,39 @@ export default function DriverDossier({ driver, assignedVehicle, onChat, onReass
     <div className="card">
       {/* Profile header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 18 }}>
-        <div style={{ width: 56, height: 56, background: 'linear-gradient(135deg, #2a5c9a, var(--brand))', border: '1px solid rgba(59,130,246,0.4)', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 20, fontWeight: 800 }}>
-          {driver.name.split(' ').map(n => n[0]).join('')}
-        </div>
+        <Avatar
+          name={driver.name}
+          size="lg"
+          status={driver.status === 'Available' ? 'online' : driver.status === 'On Trip' ? 'busy' : 'offline'}
+        />
         <div>
           <div style={{ fontWeight: 800, fontSize: 18, color: 'var(--text-high)' }}>{driver.name}</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
             {[...Array(5)].map((_, i) => (
-              <Star key={i} size={12} fill={i < Math.floor(driver.rating) ? 'var(--brand)' : 'none'} color={i < Math.floor(driver.rating) ? 'var(--brand)' : 'var(--border-mid)'} />
+              <Star key={i} size={12} fill={i < Math.floor(driver.rating) ? '#D97706' : 'none'} color={i < Math.floor(driver.rating) ? '#D97706' : 'var(--border-mid)'} />
             ))}
             <span style={{ fontSize: 12, color: 'var(--text-low)', marginLeft: 4 }}>{driver.rating} Rating</span>
           </div>
         </div>
-        <span className={`badge ${STATUS_COLOR[driver.status] || 'badge-gray'}`} style={{ marginLeft: 'auto' }}>{driver.status}</span>
+        <BadgeWithDot
+          color={driver.status === 'Available' ? 'success' : driver.status === 'On Trip' ? 'brand' : 'gray'}
+          pulse={driver.status === 'On Trip'}
+          size="md"
+          style={{ marginLeft: 'auto' }}
+        >
+          {driver.status}
+        </BadgeWithDot>
       </div>
 
       {/* Document verification badge */}
-      <div style={{
-        padding: '10px 14px',
-        background: driver.documentVerified ? 'rgba(45,138,78,0.15)' : 'rgba(239,68,68,0.15)',
-        border: `1px solid ${driver.documentVerified ? 'rgba(45,138,78,0.4)' : 'rgba(239,68,68,0.4)'}`,
-        borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {driver.documentVerified ? <ShieldCheck size={16} color="var(--brand)" /> : <ShieldAlert size={16} color="var(--brand-dark)" />}
-          <span style={{ fontSize: 12.5, fontWeight: 700, color: driver.documentVerified ? 'var(--brand)' : 'var(--text-low)' }}>
-            {driver.documentVerified ? 'DOCUMENT VERIFIED' : 'VERIFICATION PENDING'}
-          </span>
-        </div>
-        <span style={{ fontSize: 11, color: 'var(--text-low)' }}>RTO Verified</span>
+      <div style={{ marginBottom: 16 }}>
+        <BadgeGroup
+          addonText={driver.documentVerified ? 'VERIFIED' : 'PENDING'}
+          color={driver.documentVerified ? 'success' : 'warning'}
+          size="md"
+        >
+          {driver.documentVerified ? 'RTO commercial credentials active & compliant' : 'Commercial license renewal documentation required'}
+        </BadgeGroup>
       </div>
 
       {/* Credentials */}
@@ -77,7 +78,7 @@ export default function DriverDossier({ driver, assignedVehicle, onChat, onReass
         <FileUpload
           label="Update Commercial License or Medical Certificate"
           description="Upload scanned DL or fitness cert to update RTO verification"
-          onFileSelect={(f) => console.log('Uploaded driver document:', f.name)}
+          onFileSelect={() => {/* TODO: wire to /api/drivers/[id]/documents upload endpoint */}}
         />
       </div>
 
@@ -88,7 +89,7 @@ export default function DriverDossier({ driver, assignedVehicle, onChat, onReass
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <div className="mono" style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-high)' }}>{assignedVehicle.vehicleNo}</div>
-              <div style={{ fontSize: 11.5, color: 'var(--text-low)', marginTop: 2 }}>{assignedVehicle.type} · {assignedVehicle.capacity.toLocaleString()} kg</div>
+              <div style={{ fontSize: 11.5, color: 'var(--text-low)', marginTop: 2 }}>{assignedVehicle.type} · {(assignedVehicle.capacity ?? 0).toLocaleString()} kg</div>
             </div>
             <button className="btn btn-secondary btn-sm" onClick={onReassign}><RotateCcw size={12} /> Reassign Vehicle</button>
           </div>

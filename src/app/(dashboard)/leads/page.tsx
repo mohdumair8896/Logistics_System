@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { useStore } from '@/lib/store';
+import { useLeads } from '@/features/leads/hooks';
 import {
   Search, Truck, CheckCircle,
   Sparkles
@@ -8,12 +8,14 @@ import {
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { AlertBanner } from '@/components/ui/AlertBanner';
+import { Avatar } from '@/components/ui/Avatar';
+import { BadgeWithDot } from '@/components/ui/BadgeWithDot';
 
 export default function LeadsCRMPage() {
-  const { leads, updateLeadStatus, convertLeadToOrder } = useStore();
+  const { leads, updateLeadStatus, convertLeadToOrder, loading } = useLeads();
   const [activeTab, setActiveTab] = useState<'All' | 'New' | 'Allocated' | 'Contacted' | 'Archived'>('All');
   const [search, setSearch] = useState('');
-  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(leads[0]?.id || null);
+  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const router = useRouter();
 
   const filteredLeads = leads.filter(l => {
@@ -33,8 +35,8 @@ export default function LeadsCRMPage() {
   const newLeadsCount = leads.filter(l => l.status === 'New').length;
   const allocatedCount = leads.filter(l => l.status === 'Allocated').length;
 
-  const handleConvertLead = (leadId: string) => {
-    const orderId = convertLeadToOrder(leadId);
+  const handleConvertLead = async (leadId: string) => {
+    const orderId = await convertLeadToOrder(leadId);
     toast.success('Lead Dispatched to Active Fleet', {
       description: `Shipment order ${orderId} created from inbound lead. Ready for vehicle allocation.`
     });
@@ -43,15 +45,9 @@ export default function LeadsCRMPage() {
     }, 1200);
   };
 
-  const statusColor: Record<string, string> = {
-    'New': 'badge-yellow',
-    'Allocated': 'badge-green',
-    'Contacted': 'badge-blue',
-    'Archived': 'badge-gray'
-  };
-
   return (
     <div className="animate-slide-in">
+      {loading && <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-low)' }}>Loading leads from database...</div>}
       {/* Page Header */}
       <div className="page-header">
         <div>
@@ -96,7 +92,7 @@ export default function LeadsCRMPage() {
               Pipeline Freight Value
             </div>
             <div className="mono" style={{ fontSize: 26, fontWeight: 800, color: 'var(--brand)', marginTop: 4 }}>
-              ?{totalPipelineValue.toLocaleString()}
+              ₹{totalPipelineValue.toLocaleString()}
             </div>
             <div style={{ fontSize: 11, color: 'var(--text-low)', marginTop: 2 }}>Spot tariff estimates</div>
           </div>
@@ -107,7 +103,7 @@ export default function LeadsCRMPage() {
             <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase' }}>
               Dispatched & Allocated
             </div>
-            <div className="mono" style={{ fontSize: 26, fontWeight: 800, color: 'var(--cyan)', marginTop: 4 }}>
+            <div className="mono" style={{ fontSize: 26, fontWeight: 800, color: 'var(--brand)', marginTop: 4 }}>
               {allocatedCount}
             </div>
             <div style={{ fontSize: 11, color: 'var(--text-low)', marginTop: 2 }}>Active corridor dispatches</div>
@@ -119,7 +115,7 @@ export default function LeadsCRMPage() {
             <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase' }}>
               Conversion Rate
             </div>
-            <div className="mono" style={{ fontSize: 26, fontWeight: 800, color: '#F59E0B', marginTop: 4 }}>
+            <div className="mono" style={{ fontSize: 26, fontWeight: 800, color: 'var(--text-high)', marginTop: 4 }}>
               {leads.length > 0 ? Math.round((allocatedCount / leads.length) * 100) : 0}%
             </div>
             <div style={{ fontSize: 11, color: 'var(--brand)', marginTop: 2 }}>Autonomous chat triage</div>
@@ -154,11 +150,9 @@ export default function LeadsCRMPage() {
               ))}
             </div>
 
-            <div style={{ position: 'relative', width: 170 }}>
-              <Search size={13} color="var(--text-low)" style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)' }} />
+            <div className="input-group input-group-sm" style={{ width: 190 }}>
+              <Search size={13} />
               <input
-                className="form-input"
-                style={{ paddingLeft: 26, fontSize: 11.5, padding: '5px 8px 5px 26px' }}
                 placeholder="Search leads..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
@@ -192,17 +186,20 @@ export default function LeadsCRMPage() {
                       <tr
                         key={lead.id}
                         onClick={() => setSelectedLeadId(lead.id)}
-                        style={{ background: isSelected ? 'rgba(245,158,11,0.1)' : '' }}
+                        style={{ background: isSelected ? 'var(--brand-10, rgba(0,87,255,0.08))' : '' }}
                       >
                         <td>
-                          <div>
-                            <div style={{ fontWeight: 700, color: 'var(--text-high)' }}>{lead.shipperName}</div>
-                            <div style={{ fontSize: 11, color: 'var(--text-low)' }}>{lead.companyName}</div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <Avatar name={lead.shipperName} size="xs" />
+                            <div>
+                              <div style={{ fontWeight: 700, color: 'var(--text-high)' }}>{lead.shipperName}</div>
+                              <div style={{ fontSize: 11, color: 'var(--text-low)' }}>{lead.companyName}</div>
+                            </div>
                           </div>
                         </td>
                         <td>
                           <div style={{ fontSize: 11.5 }}>
-                            {lead.originHub.split(' ')[0]} ? {lead.destinationHub.split(' ')[0]}
+                            {lead.originHub.split(' ')[0]} → {lead.destinationHub.split(' ')[0]}
                           </div>
                           <span style={{ fontSize: 10, color: 'var(--text-low)' }}>{lead.cargoType}</span>
                         </td>
@@ -211,11 +208,21 @@ export default function LeadsCRMPage() {
                         </td>
                         <td>
                           <span className="mono" style={{ fontSize: 12, color: 'var(--brand)', fontWeight: 700 }}>
-                            ?{lead.freightQuote.toLocaleString()}
+                            ₹{lead.freightQuote.toLocaleString()}
                           </span>
                         </td>
                         <td>
-                          <span className={`badge ${statusColor[lead.status] || 'badge-gray'}`}>{lead.status}</span>
+                          <BadgeWithDot
+                            color={
+                              lead.status === 'New' ? 'warning' :
+                              lead.status === 'Allocated' ? 'success' :
+                              lead.status === 'Contacted' ? 'brand' : 'gray'
+                            }
+                            pulse={lead.status === 'New'}
+                            size="sm"
+                          >
+                            {lead.status}
+                          </BadgeWithDot>
                         </td>
                       </tr>
                     );
@@ -231,17 +238,28 @@ export default function LeadsCRMPage() {
           {selectedLead ? (
             <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid var(--border)', paddingBottom: 12 }}>
-                <div>
-                  <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-high)' }}>
-                    {selectedLead.shipperName}
-                  </div>
-                  <div style={{ fontSize: 12, color: 'var(--text-low)' }}>
-                    {selectedLead.companyName} � Reference: <span className="mono">{selectedLead.id}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <Avatar name={selectedLead.shipperName} size="lg" />
+                  <div>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-high)' }}>
+                      {selectedLead.shipperName}
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--text-low)' }}>
+                      {selectedLead.companyName} · Reference: <span className="mono">{selectedLead.id}</span>
+                    </div>
                   </div>
                 </div>
-                <span className={`badge ${statusColor[selectedLead.status] || 'badge-gray'}`}>
+                <BadgeWithDot
+                  color={
+                    selectedLead.status === 'New' ? 'warning' :
+                    selectedLead.status === 'Allocated' ? 'success' :
+                    selectedLead.status === 'Contacted' ? 'brand' : 'gray'
+                  }
+                  pulse={selectedLead.status === 'New'}
+                  size="sm"
+                >
                   {selectedLead.status}
-                </span>
+                </BadgeWithDot>
               </div>
 
               {/* Contact Credentials */}
@@ -276,7 +294,7 @@ export default function LeadsCRMPage() {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border)', paddingTop: 6 }}>
                   <span style={{ color: 'var(--text-low)' }}>Estimated Tariff Quote:</span>
-                  <span className="mono" style={{ fontWeight: 800, color: 'var(--brand)' }}>?{selectedLead.freightQuote.toLocaleString()}</span>
+                  <span className="mono" style={{ fontWeight: 800, color: 'var(--brand)' }}>₹{selectedLead.freightQuote.toLocaleString()}</span>
                 </div>
               </div>
 
@@ -287,14 +305,14 @@ export default function LeadsCRMPage() {
                     Conversation Transcript Snippet
                   </div>
                   <div style={{
-                    padding: '10px 12px',
+                    padding: '12px 14px',
                     borderRadius: 8,
-                    background: '#141210',
-                    border: '1px solid var(--border)',
-                    fontSize: 11.5,
-                    color: '#D6D3D1',
+                    background: 'var(--surface-2, #F3F2EF)',
+                    border: '1px solid var(--border, #E6E4DF)',
+                    fontSize: 12,
+                    color: 'var(--text-mid, #525252)',
                     fontStyle: 'italic',
-                    lineHeight: 1.4
+                    lineHeight: 1.5
                   }}>
                     &quot;{selectedLead.transcriptSnippet}&quot;
                   </div>
@@ -307,17 +325,25 @@ export default function LeadsCRMPage() {
                   <button
                     onClick={() => handleConvertLead(selectedLead.id)}
                     className="btn btn-primary w-full"
-                    style={{ justifyContent: 'center', gap: 8, padding: '10px' }}
+                    style={{
+                      justifyContent: 'center',
+                      gap: 8,
+                      padding: '11px',
+                      background: 'linear-gradient(135deg, #0057FF, #0040CC)',
+                      boxShadow: '0 4px 14px rgba(0, 87, 255, 0.25)',
+                      borderRadius: 10,
+                      border: 'none',
+                    }}
                   >
-                    <Truck size={15} /> Approve & Dispatch to Fleet Allocation ?
+                    <Truck size={15} /> Approve & Dispatch to Fleet Allocation →
                   </button>
                 ) : (
                   <div style={{
-                    padding: '8px 12px',
-                    background: 'rgba(16,185,129,0.1)',
-                    border: '1px solid rgba(16,185,129,0.3)',
+                    padding: '10px 14px',
+                    background: 'rgba(22, 163, 74, 0.08)',
+                    border: '1px solid rgba(22, 163, 74, 0.25)',
                     borderRadius: 8,
-                    color: 'var(--brand)',
+                    color: '#16a34a',
                     fontSize: 12,
                     display: 'flex',
                     alignItems: 'center',

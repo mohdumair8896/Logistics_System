@@ -1,23 +1,44 @@
 'use client';
 import { useState } from 'react';
-import { useStore, KnowledgeBaseItem } from '@/lib/store';
+import { useKnowledgeBase, KnowledgeBaseItem, KBCategory } from '@/features/knowledge-base/hooks';
 import {
   BookOpen, Plus, Search, Trash2,
   Sparkles, X
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ModalPortal } from '@/components/ui/ModalPortal';
-import { AlertBanner } from '@/components/ui/AlertBanner';
+import { BadgeWithDot, BadgeColor } from '@/components/ui/BadgeWithDot';
+import { BadgeGroup } from '@/components/ui/BadgeGroup';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/Breadcrumb';
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from '@/components/ui/AlertDialog';
+import { Empty, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/Empty';
 
 export default function KnowledgeBasePage() {
-  const { knowledgeBase, addKnowledgeBaseItem, deleteKnowledgeBaseItem } = useStore();
+  const { items: knowledgeBase, addItem: addKnowledgeBaseItem, deleteItem: deleteKnowledgeBaseItem } = useKnowledgeBase();
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [search, setSearch] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
 
   const [form, setForm] = useState({
     title: '',
-    category: 'Hours & Operations' as KnowledgeBaseItem['category'],
+    category: 'Hours & Operations' as KBCategory,
     content: '',
     keywords: ''
   });
@@ -31,6 +52,23 @@ export default function KnowledgeBasePage() {
     'GST & Invoicing'
   ];
 
+  const getCategoryBadgeColor = (cat: string): BadgeColor => {
+    switch (cat) {
+      case 'Hours & Operations':
+        return 'brand';
+      case 'Lane Rates':
+        return 'success';
+      case 'Cold-Chain SLA':
+        return 'warning';
+      case 'Safety & HAZMAT':
+        return 'error';
+      case 'GST & Invoicing':
+        return 'neutral';
+      default:
+        return 'gray';
+    }
+  };
+
   const filteredItems = knowledgeBase.filter(item => {
     const matchesCat = activeCategory === 'All' || item.category === activeCategory;
     const matchesSearch = !search ||
@@ -40,7 +78,7 @@ export default function KnowledgeBasePage() {
     return matchesCat && matchesSearch;
   });
 
-  const handleAdd = (e: React.FormEvent) => {
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title.trim() || !form.content.trim()) return;
 
@@ -49,7 +87,7 @@ export default function KnowledgeBasePage() {
       .map(k => k.trim())
       .filter(Boolean);
 
-    addKnowledgeBaseItem({
+    await addKnowledgeBaseItem({
       title: form.title,
       category: form.category,
       content: form.content,
@@ -64,13 +102,31 @@ export default function KnowledgeBasePage() {
     setForm({ title: '', category: 'Hours & Operations', content: '', keywords: '' });
   };
 
-  const handleDelete = (id: string, title: string) => {
-    deleteKnowledgeBaseItem(id);
+  const handleDelete = async (id: string, title: string) => {
+    await deleteKnowledgeBaseItem(id);
     toast.info('Article Removed', { description: `Deleted "${title}" from knowledge base.` });
   };
 
   return (
     <div className="animate-slide-in">
+      <div className="mb-4">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">Dashboard</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/knowledge-base">Tools &amp; Policy</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Knowledge Base</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
+
       {/* Page Header */}
       <div className="page-header">
         <div>
@@ -80,6 +136,15 @@ export default function KnowledgeBasePage() {
           </div>
           <div className="page-subtitle">
             Configure freight tariffs, hub operating guidelines & cold-chain SOPs queryable by LogiFlow
+          </div>
+          <div style={{ marginTop: 8 }}>
+            <BadgeGroup
+              addonText="Policy Index"
+              color="brand"
+              size="sm"
+            >
+              {filteredItems.length} active documents indexed for dispatch reasoning
+            </BadgeGroup>
           </div>
         </div>
         <button
@@ -115,11 +180,9 @@ export default function KnowledgeBasePage() {
             ))}
           </div>
 
-          <div style={{ position: 'relative', width: 220 }}>
-            <Search size={13} color="var(--text-low)" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)' }} />
+          <div className="input-group input-group-sm" style={{ width: 240 }}>
+            <Search size={13} />
             <input
-              className="form-input"
-              style={{ paddingLeft: 28, fontSize: 12 }}
               placeholder="Search knowledge base..."
               value={search}
               onChange={e => setSearch(e.target.value)}
@@ -134,77 +197,111 @@ export default function KnowledgeBasePage() {
         gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
         gap: 16
       }}>
-        {filteredItems.map(item => (
-          <div
-            key={item.id}
-            className="card"
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              gap: 12,
-              border: '1px solid var(--border)'
-            }}
-          >
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                <span className="badge badge-yellow" style={{ fontSize: 10.5 }}>
-                  {item.category}
-                </span>
-                <span className="mono" style={{ fontSize: 10.5, color: 'var(--text-low)' }}>
-                  {item.id}
-                </span>
-              </div>
-
-              <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-high)', marginBottom: 8, lineHeight: 1.3 }}>
-                {item.title}
-              </div>
-
-              <p style={{ fontSize: 12, color: 'var(--text-mid)', lineHeight: 1.5, marginBottom: 12 }}>
-                {item.content}
-              </p>
-            </div>
-
-            <div>
-              {/* Keywords chips */}
-              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 12 }}>
-                {item.keywords.map(kw => (
-                  <span
-                    key={kw}
-                    style={{
-                      fontSize: 10,
-                      padding: '2px 6px',
-                      borderRadius: 4,
-                      background: 'var(--surface-2)',
-                      color: 'var(--text-low)'
-                    }}
-                  >
-                    #{kw}
-                  </span>
-                ))}
-              </div>
-
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                borderTop: '1px solid var(--border)',
-                paddingTop: 8,
-                fontSize: 11,
-                color: 'var(--text-low)'
-              }}>
-                <span>Updated: {item.lastUpdated}</span>
-                <button
-                  onClick={() => handleDelete(item.id, item.title)}
-                  style={{ background: 'none', border: 'none', color: 'var(--brand-dark)', cursor: 'pointer', padding: 2 }}
-                  title="Remove document"
-                >
-                  <Trash2 size={13} />
-                </button>
-              </div>
-            </div>
+        {filteredItems.length === 0 ? (
+          <div className="card" style={{ gridColumn: '1 / -1', padding: '40px 16px', textAlign: 'center' }}>
+            <Empty>
+              <EmptyMedia>
+                <BookOpen size={36} color="var(--text-low)" />
+              </EmptyMedia>
+              <EmptyTitle>No policy documents found</EmptyTitle>
+              <EmptyDescription>
+                {search ? `No articles matching "${search}". Try searching for tariffs, cold-chain, or SLA terms.` : 'No documents indexed in this policy category.'}
+              </EmptyDescription>
+            </Empty>
           </div>
-        ))}
+        ) : (
+          filteredItems.map(item => (
+            <div
+              key={item.id}
+              className="card"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                gap: 12,
+                border: '1px solid var(--border)'
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <BadgeWithDot size="sm" color={getCategoryBadgeColor(item.category)}>
+                    {item.category}
+                  </BadgeWithDot>
+                  <span className="mono" style={{ fontSize: 10.5, color: 'var(--text-low)' }}>
+                    {item.id}
+                  </span>
+                </div>
+
+                <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-high)', marginBottom: 8, lineHeight: 1.3 }}>
+                  {item.title}
+                </div>
+
+                <p style={{ fontSize: 12, color: 'var(--text-mid)', lineHeight: 1.5, marginBottom: 12 }}>
+                  {item.content}
+                </p>
+              </div>
+
+              <div>
+                {/* Keywords chips */}
+                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 12 }}>
+                  {item.keywords.map(kw => (
+                    <span
+                      key={kw}
+                      style={{
+                        fontSize: 10,
+                        padding: '2px 6px',
+                        borderRadius: 4,
+                        background: 'var(--surface-2)',
+                        color: 'var(--text-low)'
+                      }}
+                    >
+                      #{kw}
+                    </span>
+                  ))}
+                </div>
+
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  borderTop: '1px solid var(--border)',
+                  paddingTop: 8,
+                  fontSize: 11,
+                  color: 'var(--text-low)'
+                }}>
+                  <span>Updated: {item.lastUpdated}</span>
+                  <AlertDialog>
+                    <AlertDialogTrigger render={
+                      <button
+                        style={{ background: 'none', border: 'none', color: 'var(--status-error, #DC2626)', cursor: 'pointer', padding: 2 }}
+                        title="Remove document"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    } />
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Policy Document?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete &ldquo;{item.title}&rdquo;? This will permanently remove it from the LogiFlow RAG indexing repository.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          variant="destructive"
+                          onClick={() => handleDelete(item.id, item.title)}
+                        >
+                          Delete Document
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       {/* Add Document Modal */}
@@ -216,7 +313,7 @@ export default function KnowledgeBasePage() {
                 <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Sparkles size={16} color="var(--brand)" /> Add Knowledge Document
                 </span>
-                <button onClick={() => setShowAddModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text-low)', cursor: 'pointer' }}>
+                <button type="button" onClick={() => setShowAddModal(false)} className="modal-close-btn" aria-label="Close modal">
                   <X size={18} />
                 </button>
               </div>

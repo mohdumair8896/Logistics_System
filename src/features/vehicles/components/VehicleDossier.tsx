@@ -4,8 +4,9 @@
 // To change the vehicle detail UI → edit ONLY this file.
 
 import { Truck, Fuel, Gauge, Wrench, Package, ShieldCheck, MessageSquare, Phone } from 'lucide-react';
-import { getStatusBadgeClass } from '@/lib/formatters';
 import { LabeledProgress } from '@/components/ui/LabeledProgress';
+import { Avatar } from '@/components/ui/Avatar';
+import { BadgeWithDot } from '@/components/ui/BadgeWithDot';
 import type { Vehicle } from '../types';
 import type { Driver } from '@/features/drivers/types';
 
@@ -21,7 +22,7 @@ export default function VehicleDossier({ vehicle, assignedDriver, onChatDriver }
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 46, height: 46, background: 'linear-gradient(135deg, #2a5c9a, #1a2b3c)', border: '1px solid rgba(59,130,246,0.3)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 46, height: 46, background: 'var(--brand-10, rgba(0,87,255,0.08))', border: '1px solid var(--brand-20, rgba(0,87,255,0.18))', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Truck size={24} color="var(--brand)" />
           </div>
           <div>
@@ -29,7 +30,16 @@ export default function VehicleDossier({ vehicle, assignedDriver, onChatDriver }
             <div style={{ fontSize: 12, color: 'var(--text-low)', marginTop: 1 }}>{vehicle.type} · {vehicle.id}</div>
           </div>
         </div>
-        <span className={`badge ${getStatusBadgeClass(vehicle.status)}`} style={{ fontSize: 12 }}>{vehicle.status}</span>
+        <BadgeWithDot
+          color={
+            vehicle.status === 'Available' ? 'success' :
+            vehicle.status === 'In Transit' ? 'brand' : 'error'
+          }
+          size="md"
+          pulse={vehicle.status === 'In Transit'}
+        >
+          {vehicle.status}
+        </BadgeWithDot>
       </div>
 
       {/* Fuel & Odometer gauges */}
@@ -53,9 +63,9 @@ export default function VehicleDossier({ vehicle, assignedDriver, onChatDriver }
       {/* Specs */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12.5, marginBottom: 16 }}>
         {[
-          ['Rated Payload Capacity', `${vehicle.capacity.toLocaleString()} kg`, true],
-          ['Current Assigned Load', `${vehicle.currentLoad.toLocaleString()} kg`, true],
-          ['Stationed Hub Location', vehicle.location, false],
+          ['Rated Payload Capacity', `${(vehicle.capacity ?? 0).toLocaleString()} kg`, true],
+          ['Current Assigned Load', `${(vehicle.currentLoad ?? 0).toLocaleString()} kg`, true],
+          ['Stationed Hub Location', vehicle.location || 'Central Depot', false],
           ['Last Service Inspection', vehicle.lastService || '2026-08-15', false],
         ].map(([label, value, mono], i, arr) => (
           <div key={label as string} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none', paddingBottom: i < arr.length - 1 ? 6 : 0 }}>
@@ -68,10 +78,10 @@ export default function VehicleDossier({ vehicle, assignedDriver, onChatDriver }
       {/* Load bar */}
       <div style={{ marginBottom: 16 }}>
         <LabeledProgress
-          progress={Math.round((vehicle.currentLoad / vehicle.capacity) * 100)}
+          progress={vehicle.capacity > 0 ? Math.round(((vehicle.currentLoad ?? 0) / vehicle.capacity) * 100) : 0}
           labels={[
-            `Capacity: ${vehicle.currentLoad.toLocaleString()} / ${vehicle.capacity.toLocaleString()} kg`,
-            `${Math.round((vehicle.currentLoad / vehicle.capacity) * 100)}% utilized`,
+            `Capacity: ${(vehicle.currentLoad ?? 0).toLocaleString()} / ${(vehicle.capacity ?? 0).toLocaleString()} kg`,
+            `${vehicle.capacity > 0 ? Math.round(((vehicle.currentLoad ?? 0) / vehicle.capacity) * 100) : 0}% utilized`,
           ]}
           height={8}
           intervalMs={3000}
@@ -86,9 +96,14 @@ export default function VehicleDossier({ vehicle, assignedDriver, onChatDriver }
         {assignedDriver ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 34, height: 34, background: 'linear-gradient(135deg, #2a5c9a, var(--brand))', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 800, fontSize: 12 }}>
-                {assignedDriver.name.split(' ').map(n => n[0]).join('')}
-              </div>
+              <Avatar
+                name={assignedDriver.name}
+                size="md"
+                status={
+                  assignedDriver.status === 'Available' ? 'online' :
+                  assignedDriver.status === 'On Trip' ? 'busy' : 'offline'
+                }
+              />
               <div>
                 <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-high)' }}>{assignedDriver.name}</div>
                 <div style={{ fontSize: 11, color: 'var(--text-low)' }}>{assignedDriver.phone}</div>

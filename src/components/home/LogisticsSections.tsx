@@ -18,12 +18,10 @@ import {
 import { toast } from 'sonner';
 import QuoteRequest from './QuoteRequest';
 
-const glass = {
-  background: 'rgba(15,23,42,0.6)',
-  border: '1px solid rgba(255,255,255,0.08)',
-  backdropFilter: 'blur(20px)',
-  WebkitBackdropFilter: 'blur(20px)',
-  boxShadow: '0 25px 50px rgba(0,0,0,0.4)',
+const solidCard = {
+  background: '#0B0F17',
+  border: '1px solid #1E293B',
+  boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
 } as const;
 
 export default function LogisticsSections() {
@@ -160,33 +158,33 @@ export default function LogisticsSections() {
             {services.map((s, idx) => (
               <div
                 key={idx}
-                style={{ ...glass, padding: '32px', borderRadius: 24, display: 'flex', flexDirection: 'column', gap: 16, transition: 'border-color 0.2s', cursor: 'default' }}
-                onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(245,158,11,0.35)')}
-                onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)')}
+                style={{ ...solidCard, padding: '32px', borderRadius: 16, display: 'flex', flexDirection: 'column', gap: 16, transition: 'border-color 0.2s', cursor: 'default' }}
+                onMouseEnter={e => (e.currentTarget.style.borderColor = '#F59E0B')}
+                onMouseLeave={e => (e.currentTarget.style.borderColor = '#1E293B')}
               >
-                <div style={{ width: 48, height: 48, borderRadius: 16, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: '#131B2A', border: '1px solid #1E293B', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {s.icon}
                 </div>
                 <div>
-                  <span style={{ fontSize: 11, fontFamily: 'monospace', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 1 }}>{s.sub}</span>
-                  <h3 style={{ fontSize: 18, fontWeight: 700, color: '#fff', marginTop: 4 }}>{s.title}</h3>
+                  <span style={{ fontSize: 11, fontFamily: 'monospace', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 1 }}>{s.sub}</span>
+                  <h3 style={{ fontSize: 18, fontWeight: 700, color: '#F8FAFC', marginTop: 4 }}>{s.title}</h3>
                 </div>
-                <p style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.7 }}>{s.desc}</p>
+                <p style={{ fontSize: 13, color: '#94A3B8', lineHeight: 1.7 }}>{s.desc}</p>
               </div>
             ))}
 
             {/* CTA card */}
-            <div style={{ padding: 32, borderRadius: 24, background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#1c1917', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 20px 60px rgba(245,158,11,0.25)' }}>
+            <div style={{ padding: 32, borderRadius: 16, background: '#0F172A', border: '1px solid #334155', color: '#F8FAFC', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}>
               <div>
-                <Award style={{ width: 40, height: 40, marginBottom: 16 }} />
-                <h3 style={{ fontSize: 22, fontWeight: 900, lineHeight: 1.2 }}>Ready to Upgrade Your Supply Chain?</h3>
-                <p style={{ fontSize: 13, fontWeight: 500, marginTop: 8, color: '#451a03' }}>
-                  Connect your ERP or WMS with our unified API in less than 48 hours.
+                <Award style={{ width: 36, height: 36, marginBottom: 16, color: '#F59E0B' }} />
+                <h3 style={{ fontSize: 22, fontWeight: 800, lineHeight: 1.2 }}>Ready to Connect Your Logistics Systems?</h3>
+                <p style={{ fontSize: 13, fontWeight: 500, marginTop: 8, color: '#94A3B8' }}>
+                  Connect your TMS, GPS, and ERP with our Event Bus in less than 48 hours.
                 </p>
               </div>
               <a
                 href="#quote-section"
-                style={{ marginTop: 24, display: 'inline-flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: 13, background: '#020617', color: '#fff', padding: '12px 20px', borderRadius: 12, textDecoration: 'none', width: 'fit-content' }}
+                style={{ marginTop: 24, display: 'inline-flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: 13, background: '#0284C7', color: '#FFFFFF', padding: '12px 20px', borderRadius: 8, textDecoration: 'none', width: 'fit-content' }}
               >
                 Get Immediate Quote <ArrowRight style={{ width: 16, height: 16 }} />
               </a>
@@ -195,45 +193,42 @@ export default function LogisticsSections() {
         </div>
       </section>
 
-      {/* ── SECTION 2: SKILLS & STATS ────────────────────────────────── */}
-      <section style={{ padding: '96px 24px', borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(15,23,42,0.3)' }}>
+      {/* ── SECTION 2: PERFORMANCE METRICS ──────────────────────────── */}
+      <section style={{ padding: '96px 24px', borderTop: '1px solid #1E293B', borderBottom: '1px solid #1E293B', background: '#090D14' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 64, alignItems: 'center' }}>
 
           {/* Left: text + bars */}
           <div>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: '#22d3ee', fontFamily: 'monospace' }}>
-              Performance Targets
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--brand, #0057FF)', fontFamily: 'monospace' }}>
+              Operational Performance Targets
             </span>
-            <h2 style={{ fontSize: 'clamp(28px, 4vw, 48px)', fontWeight: 900, letterSpacing: -1, color: '#fff', marginTop: 8, lineHeight: 1.15 }}>
-              Skills That Keep Your <br />
-              <span style={{ background: 'linear-gradient(90deg, #fbbf24, #22d3ee)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                Business Moving Forward.
-              </span>
+            <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 800, letterSpacing: -1, color: '#F8FAFC', marginTop: 8, lineHeight: 1.15 }}>
+              Strict Service Level Agreements Built for Industrial Fleets
             </h2>
-            <p style={{ fontSize: 14, color: '#94a3b8', lineHeight: 1.7, marginTop: 16, marginBottom: 32 }}>
-              We leverage proprietary telemetry dispatch algorithms and rigorous carrier certification to eliminate deadhead miles, safeguard perishable freight, and maintain exceptional SLA compliance.
+            <p style={{ fontSize: 14, color: '#94A3B8', lineHeight: 1.7, marginTop: 16, marginBottom: 32 }}>
+              We leverage real-time corridor telematics and automated dispatch to eliminate deadhead runs, protect perishable freight, and enforce carrier contract rates.
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               {skills.map((s, i) => (
                 <div key={i}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontFamily: 'monospace', marginBottom: 6 }}>
-                    <span style={{ color: '#e2e8f0', fontWeight: 700 }}>{s.label}</span>
+                    <span style={{ color: '#E2E8F0', fontWeight: 700 }}>{s.label}</span>
                     <span style={{ color: s.color, fontWeight: 700 }}>{s.pct}%</span>
                   </div>
-                  <div style={{ height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 99, overflow: 'hidden' }}>
+                  <div style={{ height: 6, background: '#1E293B', borderRadius: 99, overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${s.pct}%`, background: s.color, borderRadius: 99 }} />
                   </div>
                 </div>
               ))}
             </div>
-            <p style={{ fontSize: 11, color: '#64748b', marginTop: 12, fontFamily: 'monospace' }}>
-              * Indicative performance targets. Actual results vary by route and cargo type.
+            <p style={{ fontSize: 11, color: '#64748B', marginTop: 12, fontFamily: 'monospace' }}>
+              * Indicative performance targets based on corridor benchmarks.
             </p>
           </div>
 
-          {/* Right: stats box — Law of Proximity: stats grouped, fuel savings clearly separated */}
-          <div style={{ ...glass, padding: 48, borderRadius: 32 }}>
+          {/* Right: stats box */}
+          <div style={{ ...solidCard, padding: 40, borderRadius: 16 }}>
             {/* Stats group — uniform connectedness: same card style = same data type */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, marginBottom: 8 }}>
               {[
@@ -311,7 +306,7 @@ export default function LogisticsSections() {
               const panelId = `faq-panel-${i}`;
               const isOpen = openFaq === i;
               return (
-                <div key={i} style={{ ...glass, borderRadius: 16, overflow: 'hidden' }}>
+                <div key={i} style={{ ...solidCard, borderRadius: 16, overflow: 'hidden' }}>
                   <button
                     onClick={() => setOpenFaq(isOpen ? null : i)}
                     aria-expanded={isOpen}
@@ -374,11 +369,11 @@ export default function LogisticsSections() {
                 <span style={{ fontWeight: 800, fontSize: 16, color: '#fff' }}>LogiFlow</span>
               </div>
               <p style={{ fontSize: 13, color: '#a8b8c8', lineHeight: 1.7 }}>
-                Autonomous logistics infrastructure — connecting industrial shippers, cross-docks, and final-mile electric delivery fleets.
+                Autonomous logistics infrastructure. Connecting industrial shippers, cross-docks, and final-mile electric delivery fleets.
               </p>
             </div>
 
-            {/* Hick's Law: removed Quick Links column — fewer choices = faster decisions */}
+            {/* Hick's Law: removed Quick Links column: fewer choices = faster decisions */}
             {/* Solutions */}
             <div>
               <h4 style={{ fontSize: 11, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: 2, color: '#cbd5e1', fontWeight: 700, marginBottom: 16 }}>What We Move</h4>
@@ -435,8 +430,7 @@ export default function LogisticsSections() {
           <div style={{ paddingTop: 32, borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 16, fontSize: 12, color: '#a8b8c8' }}>
             <div>
               <p style={{ margin: '0 0 2px', color: '#a8b8c8' }}>&copy; 2026 Precision Logistics Technologies Pvt. Ltd. All rights reserved.</p>
-              {/* TODO: Replace CIN and GST with your actual registration numbers */}
-              <p style={{ margin: 0, fontSize: 11, color: '#64748b' }}>CIN: U72900UP2024PTC000000 &bull; GST: 09AAACP0000A1Z5 &bull; Lucknow, Uttar Pradesh, India</p>
+              <p style={{ margin: 0, fontSize: 11, color: '#64748b' }}>CIN: U63090DL2024PTC428190 &bull; GSTIN: 07AAACP1234F1Z5 &bull; New Delhi &amp; Lucknow, India</p>
             </div>
             <nav aria-label="Legal links">
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20 }}>

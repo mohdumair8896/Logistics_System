@@ -1,9 +1,18 @@
-// ─── Allocation Feature — Hooks ───────────────────────────────────────────────
-import { useStore } from '@/lib/store';
+// ─── Allocation Feature — Hooks (Real API) ────────────────────────────────────
+// Uses real DB data from API hooks instead of Zustand store.
+
+'use client';
+import { useOrders } from '@/features/orders/hooks';
+import { useCustomers } from '@/features/customers/hooks';
+import { useVehicles } from '@/features/vehicles/hooks';
+import { useDrivers } from '@/features/drivers/hooks';
 import type { EvaluatedVehicle } from './types';
 
 export function useAllocation(activeOrderId: string | null) {
-  const { orders, vehicles, drivers, customers, allocateVehicle } = useStore();
+  const { orders, allocateVehicle } = useOrders();
+  const { customers } = useCustomers();
+  const { vehicles } = useVehicles();
+  const { drivers } = useDrivers();
 
   const pendingOrders = orders.filter(o => o.status === 'Pending');
   const activeOrder = orders.find(o => o.id === (activeOrderId || pendingOrders[0]?.id)) ?? null;

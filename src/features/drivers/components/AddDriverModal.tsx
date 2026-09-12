@@ -7,14 +7,17 @@ import { useState } from 'react';
 import { X } from 'lucide-react';
 import { toast } from 'sonner';
 import { ModalPortal } from '@/components/ui/ModalPortal';
-import { useStore } from '@/lib/store';
+import { useDrivers } from '@/features/drivers/hooks';
+import { useVehicles } from '@/features/vehicles/hooks';
+
 
 interface Props {
   onClose: () => void;
 }
 
 export default function AddDriverModal({ onClose }: Props) {
-  const { addDriver, vehicles } = useStore();
+  const { addDriver } = useDrivers();
+  const { vehicles } = useVehicles();
   const [form, setForm] = useState({
     name: '', phone: '', licenseNo: '', licenseExpiry: '',
     vehicleId: null as string | null,
@@ -22,9 +25,9 @@ export default function AddDriverModal({ onClose }: Props) {
     trips: 0, rating: 4.8, documentVerified: true
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    addDriver({ ...form, phone: form.phone.replace(/\D/g, '') });
+    await addDriver({ ...form, phone: form.phone });
     toast.success('Driver Added', { description: `${form.name} has been added to the fleet roster.` });
     onClose();
   };
@@ -35,7 +38,9 @@ export default function AddDriverModal({ onClose }: Props) {
         <div className="modal" onClick={e => e.stopPropagation()}>
           <div className="modal-title">
             <span>Add Fleet Personnel &amp; Credentials</span>
-            <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-low)', cursor: 'pointer' }}><X size={20} /></button>
+            <button type="button" onClick={onClose} className="modal-close-btn" aria-label="Close modal">
+              <X size={18} />
+            </button>
           </div>
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div className="form-group">

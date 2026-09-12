@@ -11,44 +11,35 @@ export function formatINR(val: number): string {
   return `₹${Math.round(val).toLocaleString('en-IN')}`;
 }
 
-/** Formats weight into standard kg or metric tons */
-export function formatWeight(kg: number): string {
-  if (!kg) return '0 kg';
-  if (kg >= 1000) {
-    return `${(kg / 1000).toFixed(1)} T`;
-  }
-  return `${kg.toLocaleString('en-IN')} kg`;
-}
-
-/** Common status badge class mapping across all logistics entities */
-export const STATUS_BADGE_CLASSES: Record<string, string> = {
+/** Common status badge class mapping across all logistics entities (internal) */
+const STATUS_BADGE_CLASSES: Record<string, string> = {
   // Order & Trip statuses
-  'Pending':    'badge-yellow',
-  'Allocated':  'badge-blue',
-  'Staged':     'badge-purple',
+  'Pending': 'badge-yellow',
+  'Allocated': 'badge-blue',
+  'Staged': 'badge-purple',
   'In Transit': 'badge-blue',
-  'Delivered':  'badge-green',
-  'Cancelled':  'badge-gray',
-  'Delayed':    'badge-red',
+  'Delivered': 'badge-green',
+  'Cancelled': 'badge-gray',
+  'Delayed': 'badge-red',
 
   // Vehicle statuses
-  'Available':   'badge-green',
+  'Available': 'badge-green',
   'Maintenance': 'badge-yellow',
 
   // Driver statuses
-  'On Trip':  'badge-blue',
+  'On Trip': 'badge-blue',
   'Off Duty': 'badge-gray',
 
   // Lead statuses
-  'New':       'badge-yellow',
+  'New': 'badge-yellow',
   'Contacted': 'badge-blue',
-  'Archived':  'badge-gray',
+  'Archived': 'badge-gray',
 
   // Invoice statuses
-  'Paid':    'badge-green',
+  'Paid': 'badge-green',
   'Overdue': 'badge-red',
-  'Draft':   'badge-gray',
-  'Sent':    'badge-blue',
+  'Draft': 'badge-gray',
+  'Sent': 'badge-blue',
 };
 
 /** Returns the badge CSS class for a given status string */

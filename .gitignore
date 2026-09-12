@@ -41,6 +41,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# firecrawl cache
+# scratch testing
+/scratch/
 .firecrawl/
-

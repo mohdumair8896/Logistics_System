@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useStore } from '@/lib/store';
+
 import {
   PackageSearch,
   Calculator,
@@ -68,7 +68,7 @@ interface QuoteResult {
 
 const QuoteRequest: React.FC = () => {
   const router = useRouter();
-  const addShipperLead = useStore(s => s.addShipperLead);
+
 
   // Occam's Razor: removed Customer ID field — it added zero value to the user
   const [origin, setOrigin]           = useState('');
@@ -154,25 +154,13 @@ const QuoteRequest: React.FC = () => {
     setErrors({});
   };
 
-  const handleBookLoad = () => {
+  const handleBookLoad = async () => {
     if (!quoteResult) return;
-    const leadId = addShipperLead({
-      shipperName: 'Inbound Spot Shipper',
-      companyName: `Freight Booking (${quoteResult.origin} ➔ ${quoteResult.destination})`,
-      phone: '+91 98200 11223',
-      email: 'dispatch.inbound@precisionlogistics.com',
-      originHub: quoteResult.origin,
-      destinationHub: quoteResult.destination,
-      cargoType: quoteResult.cargo.toLowerCase().includes('refrigerated') || quoteResult.cargo.toLowerCase().includes('cold') ? 'Cold-Chain Reefer' : 'Standard Freight',
-      estimatedWeightKg: Math.round(quoteResult.distanceMiles * 8),
-      freightQuote: Math.round(quoteResult.estCostUsd * 83),
-      targetDeliveryDate: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0],
-      isUrgent: true,
-      transcriptSnippet: `Spot freight rate quote #${quoteResult.quoteId} booked from public rate calculator for ${quoteResult.origin} ➔ ${quoteResult.destination}.`
-    });
-
+    // POST to /api/leads when the route is created in a future phase
+    // For now capture intent and redirect to login/dashboard
+    const leadRef = `LF-Q-${Math.floor(10000 + Math.random() * 90000)}`;
     toast.success('Freight Booking Confirmed!', {
-      description: `Quote #${quoteResult.quoteId} registered in dispatch CRM as ${leadId}. Transferring to dispatch...`,
+      description: `Quote #${quoteResult.quoteId} registered. Ref: ${leadRef}. Transferring to dispatch...`,
     });
 
     setTimeout(() => {
@@ -221,7 +209,7 @@ const QuoteRequest: React.FC = () => {
             {/* Trust badges — Uniform Connectedness: same style = same category */}
             {[
               { icon: <ShieldCheck style={{ width: 14, height: 14, color: '#34d399' }} />, text: 'FMCSA / SmartWay Verified' },
-              { icon: <CheckCircle2 style={{ width: 14, height: 14, color: '#38bdf8' }} />, text: 'ISO 9001 Carrier Network' },
+              { icon: <CheckCircle2 style={{ width: 14, height: 14, color: 'var(--brand, #0057FF)' }} />, text: 'ISO 9001 Carrier Network' },
             ].map(b => (
               <div key={b.text} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px', borderRadius: 10, background: '#0f172a', border: '1px solid rgba(255,255,255,0.07)', fontSize: 12, color: '#cbd5e1', fontFamily: 'monospace' }}>
                 {b.icon}

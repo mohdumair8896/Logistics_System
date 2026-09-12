@@ -1,16 +1,18 @@
 'use client';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useStore } from '@/lib/store';
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
 import LogiFlowChatbot from '@/components/layout/LogiFlowChatbot';
-import { startLiveNotificationFeed, stopLiveNotificationFeed } from '@/lib/liveNotifications';
+
+
+import { getCurrentUser } from '@/lib/useCurrentUser';
 
 const emptySubscribe = () => () => {};
 
 const pageTitles: Record<string, { title: string; subtitle: string }> = {
   '/dashboard': { title: 'Fleet Operations Dashboard', subtitle: 'Live logistics intelligence & hub status' },
+  '/agent-ops': { title: 'AI Operations Command Center', subtitle: 'Autonomous Multi-Agent Workforce, Monday Brief & Operational Event Graph' },
   '/vehicles': { title: 'Fleet Roster & Telematics', subtitle: 'Master vehicle status, maintenance & live load' },
   '/drivers': { title: 'Driver Management & Credentials', subtitle: 'Personnel roster, licensing & verification' },
   '/orders': { title: 'Order Intake & Dispatch Queue', subtitle: 'Customer shipments and scheduling' },
@@ -27,10 +29,12 @@ const pageTitles: Record<string, { title: string; subtitle: string }> = {
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const isLoggedIn = useStore(s => s.isLoggedIn);
   const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null); // null = loading
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [prevPathname, setPrevPathname] = useState(pathname);
+
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // Close mobile drawer when route changes (React-idiomatic render-time state adjustment)
   if (prevPathname !== pathname) {
@@ -39,35 +43,67 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   useEffect(() => {
-    if (mounted && !isLoggedIn) router.replace('/login');
-  }, [isLoggedIn, router, mounted]);
+    // Load persisted collapse state
+    try {
+      const saved = localStorage.getItem('logiflow_sidebar_collapsed');
+      if (saved === 'true') setIsSidebarCollapsed(true);
+    } catch {}
 
-  // Start live operational notification feed while dashboard is active
-  useEffect(() => {
-    if (mounted && isLoggedIn) {
-      startLiveNotificationFeed(45000);
-    }
-    return () => {
-      stopLiveNotificationFeed();
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        setIsSidebarCollapsed((prev) => {
+          const next = !prev;
+          try {
+            localStorage.setItem('logiflow_sidebar_collapsed', String(next));
+          } catch {}
+          return next;
+        });
+      }
     };
-  }, [mounted, isLoggedIn]);
 
-  if (!mounted || !isLoggedIn) return null;
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const handleToggleSidebarCollapse = () => {
+    setIsSidebarCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('logiflow_sidebar_collapsed', String(next));
+      } catch {}
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    getCurrentUser()
+      .then(user => {
+        if (user) setIsLoggedIn(true);
+        else { setIsLoggedIn(false); router.replace('/login'); }
+      })
+      .catch(() => { setIsLoggedIn(false); router.replace('/login'); });
+  }, [router]);
+
+  if (!mounted || isLoggedIn === null) return null; // still checking session
+  if (!isLoggedIn) return null; // redirect already triggered
 
   const info = pageTitles[pathname] || { title: 'LogiFlow', subtitle: 'Logistics Management' };
 
   return (
-    <div className="app-layout">
+    <div className="app-layout" data-collapsed={isSidebarCollapsed}>
       {/* Mobile Drawer Backdrop */}
       <div
         className={`mobile-sidebar-backdrop ${isMobileSidebarOpen ? 'active' : ''}`}
         onClick={() => setIsMobileSidebarOpen(false)}
       />
 
-      {/* Sidebar with Drawer Support */}
+      {/* Sidebar with Drawer & Collapse Support */}
       <Sidebar
         isOpen={isMobileSidebarOpen}
         onClose={() => setIsMobileSidebarOpen(false)}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={handleToggleSidebarCollapse}
       />
 
       <div className="main-content">

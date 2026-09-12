@@ -1,8 +1,22 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
-import { useStore } from '@/lib/store';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { useDrivers } from '@/features/drivers/hooks';
+import { useVehicles } from '@/features/vehicles/hooks';
 import { X, Send, Phone, CheckCheck, Truck } from 'lucide-react';
 import { ModalPortal } from '@/components/ui/ModalPortal';
+import { DotSpinner } from '@/components/ui/DotSpinner';
+
+// ─── Real DB-backed driver chat ────────────────────────────────────────────────
+// Messages are stored in Neon PostgreSQL driver_messages table.
+// Phase 4: WhatsApp delivery will be added via Meta Cloud API webhook.
+// ❌ REMOVED: simulateDriverReply() — fake auto-reply simulation
+
+interface Message {
+  id?: string;
+  sender: 'driver' | 'dispatcher';
+  text: string;
+  time: string;
+}
 
 interface Props {
   driverId: string;
@@ -10,63 +24,79 @@ interface Props {
 }
 
 export default function DriverChatModal({ driverId, onClose }: Props) {
-  const { drivers, vehicles, messages, sendDriverMessage, receiveDriverReply } = useStore();
+  const { drivers } = useDrivers();
+  const { vehicles } = useVehicles();
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
-  const [driverTyping, setDriverTyping] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const driver = drivers.find(d => d.id === driverId);
   const vehicle = driver ? vehicles.find(v => v.id === driver.vehicleId) : null;
-  const conversation = messages[driverId] || [];
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [conversation.length, driverTyping]);
-
-  const simulateDriverReply = (sentText: string) => {
-    setDriverTyping(true);
-    setTimeout(() => {
-      setDriverTyping(false);
-      const lower = sentText.toLowerCase();
-      let reply = 'Message acknowledged Dispatch. Operating all systems within corridor parameters.';
-
-      if (lower.includes('location') || lower.includes('gps') || lower.includes('where')) {
-        reply = `Current GPS: Milestone 142 on NH-19 expressway corridor. Highway speed 62 km/h. Fuel at 82%.`;
-      } else if (lower.includes('arrival') || lower.includes('reach') || lower.includes('delivery')) {
-        reply = `Approaching receiver destination gate now. Standing by for e-POD and unloading verification.`;
-      } else if (lower.includes('speed') || lower.includes('slow') || lower.includes('limit')) {
-        reply = `Copy that Dispatch. Reducing speed to 55 km/h immediately. Road condition is slightly wet.`;
-      } else if (lower.includes('bay') || lower.includes('load') || lower.includes('warehouse')) {
-        reply = `Understood! Backing truck into designated staging bay right now.`;
+  // Load message history from DB
+  const fetchMessages = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/messages/${driverId}`);
+      if (res.ok) {
+        const data: Message[] = await res.json();
+        setMessages(data);
       }
+    } catch (err) {
+      console.error('[DriverChat] fetch error', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [driverId]);
 
-      receiveDriverReply(driverId, reply);
-    }, 1400);
-  };
+  useEffect(() => {
+    fetchMessages();
+    // Poll for new driver replies every 10 seconds
+    const interval = setInterval(fetchMessages, 10000);
+    return () => clearInterval(interval);
+  }, [fetchMessages]);
 
-  const handleSend = (e: React.FormEvent) => {
+  useEffect(() => { scrollToBottom(); }, [messages.length]);
+
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || sending) return;
     const text = input.trim();
-    sendDriverMessage(driverId, text);
     setInput('');
-    simulateDriverReply(text);
+    setSending(true);
+
+    // Optimistic UI update
+    const optimistic: Message = { sender: 'dispatcher', text, time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) };
+    setMessages(prev => [...prev, optimistic]);
+
+    try {
+      await fetch(`/api/messages/${driverId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, sender: 'dispatcher' }),
+      });
+      // Phase 4: WhatsApp message will be sent from the API route automatically
+    } catch (err) {
+      console.error('[DriverChat] send error', err);
+    } finally {
+      setSending(false);
+    }
   };
 
   const handleQuickReply = (qr: string) => {
-    sendDriverMessage(driverId, qr);
-    simulateDriverReply(qr);
+    setInput(qr);
   };
 
   const quickReplies = [
     'What is your current GPS location?',
     'Please confirm arrival at delivery point.',
     'Speed limit advisory: NH-19 corridor.',
-    'Warehouse Bay 4 is ready for loading.'
+    'Warehouse Bay 4 is ready for loading.',
   ];
 
   return (
@@ -76,7 +106,7 @@ export default function DriverChatModal({ driverId, onClose }: Props) {
         {/* Header */}
         <div style={{ background: 'var(--surface-2)', padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ width: 40, height: 40, background: 'linear-gradient(135deg, #2a5c9a, var(--brand))', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 800 }}>
+            <div style={{ width: 40, height: 40, background: 'linear-gradient(135deg, #0057FF, #0040CC)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 800, boxShadow: '0 2px 8px rgba(0,87,255,0.2)' }}>
               {driver?.name.split(' ').map(n => n[0]).join('') || 'D'}
             </div>
             <div>
@@ -99,35 +129,42 @@ export default function DriverChatModal({ driverId, onClose }: Props) {
               <Phone size={14} color="var(--icon)" />
             </a>
             <button
+              type="button"
               onClick={onClose}
               aria-label="Close chat"
-              style={{ background: 'none', border: 'none', color: 'var(--text-low)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8, minWidth: 40, minHeight: 40, borderRadius: 8 }}
+              className="modal-close-btn"
             >
-              <X size={20} />
+              <X size={18} />
             </button>
           </div>
         </div>
 
         {/* Message history */}
         <div style={{ height: 320, overflowY: 'auto', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12, background: 'var(--surface)' }}>
-          {conversation.length === 0 ? (
+          {loading ? (
+            <div style={{ textAlign: 'center', margin: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, color: 'var(--text-low)', fontSize: 12 }}>
+              <DotSpinner size={24} color="var(--brand)" />
+              <span>Syncing driver messages...</span>
+            </div>
+          ) : messages.length === 0 ? (
             <div style={{ textAlign: 'center', margin: 'auto', color: 'var(--text-low)', fontSize: 13 }}>
               No previous messages with {driver?.name}. Send a dispatch notice below.
             </div>
           ) : (
-            conversation.map((msg, i) => {
+            messages.map((msg, i) => {
               const isDispatcher = msg.sender === 'dispatcher';
               return (
-                <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: isDispatcher ? 'flex-end' : 'flex-start' }}>
+                <div key={msg.id ?? i} style={{ display: 'flex', flexDirection: 'column', alignItems: isDispatcher ? 'flex-end' : 'flex-start' }}>
                   <div style={{
                     maxWidth: '82%',
                     padding: '10px 14px',
                     borderRadius: 12,
                     borderBottomRightRadius: isDispatcher ? 2 : 12,
                     borderBottomLeftRadius: isDispatcher ? 12 : 2,
-                    background: isDispatcher ? 'linear-gradient(135deg, #2a5c9a, #1d4ed8)' : 'var(--surface-1)',
+                    background: isDispatcher ? 'linear-gradient(135deg, #0057FF, #0040CC)' : 'var(--surface-1)',
                     color: isDispatcher ? 'white' : 'var(--text-high)',
-                    border: isDispatcher ? '1px solid rgba(59,130,246,0.3)' : '1px solid var(--border)',
+                    border: isDispatcher ? 'none' : '1px solid var(--border)',
+                    boxShadow: isDispatcher ? '0 2px 8px rgba(0,87,255,0.2)' : '0 1px 3px rgba(0,0,0,0.04)',
                     fontSize: 13,
                     lineHeight: 1.4
                   }}>
@@ -141,15 +178,6 @@ export default function DriverChatModal({ driverId, onClose }: Props) {
               );
             })
           )}
-
-          {/* Typing Indicator */}
-          {driverTyping && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', background: 'var(--surface-1)', borderRadius: 10, width: 'fit-content', border: '1px solid var(--border)' }}>
-              <span style={{ fontSize: 11, color: 'var(--text-low)' }}>{driver?.name || 'Driver'} is typing...</span>
-              <div style={{ width: 10, height: 10, border: '2px solid var(--brand)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-            </div>
-          )}
-
           <div ref={messagesEndRef} />
         </div>
 
@@ -177,17 +205,18 @@ export default function DriverChatModal({ driverId, onClose }: Props) {
         </div>
 
         {/* Input */}
-        <form onSubmit={handleSend} style={{ padding: '12px 16px', background: 'var(--surface-1)', borderTop: '1px solid var(--border)', display: 'flex', gap: 8 }}>
-          <input
-            className="form-input"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            placeholder={`Message ${driver?.name || 'Driver'}...`}
-            style={{ borderRadius: 20 }}
-          />
-          <button type="submit" className="btn btn-primary" style={{ borderRadius: 20, padding: '8px 16px' }} disabled={!input.trim()}>
-            <Send size={14} />
-          </button>
+        <form onSubmit={handleSend} style={{ padding: '10px 16px', background: 'var(--surface-1)', borderTop: '1px solid var(--border)' }}>
+          <div className="input-group" style={{ height: 40, borderRadius: 20, padding: '0 6px 0 14px' }}>
+            <input
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              placeholder={`Message ${driver?.name || 'Driver'}...`}
+              style={{ fontSize: 13 }}
+            />
+            <button type="submit" className="btn btn-primary" style={{ borderRadius: 16, padding: '6px 14px', height: 30 }} disabled={!input.trim() || sending}>
+              <Send size={13} />
+            </button>
+          </div>
         </form>
       </div>
     </div>

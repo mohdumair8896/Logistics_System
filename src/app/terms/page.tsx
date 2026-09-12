@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { ArrowLeft, FileCheck, Scale, AlertTriangle, Truck, CheckCircle2, Shield } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -22,8 +22,8 @@ export default function TermsPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-      <div style={{ background: '#020617', color: '#e2e8f0', minHeight: '100vh', padding: '48px 24px' }}>
-      <div style={{ maxWidth: 880, margin: '0 auto' }}>
+      <div style={{ background: 'var(--surface, #F8F7F4)', color: 'var(--text-high, #141414)', minHeight: '100vh', padding: '48px 24px' }}>
+      <div style={{ maxWidth: 880, margin: '0 auto', background: 'var(--surface-1, #FFFFFF)', border: '1px solid var(--border, #E6E4DF)', borderRadius: 20, padding: '40px 48px', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
         
         {/* Navigation back */}
         <div style={{ marginBottom: 32 }}>
@@ -35,12 +35,12 @@ export default function TermsPage() {
               gap: 8,
               fontSize: 13,
               fontWeight: 600,
-              color: '#94a3b8',
+              color: 'var(--text-mid, #525252)',
               textDecoration: 'none',
               padding: '8px 16px',
               borderRadius: 10,
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.08)',
+              background: 'var(--surface-2, #F3F2EF)',
+              border: '1px solid var(--border, #E6E4DF)',
               transition: 'color 0.2s',
             }}
           >
@@ -50,33 +50,33 @@ export default function TermsPage() {
         </div>
 
         {/* Header */}
-        <div style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: 32, marginBottom: 40 }}>
+        <div style={{ borderBottom: '1px solid var(--border, #E6E4DF)', paddingBottom: 28, marginBottom: 36 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
             <div style={{
               width: 36, height: 36, borderRadius: 10,
-              background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)',
+              background: 'rgba(0, 87, 255, 0.08)', border: '1px solid rgba(0, 87, 255, 0.2)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <FileCheck style={{ width: 20, height: 20, color: '#fbbf24' }} />
+              <FileCheck style={{ width: 20, height: 20, color: 'var(--brand, #0057FF)' }} />
             </div>
-            <span style={{ fontSize: 12, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: 2, color: '#fbbf24', fontWeight: 700 }}>
+            <span style={{ fontSize: 12, fontFamily: 'var(--font-mono, monospace)', textTransform: 'uppercase', letterSpacing: 2, color: 'var(--brand, #0057FF)', fontWeight: 700 }}>
               Master Service Agreement
             </span>
           </div>
-          <h1 style={{ fontSize: 'clamp(32px, 4vw, 44px)', fontWeight: 900, letterSpacing: -1, color: '#fff', margin: '0 0 12px' }}>
+          <h1 style={{ fontSize: 'clamp(30px, 4vw, 40px)', fontWeight: 900, letterSpacing: -1, color: 'var(--text-high, #141414)', margin: '0 0 12px' }}>
             Terms and Conditions of Service
           </h1>
-          <p style={{ fontSize: 14, color: '#94a3b8', margin: 0 }}>
+          <p style={{ fontSize: 14, color: 'var(--text-mid, #525252)', margin: 0 }}>
             Effective Date: January 1, 2026 &bull; Version 4.2
           </p>
         </div>
 
         {/* Terms Body */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 36, lineHeight: 1.8, fontSize: 15, color: '#cbd5e1' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 36, lineHeight: 1.8, fontSize: 15, color: 'var(--text-mid, #525252)' }}>
           
           <section>
-            <h2 style={{ fontSize: 20, fontWeight: 700, color: '#fff', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
-              <Scale style={{ width: 18, height: 18, color: '#fbbf24' }} />
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-high, #141414)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <Scale style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
               1. Acceptance of Terms
             </h2>
             <p>
@@ -85,8 +85,8 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 style={{ fontSize: 20, fontWeight: 700, color: '#fff', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
-              <Truck style={{ width: 18, height: 18, color: '#fbbf24' }} />
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-high, #141414)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <Truck style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
               2. Logistics Services & Dispatch
             </h2>
             <p>
@@ -94,20 +94,20 @@ export default function TermsPage() {
             </p>
             <ul style={{ paddingLeft: 24, display: 'flex', flexDirection: 'column', gap: 8 }}>
               <li>
-                <strong>Manifest Accuracy:</strong> Shippers must provide strictly truthful cargo weight, volume, hazmat classification, and temperature constraints prior to pickup induction.
+                <strong style={{ color: 'var(--text-high, #141414)' }}>Manifest Accuracy:</strong> Shippers must provide strictly truthful cargo weight, volume, hazmat classification, and temperature constraints prior to pickup induction.
               </li>
               <li>
-                <strong>Autonomous Matching:</strong> Our algorithmic dispatch engine pairs loads with certified third-party haulers based on safety scores, geofence availability, and equipment qualifications.
+                <strong style={{ color: 'var(--text-high, #141414)' }}>Autonomous Matching:</strong> Our algorithmic dispatch engine pairs loads with certified third-party haulers based on safety scores, geofence availability, and equipment qualifications.
               </li>
               <li>
-                <strong>Proof of Delivery (POD):</strong> Digital signatures, geo-stamped receipts, and optical photos uploaded via the Driver Portal constitute conclusive proof of handover.
+                <strong style={{ color: 'var(--text-high, #141414)' }}>Proof of Delivery (POD):</strong> Digital signatures, geo-stamped receipts, and optical photos uploaded via the Driver Portal constitute conclusive proof of handover.
               </li>
             </ul>
           </section>
 
           <section>
-            <h2 style={{ fontSize: 20, fontWeight: 700, color: '#fff', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
-              <Shield style={{ width: 18, height: 18, color: '#fbbf24' }} />
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-high, #141414)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <Shield style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
               3. Carrier Liability & Cargo Insurance
             </h2>
             <p>
@@ -116,8 +116,8 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 style={{ fontSize: 20, fontWeight: 700, color: '#fff', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
-              <AlertTriangle style={{ width: 18, height: 18, color: '#fbbf24' }} />
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-high, #141414)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <AlertTriangle style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
               4. Service Availability & SLA
             </h2>
             <p>
@@ -126,8 +126,8 @@ export default function TermsPage() {
           </section>
 
           <section id="security">
-            <h2 style={{ fontSize: 20, fontWeight: 700, color: '#fff', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
-              <CheckCircle2 style={{ width: 18, height: 18, color: '#fbbf24' }} />
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-high, #141414)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <CheckCircle2 style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
               5. Security, Invoicing & Billing
             </h2>
             <p>
@@ -138,8 +138,8 @@ export default function TermsPage() {
         </div>
 
         {/* Footer */}
-        <div style={{ marginTop: 60, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.08)', textAlign: 'center', fontSize: 13, color: '#94a3b8' }}>
-          &copy; 2026 LogiFlow Technologies Inc. All rights reserved. &bull; <Link href="/privacy" style={{ color: '#fbbf24', textDecoration: 'none' }}>Privacy Policy</Link>
+        <div style={{ marginTop: 60, paddingTop: 24, borderTop: '1px solid var(--border, #E6E4DF)', textAlign: 'center', fontSize: 13, color: 'var(--text-mid, #525252)' }}>
+          &copy; 2026 LogiFlow Technologies Inc. All rights reserved. &bull; <Link href="/privacy" style={{ color: 'var(--brand, #0057FF)', textDecoration: 'none' }}>Privacy Policy</Link>
         </div>
 
       </div>

@@ -1,6 +1,11 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
-import { useStore } from '@/lib/store';
+import { useState, useEffect } from 'react';
+import { useTrips } from '@/features/trips/hooks';
+import { useVehicles } from '@/features/vehicles/hooks';
+import { useDrivers } from '@/features/drivers/hooks';
+import { useOrders } from '@/features/orders/hooks';
+import { useCustomers } from '@/features/customers/hooks';
+import { useInvoices } from '@/features/invoices/hooks';
 import { CheckCircle, ChevronLeft, ChevronRight, MapPin, Truck, Clock, Package } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -10,47 +15,45 @@ import TelemetryPanel from '@/components/tracking/TelemetryPanel';
 import { LabeledProgress } from '@/components/ui/LabeledProgress';
 import { ShipmentQR } from '@/components/ui/ShipmentQR';
 import { AvatarStack } from '@/components/ui/AvatarStack';
+import { CopyButton } from '@/components/ui/CopyButton';
+import { ShareButton } from '@/components/ui/ShareButton';
+import { DotSpinner } from '@/components/ui/DotSpinner';
 
 // Load Leaflet map client-side only (no SSR)
 const P44CorridorMap = dynamic(() => import('@/components/tracking/P44CorridorMap'), {
   ssr: false,
   loading: () => (
-    <div style={{ height: '100%', minHeight: 280, background: 'var(--surface-2)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ fontSize: 12, color: 'var(--text-low)' }}>Loading map…</div>
+    <div style={{ height: '100%', minHeight: 280, background: 'var(--surface-2)', borderRadius: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+      <DotSpinner size={30} color="var(--brand)" />
+      <div style={{ fontSize: 12, color: 'var(--text-low)', fontWeight: 500 }}>Syncing corridor telematics…</div>
     </div>
   ),
 });
 
+// ─── Real GPS polling interval ─────────────────────────────────────────────────
+// Polls /api/trips every 8 seconds to pick up GPS lat/lng sent by driver smartphone.
+const GPS_POLL_INTERVAL = 8000;
+
 export default function TrackingPage() {
-  const { trips, vehicles, drivers, orders, invoices, updateTrip, customers } = useStore();
+  const { trips, completeDelivery, refetch: refetchTrips } = useTrips();
+  const { vehicles } = useVehicles();
+  const { drivers } = useDrivers();
+  const { orders } = useOrders();
+  const { customers } = useCustomers();
+  const { invoices } = useInvoices();
+
   const [selectedTrip, setSelectedTrip] = useState<string | null>(null);
-  const [simulating, setSimulating] = useState(false);
   const [chatDriverId, setChatDriverId] = useState<string | null>(null);
   const router = useRouter();
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Poll for live GPS updates from driver phones
+  useEffect(() => {
+    const id = setInterval(refetchTrips, GPS_POLL_INTERVAL);
+    return () => clearInterval(id);
+  }, [refetchTrips]);
 
   const activeTrips = trips.filter(t => t.status === 'In Transit');
   const trip = trips.find(t => t.id === selectedTrip) || activeTrips[0] || null;
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, []);
-
-  // Ambient telemetry sync
-  useEffect(() => {
-    const currentTripId = trip?.id;
-    if (!currentTripId || trip?.status !== 'In Transit' || simulating) return;
-    const ambientTimer = setInterval(() => {
-      if (document.hidden) return;
-      const currentTrip = useStore.getState().trips.find(t => t.id === currentTripId);
-      if (!currentTrip || currentTrip.status !== 'In Transit') return;
-      const jitter = Math.floor(Math.random() * 5) - 2;
-      const newSpeed = Math.min(75, Math.max(58, (currentTrip.speedKmH || 64) + jitter));
-      updateTrip(currentTripId, { speedKmH: newSpeed });
-    }, 4500);
-    return () => clearInterval(ambientTimer);
-  }, [trip?.id, trip?.status, simulating, updateTrip]);
 
   // Derived data
   const vehicle  = trip ? vehicles.find(v => v.id === trip.vehicleId) ?? null : null;
@@ -70,46 +73,20 @@ export default function TrackingPage() {
   ];
   const displayCheckpoints = (trip?.checkpoints && trip.checkpoints.length > 0) ? trip.checkpoints : defaultCheckpoints;
 
-  // Simulation
-  const startSimulation = () => {
-    if (!trip || trip.progress >= 100) return;
-    setSimulating(true);
-    intervalRef.current = setInterval(() => {
-      const current = useStore.getState().trips.find(t => t.id === trip.id);
-      if (!current || current.progress >= 100) {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-        setSimulating(false);
-        return;
-      }
-      const newProgress = Math.min(100, current.progress + 10);
-      const remaining = trip.distance - Math.round((newProgress / 100) * trip.distance);
-      const etaMin = Math.round((remaining / trip.distance) * (trip.distance / 60 * 60));
-      const baseCheckpoints = (current.checkpoints && current.checkpoints.length > 0) ? current.checkpoints : defaultCheckpoints;
-      const totalCp = baseCheckpoints.length || 3;
-      const updatedCheckpoints = baseCheckpoints.map((cp, idx) => {
-        const threshold = (idx + 1) * (100 / totalCp);
-        const isPassed = Boolean(cp.passed || newProgress >= threshold - 10);
-        return { ...cp, passed: isPassed, time: isPassed ? (cp.time ?? new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })) : undefined };
-      });
-      const isDelivered = newProgress >= 100;
-      updateTrip(trip.id, {
-        progress: newProgress,
-        eta: isDelivered ? 'Arrived!' : `${etaMin} min`,
-        status: isDelivered ? 'Delivered' : 'In Transit',
-        speedKmH: isDelivered ? 0 : Math.floor(Math.random() * 15) + 60,
-        fuelPercent: Math.max(20, (current.fuelPercent ?? 85) - 2),
-        geofenceStatus: isDelivered ? 'Arrived' : 'Inside Corridor',
-        completedAt: isDelivered ? new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : current.completedAt,
-        checkpoints: updatedCheckpoints,
-      });
-      if (isDelivered) {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-        setSimulating(false);
-        useStore.getState().updateOrder(trip.orderId, { status: 'Delivered' });
-        toast.success('Shipment Delivered!', { description: 'Cargo delivered. Generating POD.' });
-        setTimeout(() => router.push('/delivery'), 1800);
-      }
-    }, 600);
+  // ─── Mark Delivered ────────────────────────────────────────────────────────
+  // Called manually by dispatcher when they confirm delivery.
+  // Cascades: trip → order → vehicle → driver via API.
+  const handleCompleteDelivery = async () => {
+    if (!trip) return;
+    await completeDelivery(trip.id);
+    toast.success('Shipment Delivered!', { description: 'Cargo delivered. Generating POD.' });
+    setTimeout(() => router.push('/delivery'), 1500);
+  };
+
+  // ─── Manual GPS refresh ────────────────────────────────────────────────────
+  const handleRefreshGps = async () => {
+    await refetchTrips();
+    toast.info('GPS refreshed from server');
   };
 
   // Empty state
@@ -119,9 +96,9 @@ export default function TrackingPage() {
         <div className="card" style={{ textAlign: 'center', padding: 60, maxWidth: 400 }}>
           <CheckCircle size={44} color="var(--brand)" style={{ margin: '0 auto 14px' }} />
           <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-high)', marginBottom: 8 }}>All Deliveries Completed</div>
-          <div style={{ fontSize: 13, color: 'var(--text-low)', marginBottom: 18 }}>View completed shipments in the Delivery & POD module.</div>
+          <div style={{ fontSize: 13, color: 'var(--text-low)', marginBottom: 18 }}>View completed shipments in the Delivery &amp; POD module.</div>
           <button className="btn btn-primary" style={{ justifyContent: 'center' }} onClick={() => router.push('/delivery')}>
-            Go to Delivery & POD
+            Go to Delivery &amp; POD
           </button>
         </div>
       </div>
@@ -190,7 +167,7 @@ export default function TrackingPage() {
       </div>
 
       {/* ── 3-column layout ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr 300px', gap: 14, alignItems: 'flex-start' }}>
+      <div className="tracking-grid">
 
         {/* ── Column 1: Shipment Info ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -201,13 +178,24 @@ export default function TrackingPage() {
                 <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 4 }}>
                   Shipment
                 </div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 17, fontWeight: 800, color: 'var(--text-high)' }}>
-                  {trip.id}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 17, fontWeight: 800, color: 'var(--text-high)' }}>
+                    {trip.id}
+                  </span>
+                  <CopyButton text={trip.id} label="Trip ID" variant="icon" size={13} />
                 </div>
               </div>
-              <span className="badge badge-blue" style={{ fontSize: 10 }}>
-                {trip.status}
-              </span>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+                <span className="badge badge-blue" style={{ fontSize: 10 }}>
+                  {trip.status}
+                </span>
+                <ShareButton
+                  url={typeof window !== 'undefined' ? `${window.location.origin}/track/${trip.orderId || trip.id}` : undefined}
+                  title={`Live Freight Tracking ${trip.id}`}
+                  buttonText="Share"
+                  style={{ padding: '3px 8px', fontSize: 11 }}
+                />
+              </div>
             </div>
 
             {/* Route */}
@@ -245,7 +233,7 @@ export default function TrackingPage() {
             </div>
           </div>
 
-          {/* Vehicle + Customer cards */}
+          {/* Vehicle card */}
           {vehicle && (
             <div className="card" style={{ padding: 14 }}>
               <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Vehicle</div>
@@ -261,6 +249,7 @@ export default function TrackingPage() {
             </div>
           )}
 
+          {/* Customer card */}
           {customer && (
             <div className="card" style={{ padding: 14 }}>
               <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Customer</div>
@@ -291,34 +280,44 @@ export default function TrackingPage() {
 
         {/* ── Column 2: Real Map ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {/* Map */}
           <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-            {/* Map header */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', borderBottom: '1px solid var(--border)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                 <MapPin size={14} color="var(--brand)" />
                 <span style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--text-high)' }}>Corridor Map</span>
+                {trip.lat && trip.lng && (
+                  <span style={{ fontSize: 10, color: 'var(--brand)', fontFamily: 'monospace' }}>
+                    {parseFloat(trip.lat as unknown as string).toFixed(4)}°N {parseFloat(trip.lng as unknown as string).toFixed(4)}°E
+                  </span>
+                )}
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--brand)', display: 'inline-block', animation: 'pulse 2s infinite' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <button
+                  className="btn btn-ghost btn-sm"
+                  onClick={handleRefreshGps}
+                  title="Refresh GPS from server"
+                  style={{ fontSize: 10, padding: '3px 8px' }}
+                >
+                  ↻ GPS
+                </button>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--brand)', display: 'inline-block', animation: 'dotPulse 1.4s infinite ease-in-out' }} />
                 <span style={{ fontSize: 10, color: 'var(--brand)', fontWeight: 700 }}>LIVE</span>
               </div>
             </div>
-            {/* Map tile */}
-            <div style={{ height: 380 }} key={`${trip.id}-${trip.progress}`}>
+            <div style={{ height: 380 }} key={trip.id}>
               <P44CorridorMap
                 origin={trip.origin}
                 destination={trip.destination}
                 progress={trip.progress}
-                waypoints={displayCheckpoints.map((cp, i) => ({
+                liveCoords={trip.lat && trip.lng ? { lat: parseFloat(trip.lat as unknown as string), lng: parseFloat(trip.lng as unknown as string) } : undefined}
+                waypoints={displayCheckpoints.map((cp) => ({
                   name: cp.name,
-                  lat: 0, lng: 0, // resolved inside component
+                  lat: 0, lng: 0,
                   passed: cp.passed,
                 }))}
                 geofenceStatus={trip.geofenceStatus}
               />
             </div>
-            {/* Map legend */}
             <div style={{ padding: '10px 14px', borderTop: '1px solid var(--border)', display: 'flex', gap: 16, flexWrap: 'wrap' }}>
               {[
                 { color: 'var(--brand)', label: 'Completed route' },
@@ -333,7 +332,7 @@ export default function TrackingPage() {
             </div>
           </div>
 
-          {/* Animated labeled progress — watermelon labeled-progress-indicator pattern */}
+          {/* Transit progress bar */}
           <div className="card" style={{ padding: 14 }}>
             <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>Transit Progress</div>
             <LabeledProgress
@@ -364,7 +363,7 @@ export default function TrackingPage() {
             </div>
           )}
 
-          {/* Operations Corridor Team — watermelon avatar-21 pattern */}
+          {/* Corridor team avatars */}
           <div className="card" style={{ padding: 14 }}>
             <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>
               Corridor Operations Team
@@ -379,16 +378,19 @@ export default function TrackingPage() {
             />
           </div>
 
-          {/* QR code pill for tracking link — watermelon show-qr pattern */}
+          {/* QR for driver GPS app link */}
           <div className="card" style={{ padding: 14, display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Tracking Link</div>
-              <div style={{ fontSize: 11, color: 'var(--text-low)', fontFamily: 'var(--font-mono)' }}>logiflow.app/track/{trip.id}</div>
+              <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Driver GPS App</div>
+              <div style={{ fontSize: 10, color: 'var(--text-low)', fontFamily: 'var(--font-mono)', wordBreak: 'break-all' }}>
+                /driver-app?v={trip.vehicleId}&t={trip.id}
+              </div>
+              <div style={{ fontSize: 10, color: 'var(--text-low)', marginTop: 4 }}>Scan to open on driver&apos;s phone</div>
             </div>
             <ShipmentQR
-              value={`https://logiflow.app/track/${trip.id}`}
-              label="QR Code"
-              size={140}
+              value={`${typeof window !== 'undefined' ? window.location.origin : ''}/driver-app?v=${trip.vehicleId}&t=${trip.id}`}
+              label="GPS App"
+              size={120}
             />
           </div>
         </div>
@@ -401,8 +403,8 @@ export default function TrackingPage() {
             driver={driver}
             distDone={distDone}
             distLeft={distLeft}
-            simulating={simulating}
-            onStartSimulation={startSimulation}
+            simulating={false}
+            onStartSimulation={handleCompleteDelivery}
             onChatDriver={() => driver && setChatDriverId(driver.id)}
             onNavigateDelivery={() => router.push('/delivery')}
           />
