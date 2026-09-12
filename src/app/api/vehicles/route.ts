@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
       status: body.status ?? 'Available',
       driverId: body.driverId ?? null,
       location: body.location ?? '',
-      lastService: body.lastService ?? null,
+      lastService: body.lastService && String(body.lastService).trim() ? body.lastService : null,
       odometerKm: body.odometerKm ?? 0,
       fuelLevel: body.fuelLevel ?? 100,
       activityLog: [{ id: `ACT-${Date.now()}`, title: 'Vehicle Registered & Onboarded into Fleet', timestamp: new Date().toLocaleString('en-IN'), type: 'inspection' }],
