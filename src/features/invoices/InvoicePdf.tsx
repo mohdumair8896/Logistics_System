@@ -123,18 +123,18 @@ export function InvoicePdf({ data }: { data: InvoicePdfData }) {
   const getProductName = (id: string) => products.find(p => p.id === id)?.name || id;
 
   return (
-    <Document title={`Tax Invoice ${invoice.id}`} author="Precision Logistics India Pvt. Ltd.">
+    <Document title={`Tax Invoice ${invoice.id}`} author="LogisticsEdge India Pvt. Ltd.">
       <Page size="A4" style={s.page}>
 
         {/* ── Header ── */}
         <View style={s.headerRow}>
           <View>
-            <Text style={s.companyName}>PRECISION LOGISTICS</Text>
+            <Text style={s.companyName}>LOGISTICS EDGE</Text>
             <Text style={s.companyTagline}>India Pvt. Ltd. — National Fleet Operations</Text>
             <Text style={s.companyMeta}>
               Central Distribution Hub, Lucknow, UP{'\n'}
               GSTIN: 09AABCP1234Q1Z5  |  CIN: U63090UP2021PTC145312{'\n'}
-              PAN: AABCP1234Q  |  support@precisionlogistics.com
+              PAN: AABCP1234Q  |  support@logisticsedge.io
             </Text>
           </View>
           <View>
@@ -161,7 +161,7 @@ export function InvoicePdf({ data }: { data: InvoicePdfData }) {
           </View>
           <View style={s.partyBox}>
             <Text style={s.partyLabel}>Service Provider</Text>
-            <Text style={s.partyName}>Precision Logistics India Pvt. Ltd.</Text>
+            <Text style={s.partyName}>LogisticsEdge India Pvt. Ltd.</Text>
             <Text style={s.partyLine}>Central Distribution Hub, Lucknow</Text>
             <Text style={s.partyLine}>Uttar Pradesh — 226010</Text>
             <Text style={[s.partyLine, { marginTop: 4, fontFamily: 'Helvetica-Bold', color: DARK }]}>GSTIN: 09AABCP1234Q1Z5</Text>
@@ -306,11 +306,11 @@ export function InvoicePdf({ data }: { data: InvoicePdfData }) {
         <View style={s.footer}>
           <View>
             <Text style={s.footerText}>This is a computer-generated invoice. No physical signature required.</Text>
-            <Text style={s.footerText}>For disputes, contact: accounts@precisionlogistics.com | +91-522-4001234</Text>
+            <Text style={s.footerText}>For disputes, contact: accounts@logisticsedge.io | +91-522-4001234</Text>
           </View>
           <View style={{ alignItems: 'flex-end' }}>
             <Text style={s.gstin}>GSTIN: 09AABCP1234Q1Z5</Text>
-            <Text style={s.footerText}>Precision Logistics India Pvt. Ltd. | CIN: U63090UP2021PTC145312</Text>
+            <Text style={s.footerText}>LogisticsEdge India Pvt. Ltd. | CIN: U63090UP2021PTC145312</Text>
           </View>
         </View>
 

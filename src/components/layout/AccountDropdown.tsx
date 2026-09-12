@@ -12,19 +12,19 @@ import Link from 'next/link';
 const roleProfiles = [
   {
     role: 'Operations Director',
-    email: 'admin@precisionlogistics.com',
+    email: 'admin@logisticsedge.io',
     name: 'Alex Morgan',
     facility: 'Central Distribution Hub',
   },
   {
     role: 'Fleet Dispatcher',
-    email: 'dispatch@precisionlogistics.com',
+    email: 'dispatch@logisticsedge.io',
     name: 'Sam Rivera',
     facility: 'North Corridor Terminal',
   },
   {
     role: 'Compliance Officer',
-    email: 'compliance@precisionlogistics.com',
+    email: 'compliance@logisticsedge.io',
     name: 'Jordan Patel',
     facility: 'West Regional Terminal',
   },
@@ -162,7 +162,7 @@ export function AccountDropdown() {
                 {displayName}
               </div>
               <div style={{ fontSize: 11, color: 'var(--text-low)', marginTop: 2 }}>
-                {user?.email || 'admin@precisionlogistics.com'}
+                {user?.email || 'admin@logisticsedge.io'}
               </div>
               <div style={{
                 marginTop: 6,

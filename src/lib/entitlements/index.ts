@@ -60,7 +60,7 @@ const MASTER_NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
     label: 'OVERVIEW',
     items: [
       { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-      { href: '/agent-ops', icon: Cpu, label: 'LogiPilot AI Ops', requiredModule: 'EXCEPTION_AGENT' },
+      { href: '/agent-ops', icon: Cpu, label: 'EdgePilot AI Ops', requiredModule: 'EXCEPTION_AGENT' },
     ],
   },
   {

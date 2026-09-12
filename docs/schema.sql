@@ -1,5 +1,5 @@
 -- ============================================================
--- PRECISION LOGISTICS MANAGEMENT SYSTEM (LMS)
+-- LOGISTICSEDGE PLATFORM (LMS)
 -- Database Architecture & Schema Specification
 -- Engine: PostgreSQL 15+ / Supabase / Neon / PlanetScale
 -- Designed by: Agency Database Optimizer

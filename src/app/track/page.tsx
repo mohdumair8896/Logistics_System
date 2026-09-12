@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Search, ArrowRight, ShieldCheck, Truck, PackageCheck, Clock } from 'lucide-react';
+import { LogisticsEdgeLogo } from '@/components/ui/LogisticsEdgeLogo';
 
 export default function PublicTrackingSearchPage() {
   const router = useRouter();
@@ -27,12 +28,7 @@ export default function PublicTrackingSearchPage() {
       {/* Top Navigation Bar */}
       <header style={{ borderBottom: '1px solid var(--border, #E6E4DF)', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-1, #FFFFFF)', backdropFilter: 'blur(12px)', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-          <div style={{ width: 32, height: 32, borderRadius: 8, background: 'linear-gradient(135deg, #0057FF, #0040CC)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: '#fff', fontSize: 16 }}>
-            L
-          </div>
-          <span style={{ fontWeight: 800, fontSize: 18, letterSpacing: -0.5, color: 'var(--text-high, #141414)' }}>
-            Logi<span style={{ color: 'var(--brand, #0057FF)' }}>Flow</span>
-          </span>
+          <LogisticsEdgeLogo size="sm" variant="full" />
           <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: 'rgba(0, 87, 255, 0.08)', color: 'var(--brand, #0057FF)', border: '1px solid rgba(0, 87, 255, 0.2)', textTransform: 'uppercase' }}>
             Public Portal
           </span>

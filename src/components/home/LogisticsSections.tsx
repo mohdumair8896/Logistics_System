@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import QuoteRequest from './QuoteRequest';
+import LogisticsEdgeLogo from '@/components/ui/LogisticsEdgeLogo';
 
 const solidCard = {
   background: '#0B0F17',
@@ -431,9 +432,8 @@ export default function LogisticsSections() {
 
             {/* Brand */}
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                <div style={{ width: 34, height: 34, borderRadius: 10, background: 'linear-gradient(135deg, #f59e0b, #d97706)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 13, color: '#1c1917', boxShadow: '0 0 20px rgba(245,158,11,0.3)' }}>LF</div>
-                <span style={{ fontWeight: 800, fontSize: 16, color: '#fff' }}>LogisticsEdge</span>
+              <div style={{ marginBottom: 16 }}>
+                <LogisticsEdgeLogo size="md" variant="wordmark" />
               </div>
               <p style={{ fontSize: 13, color: '#a8b8c8', lineHeight: 1.7 }}>
                 Autonomous logistics infrastructure. Connecting industrial shippers, cross-docks, and final-mile electric delivery fleets.
@@ -496,7 +496,7 @@ export default function LogisticsSections() {
           {/* Bottom bar */}
           <div style={{ paddingTop: 32, borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 16, fontSize: 12, color: '#a8b8c8' }}>
             <div>
-              <p style={{ margin: '0 0 2px', color: '#a8b8c8' }}>&copy; 2026 Precision Logistics Technologies Pvt. Ltd. All rights reserved.</p>
+              <p style={{ margin: '0 0 2px', color: '#a8b8c8' }}>&copy; 2026 LogisticsEdge Technologies Pvt. Ltd. All rights reserved.</p>
               <p style={{ margin: 0, fontSize: 11, color: '#64748b' }}>CIN: U63090DL2024PTC428190 &bull; GSTIN: 07AAACP1234F1Z5 &bull; New Delhi &amp; Lucknow, India</p>
             </div>
             <nav aria-label="Legal links">

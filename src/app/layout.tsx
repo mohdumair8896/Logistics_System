@@ -91,10 +91,10 @@ export const viewport: Viewport = {
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": ["Organization", "LocalBusiness"],
-  "name": "Precision Logistics Technologies Pvt. Ltd.",
+  "name": "LogisticsEdge Technologies Pvt. Ltd.",
   "alternateName": "LogisticsEdge",
   "url": siteUrl,
-  "description": "Enterprise autonomous logistics infrastructure connecting industrial shippers, cross-docks, dispatch, real-time IoT sensory tracking, and electric fleet routing across India.",
+  "description": "Enterprise logistics infrastructure connecting industrial shippers, cross-docks, dispatch, real-time GPS tracking, and fleet routing across India and global supply chains.",
   "foundingDate": "2024",
   "areaServed": "IN",
   "serviceType": "Freight & Logistics Management",

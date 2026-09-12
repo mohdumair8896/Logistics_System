@@ -191,7 +191,7 @@ export default function CookiePolicyPage() {
         {/* Footer */}
         <div style={{ marginTop: 60, paddingTop: 24, borderTop: '1px solid var(--border, #E6E4DF)', fontSize: 13, color: 'var(--text-mid, #525252)' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between' }}>
-            <p style={{ margin: 0 }}>&copy; 2026 Precision Logistics Technologies Pvt. Ltd. All rights reserved.</p>
+            <p style={{ margin: 0 }}>&copy; 2026 LogisticsEdge Technologies Pvt. Ltd. All rights reserved.</p>
             <div style={{ display: 'flex', gap: 16 }}>
               <Link href="/privacy" style={{ color: 'var(--brand, #0057FF)', textDecoration: 'none' }}>Privacy Policy</Link>
               <Link href="/terms" style={{ color: 'var(--brand, #0057FF)', textDecoration: 'none' }}>Terms of Service</Link>

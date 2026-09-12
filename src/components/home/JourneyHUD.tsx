@@ -134,7 +134,7 @@ export const JourneyHUD: React.FC<JourneyHUDProps> = ({ progress }) => {
         {/* Shipment status pill */}
         <div style={{ ...glass, padding: '8px 16px', borderRadius: 16, display: 'flex', alignItems: 'center', gap: 10, fontFamily: 'monospace', fontSize: 11, color: '#d4d4d8', pointerEvents: 'auto' }}>
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#34d399', display: 'inline-block', boxShadow: '0 0 8px #34d399' }} />
-          <span style={{ color: '#fff', fontWeight: 700 }}>SHIPMENT #LF-9042</span>
+          <span style={{ color: '#fff', fontWeight: 700 }}>SHIPMENT #LE-9042</span>
           <span style={{ color: '#94a3b8' }}>|</span>
           <span style={{ color: '#fbbf24', fontWeight: 700 }}>{Math.round(progress * 100)}% COMPLETE</span>
         </div>

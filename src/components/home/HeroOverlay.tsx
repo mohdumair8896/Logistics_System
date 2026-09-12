@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { ArrowRight, Calculator, Sparkles } from 'lucide-react';
+import LogisticsEdgeLogo from '@/components/ui/LogisticsEdgeLogo';
 
 interface HeroOverlayProps {
   onScrollClick?: () => void;
@@ -24,29 +25,14 @@ export const HeroOverlay: React.FC<HeroOverlayProps> = ({ onScrollClick }) => {
       boxSizing: 'border-box',
     }}>
 
-      {/* ── Top Navbar ── */}
+      {/* ── Top brand + live telemetry status bar ── */}
       <header style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         flexWrap: 'wrap', gap: 12, width: '100%',
       }}>
         {/* Logo */}
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
-          <div style={{
-            width: 40, height: 40, borderRadius: 12,
-            background: 'rgba(245,158,11,0.15)',
-            border: '1px solid rgba(245,158,11,0.4)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: 900, fontSize: 16, color: '#fbbf24',
-            boxShadow: '0 0 20px rgba(245,158,11,0.25)',
-          }}>
-            LF
-          </div>
-          <div>
-            <h1 style={{ fontSize: 18, fontWeight: 900, color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: 8, letterSpacing: -0.5 }}>
-              LogisticsEdge
-            </h1>
-            <p style={{ fontSize: 11, color: '#94a3b8', margin: 0, fontWeight: 500 }}>Enterprise Autonomous Freight</p>
-          </div>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+          <LogisticsEdgeLogo size="lg" variant="full" />
         </Link>
 
         {/* Nav actions */}

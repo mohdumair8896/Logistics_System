@@ -7,6 +7,7 @@ import {
   Truck, Globe, Zap, Sparkles, Check, ArrowRight, ArrowLeft,
   Layers, Compass, Cpu, CheckCircle2, Activity
 } from 'lucide-react';
+import { LogisticsEdgeLogo } from '@/components/ui/LogisticsEdgeLogo';
 import {
   ARCHETYPES, ArchetypeCode, AVAILABLE_MODULES, calculateComplexityScore,
   DEFAULT_ONBOARDING_STATE, OnboardingState, PainPoint, CurrentSystem,
@@ -105,12 +106,7 @@ export default function ConfigurePage() {
       <header className="border-b border-slate-800/80 bg-[#020617]/90 backdrop-blur-md sticky top-0 z-40 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform">
-              <Truck className="w-5 h-5" />
-            </div>
-            <span className="font-bold tracking-tight text-lg text-white">
-              Logi<span className="text-blue-500">Flow</span>
-            </span>
+            <LogisticsEdgeLogo size="sm" variant="full" />
           </Link>
           <span className="text-slate-600 text-sm hidden sm:inline">/</span>
           <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 hidden sm:inline-flex items-center gap-1.5">
@@ -815,7 +811,7 @@ export default function ConfigurePage() {
                 Assembling your Logistics OS...
               </h2>
               <p className="text-xs text-slate-400">
-                Configuring tenant database isolation, dynamic navigation, and LogiPilot AI agents.
+                Configuring tenant database isolation, dynamic navigation, and EdgePilot AI agents.
               </p>
             </div>
 
@@ -825,7 +821,7 @@ export default function ConfigurePage() {
                 'Initializing multi-tenant workspace isolation...',
                 `Activating ${result.recommendedModules.length} operating modules: ${result.recommendedModules.slice(0, 4).join(', ')}...`,
                 'Configuring dynamic role-based navigation & permissions...',
-                `Deploying LogiPilot AI Workforce with Level ${state.autonomyLevel} autonomy...`,
+                `Deploying EdgePilot AI Workforce with Level ${state.autonomyLevel} autonomy...`,
                 'Workspace provisioned! Redirecting to live dashboard...',
               ].map((text, idx) => (
                 <div

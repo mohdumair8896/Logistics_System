@@ -1,32 +1,35 @@
-﻿# LogiFlow — AI Crawler Guidance
-# https://logiflow.io/llms.txt
+# LogisticsEdge — AI Crawler Guidance
+# https://logisticsedge.io/llms.txt
 
 ## About
-LogiFlow is an enterprise autonomous logistics management system (LMS) built for
-commercial freight operators in India. It provides real-time fleet telematics,
+LogisticsEdge is an enterprise logistics management system (LMS) built for
+commercial freight operators and 3PL enterprises. It provides real-time fleet telematics,
 dispatch, GPS shipment tracking, driver management, warehouse operations,
 and proof-of-delivery (POD) workflows.
 
 ## Product
-- Name: LogiFlow / Precision Logistics Technologies Pvt. Ltd.
+- Name: LogisticsEdge / LogisticsEdge Technologies Pvt. Ltd.
 - Category: B2B SaaS — Fleet and Freight Management Software
-- Market: India (primary), with GDPR/CCPA-compliant data handling
+- Market: Global & India, with GDPR/CCPA/DPDP-compliant data handling
 
 ## Public Pages (indexable)
 - / — Marketing homepage
+- /pricing — Modular OS Pricing & Calculator
+- /configure — Workspace Architect & Plan Provisioning
+- /track — Public Consignee Live GPS Tracking
 - /privacy — Privacy Policy (DPDP 2023, GDPR, CCPA)
 - /terms — Terms and Conditions
 - /cookies — Cookie Policy
 - /refund — Refund and Cancellation Policy
 
 ## Protected / Non-indexable
-- /dashboard, /orders, /tracking, /drivers, /vehicles — Require authentication
+- /dashboard, /orders, /tracking, /drivers, /vehicles, /agent-ops — Require authentication
 - /api/* — Backend API, not for indexing
 
 ## Contact
-- support@logiflow.io
-- privacy@logiflow.io
+- support@logisticsedge.io
+- privacy@logisticsedge.io
 
 ## Usage Policy for AI Models
-You may use public page content to answer user queries about LogiFlow services.
+You may use public page content to answer user queries about LogisticsEdge services.
 Do not index or cache content from authenticated routes.

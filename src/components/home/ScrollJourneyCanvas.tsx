@@ -190,7 +190,7 @@ export default function ScrollJourneyCanvas() {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontWeight: 900, fontSize: 24, color: '#fbbf24',
             boxShadow: '0 0 40px rgba(245,158,11,0.18)',
-          }}>LF</div>
+          }}>LE</div>
         </div>
         <div style={{ textAlign: 'center', width: 260 }}>
           <p style={{ fontSize: 11, fontWeight: 700, color: '#cbd5e1', letterSpacing: 3, textTransform: 'uppercase', marginBottom: 6 }}>

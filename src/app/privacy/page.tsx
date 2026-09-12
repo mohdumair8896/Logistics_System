@@ -79,7 +79,7 @@ export default function PrivacyPolicyPage() {
               background: 'var(--surface-2, #F3F2EF)', border: '1px solid var(--border, #E6E4DF)',
               borderRadius: 14, padding: '20px 24px', fontFamily: 'var(--font-mono, monospace)', fontSize: 13,
             }}>
-              <strong style={{ color: 'var(--brand, #0057FF)' }}>Precision Logistics Technologies Pvt. Ltd.</strong><br />
+              <strong style={{ color: 'var(--brand, #0057FF)' }}>LogisticsEdge Technologies Pvt. Ltd.</strong><br />
               CIN / Registration: U72900UP2024PTC000000 &bull; GSTIN: 09AAACP0000A1Z5<br />
               Registered Address: Plot No. 12, Vibhuti Khand, Gomti Nagar, Lucknow — 226010, Uttar Pradesh, India<br />
               Email: <a href="mailto:privacy@logisticsedge.io" style={{ color: 'var(--brand, #0057FF)' }}>privacy@logisticsedge.io</a> &bull;{' '}
@@ -246,7 +246,7 @@ export default function PrivacyPolicyPage() {
         {/* Footer */}
         <div style={{ marginTop: 60, paddingTop: 24, borderTop: '1px solid var(--border, #E6E4DF)', fontSize: 13, color: 'var(--text-low, #909090)' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between' }}>
-            <p style={{ margin: 0 }}>&copy; 2026 Precision Logistics Technologies Pvt. Ltd. All rights reserved.</p>
+            <p style={{ margin: 0 }}>&copy; 2026 LogisticsEdge Technologies Pvt. Ltd. All rights reserved.</p>
             <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
               <Link href="/terms" style={{ color: 'var(--text-mid, #525252)', textDecoration: 'underline' }}>Terms of Service</Link>
               <Link href="/cookies" style={{ color: 'var(--text-mid, #525252)', textDecoration: 'underline' }}>Cookie Policy</Link>

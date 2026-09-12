@@ -163,7 +163,7 @@ export default function RefundPolicyPage() {
             }}>
               <strong style={{ color: 'var(--brand, #0057FF)', display: 'block', marginBottom: 8 }}>Nodal / Grievance Officer (CPA 2019):</strong>
               Grievance Redressal Officer<br />
-              Precision Logistics Technologies Pvt. Ltd.<br />
+              LogisticsEdge Technologies Pvt. Ltd.<br />
               Plot No. 12, Vibhuti Khand, Gomti Nagar, Lucknow — 226010, Uttar Pradesh, India<br />
               Email: <a href="mailto:grievance@logisticsedge.io" style={{ color: 'var(--brand, #0057FF)' }}>grievance@logisticsedge.io</a><br />
               Phone: +91 522 400 1200 &bull; Available Mon–Fri, 9 AM – 6 PM IST
@@ -205,7 +205,7 @@ export default function RefundPolicyPage() {
         {/* Footer */}
         <div style={{ marginTop: 60, paddingTop: 24, borderTop: '1px solid var(--border, #E6E4DF)', fontSize: 13, color: 'var(--text-mid, #525252)' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between' }}>
-            <p style={{ margin: 0 }}>&copy; 2026 Precision Logistics Technologies Pvt. Ltd. All rights reserved.</p>
+            <p style={{ margin: 0 }}>&copy; 2026 LogisticsEdge Technologies Pvt. Ltd. All rights reserved.</p>
             <div style={{ display: 'flex', gap: 16 }}>
               <Link href="/privacy" style={{ color: 'var(--brand, #0057FF)', textDecoration: 'none' }}>Privacy Policy</Link>
               <Link href="/terms" style={{ color: 'var(--brand, #0057FF)', textDecoration: 'none' }}>Terms of Service</Link>

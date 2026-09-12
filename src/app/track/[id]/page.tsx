@@ -16,6 +16,7 @@ import { ShareButton } from '@/components/ui/ShareButton';
 import { DotSpinner } from '@/components/ui/DotSpinner';
 import { Avatar } from '@/components/ui/Avatar';
 import { BadgeWithDot } from '@/components/ui/BadgeWithDot';
+import { LogisticsEdgeLogo } from '@/components/ui/LogisticsEdgeLogo';
 
 interface TrackingData {
   orderId: string;
@@ -105,9 +106,7 @@ export default function PublicCustomerTrackingPage({ params }: Props) {
           <Link href="/track" style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--brand, #0057FF)', textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>
             <ArrowLeft size={16} /> Back to Tracking
           </Link>
-          <span style={{ fontWeight: 800, fontSize: 16 }}>
-            Logi<span style={{ color: 'var(--brand, #0057FF)' }}>Flow</span>
-          </span>
+          <LogisticsEdgeLogo size="sm" variant="full" />
         </header>
         <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, textAlign: 'center' }}>
           <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(220,38,38,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
@@ -176,9 +175,7 @@ export default function PublicCustomerTrackingPage({ params }: Props) {
           </Link>
           <div style={{ width: 1, height: 20, background: 'var(--border, #E6E4DF)' }} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontWeight: 800, fontSize: 16 }}>
-              Logi<span style={{ color: 'var(--brand, #0057FF)' }}>Flow</span>
-            </span>
+            <LogisticsEdgeLogo size="sm" variant="full" />
             <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: 'rgba(0,87,255,0.08)', color: 'var(--brand, #0057FF)', border: '1px solid rgba(0,87,255,0.2)' }}>
               Live Consignee View
             </span>

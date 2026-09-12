@@ -33,9 +33,9 @@ async function seed() {
   console.log('👤 Seeding users...');
   const passwordHash = await bcrypt.hash('Logistics2026!', 12);
   await db.insert(schema.users).values([
-    { id: 'USR-001', email: 'admin@precisionlogistics.com',      passwordHash, name: 'Alex Morgan',    role: 'Operations Director', facility: 'Central Distribution Hub',  avatar: 'AM', isActive: true },
-    { id: 'USR-002', email: 'dispatch@precisionlogistics.com',   passwordHash, name: 'Sam Rivera',     role: 'Fleet Dispatcher',    facility: 'North Corridor Terminal',    avatar: 'SR', isActive: true },
-    { id: 'USR-003', email: 'compliance@precisionlogistics.com', passwordHash, name: 'Jordan Patel',   role: 'Compliance Officer',  facility: 'West Regional Terminal',     avatar: 'JP', isActive: true },
+    { id: 'USR-001', email: 'admin@logisticsedge.io',      passwordHash, name: 'Alex Morgan',    role: 'Operations Director', facility: 'Central Distribution Hub',  avatar: 'AM', isActive: true },
+    { id: 'USR-002', email: 'dispatch@logisticsedge.io',   passwordHash, name: 'Sam Rivera',     role: 'Fleet Dispatcher',    facility: 'North Corridor Terminal',    avatar: 'SR', isActive: true },
+    { id: 'USR-003', email: 'compliance@logisticsedge.io', passwordHash, name: 'Jordan Patel',   role: 'Compliance Officer',  facility: 'West Regional Terminal',     avatar: 'JP', isActive: true },
   ]).onConflictDoNothing();
 
   // ─── Customers ──────────────────────────────────────────────────────────────

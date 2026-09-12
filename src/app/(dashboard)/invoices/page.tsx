@@ -256,7 +256,7 @@ export default function InvoicesPage() {
                       <div style={{ width: 32, height: 32, background: 'var(--brand, #0057FF)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff' }}>
                         <Building2 size={18} />
                       </div>
-                      <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-high, #141414)' }}>Precision Logistics LMS</div>
+                      <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-high, #141414)' }}>LogisticsEdge LMS</div>
                     </div>
                     <div style={{ fontSize: 11.5, color: 'var(--text-mid, #525252)', marginTop: 4 }}>
                       Central Logistics Hub, Lucknow, UP • GSTIN: 09AAACP1234F1Z9

@@ -32,16 +32,18 @@ export default async function Image() {
                 width: 64,
                 height: 64,
                 borderRadius: 18,
-                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                background: 'linear-gradient(135deg, #1e293b, #090d16)',
+                border: '2px solid #f59e0b',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 32,
+                fontSize: 30,
                 fontWeight: 900,
-                color: '#1c1917',
+                color: '#fbbf24',
+                letterSpacing: -1,
               }}
             >
-              LF
+              LE
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <div style={{ display: 'flex', fontSize: 32, fontWeight: 900, letterSpacing: -1 }}>LogisticsEdge</div>

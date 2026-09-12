@@ -125,7 +125,7 @@ const QuoteRequest: React.FC = () => {
       const ratePerMile   = cargoType.toLowerCase().includes('refrigerated') || cargoType.toLowerCase().includes('pharma') ? 2.85 : 2.25;
       const calculatedCost = Math.round(pseudoDist * ratePerMile + 180);
       const hours         = Math.round((pseudoDist / 55) * 10) / 10;
-      const quoteNum      = `LF-Q-${Math.floor(10000 + Math.random() * 90000)}`;
+      const quoteNum      = `LE-Q-${Math.floor(10000 + Math.random() * 90000)}`;
 
       const result: QuoteResult = {
         quoteId: quoteNum,
@@ -158,7 +158,7 @@ const QuoteRequest: React.FC = () => {
     if (!quoteResult) return;
     // POST to /api/leads when the route is created in a future phase
     // For now capture intent and redirect to login/dashboard
-    const leadRef = `LF-Q-${Math.floor(10000 + Math.random() * 90000)}`;
+    const leadRef = `LE-Q-${Math.floor(10000 + Math.random() * 90000)}`;
     toast.success('Freight Booking Confirmed!', {
       description: `Quote #${quoteResult.quoteId} registered. Ref: ${leadRef}. Transferring to dispatch...`,
     });

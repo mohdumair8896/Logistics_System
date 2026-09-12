@@ -263,7 +263,7 @@ export default function AgentOpsPage() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>LogiPilot AI Ops Command Center</BreadcrumbPage>
+            <BreadcrumbPage>EdgePilot AI Ops Command Center</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
@@ -828,7 +828,7 @@ export default function AgentOpsPage() {
                   <Message key={msg.id} align={msg.sender === 'driver' ? 'start' : 'end'}>
                     <MessageAvatar>
                       <Avatar
-                        name={msg.sender === 'driver' ? 'Ramesh Kumar' : 'LogiPilot AI'}
+                        name={msg.sender === 'driver' ? 'Ramesh Kumar' : 'EdgePilot AI'}
                         size="xs"
                         status={msg.sender === 'driver' ? 'online' : undefined}
                       />
@@ -842,7 +842,7 @@ export default function AgentOpsPage() {
                         paddingRight: 4,
                         textAlign: msg.sender === 'driver' ? 'left' : 'right'
                       }}>
-                        {msg.sender === 'driver' ? 'Driver (Ramesh Kumar)' : 'LogiPilot AI (Hindi NLU)'}
+                        {msg.sender === 'driver' ? 'Driver (Ramesh Kumar)' : 'EdgePilot AI (Hindi NLU)'}
                       </div>
                       <Bubble
                         align={msg.sender === 'driver' ? 'start' : 'end'}
@@ -862,7 +862,7 @@ export default function AgentOpsPage() {
                 <Marker role="status">
                   <MarkerContent className="flex items-center gap-2">
                     <Spinner size="xs" />
-                    <span>LogiPilot NLU analyzing driver message...</span>
+                    <span>EdgePilot NLU analyzing driver message...</span>
                   </MarkerContent>
                 </Marker>
               )}

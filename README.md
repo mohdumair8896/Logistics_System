@@ -1,4 +1,4 @@
-# Precision Logistics System (LMS)
+# LogisticsEdge Platform (LMS)
 
 > Enterprise Fleet Intelligence & Logistics Management System built with Next.js 15+ (App Router), React 19, TypeScript, TailwindCSS, and Zustand.
 
@@ -6,7 +6,7 @@
 
 ## 🌟 Overview & Features
 
-Implemented according to the **Precision Logistics Design System & Architecture**:
+Implemented according to the **LogisticsEdge Design System & Architecture**:
 
 1. **Operations Dashboard (`/dashboard`)**:
    - Live interactive SVG Regional Hub Network with corridor connections and region filtering (*North, Europe, East*).
@@ -71,4 +71,4 @@ npm start
 ---
 
 ## 📄 License
-MIT © Precision Logistics System
+MIT © LogisticsEdge Platform

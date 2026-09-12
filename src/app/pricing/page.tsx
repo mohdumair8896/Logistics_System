@@ -4,9 +4,10 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
-  Check, Sparkles, Truck, ArrowRight, Zap, Building2, CreditCard, X
+  Check, Sparkles, ArrowRight, Zap, Building2, CreditCard, X
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { LogisticsEdgeLogo } from '@/components/ui/LogisticsEdgeLogo';
 
 interface Plan {
   id: 'FLEX' | 'GROWTH' | 'SCALE' | 'ENTERPRISE';
@@ -100,7 +101,7 @@ const PLANS: Plan[] = [
     features: [
       'Dedicated Isolated Database / Tenant Cluster',
       'Unlimited Fleet, Drivers & Monthly Shipments',
-      'Custom LogiPilot AI Agent Fine-Tuning',
+      'Custom EdgePilot AI Agent Fine-Tuning',
       'Tailored Integration Connectors (Oracle, SAP)',
       'Enterprise SSO & SCIM Provisioning',
       '99.99% Guaranteed Operational SLA',
@@ -183,12 +184,7 @@ export default function PricingPage() {
       {/* ── Top Header ── */}
       <header className="border-b border-slate-800/80 bg-[#020617]/90 backdrop-blur-md sticky top-0 z-40 px-6 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-emerald-500 flex items-center justify-center text-slate-950 font-black shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
-            <Truck className="w-5 h-5" />
-          </div>
-          <span className="font-bold tracking-tight text-lg text-white">
-            Logi<span className="text-amber-400">Flow</span>
-          </span>
+          <LogisticsEdgeLogo size="sm" variant="full" />
         </Link>
 
         <div className="flex items-center gap-3 text-sm">
