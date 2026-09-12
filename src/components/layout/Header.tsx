@@ -11,8 +11,6 @@ import { ModalPortal } from '@/components/ui/ModalPortal';
 import { BugReportForm } from '@/components/forms/BugReportForm';
 import { FormRhfCheckbox } from '@/components/forms/FormRhfCheckbox';
 
-import { TenantSwitcher } from '@/components/layout/TenantSwitcher';
-
 interface HeaderProps {
   title: string;
   subtitle?: string;
@@ -53,10 +51,6 @@ export default function Header({
           {subtitle && (
             <div style={{ fontSize: 11, color: 'var(--text-low)', marginTop: 1 }}>{subtitle}</div>
           )}
-        </div>
-
-        <div className="hidden sm:block ml-2">
-          <TenantSwitcher />
         </div>
       </div>
 
