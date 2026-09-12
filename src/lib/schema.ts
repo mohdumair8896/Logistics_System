@@ -10,7 +10,7 @@ import {
 import { sql } from 'drizzle-orm';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// USERS (replaces hardcoded DEMO_USERS array in auth/login/route.ts)
+// USERS (Enterprise user authentication and roles)
 // ─────────────────────────────────────────────────────────────────────────────
 export const users = pgTable('users', {
   id: varchar('id', { length: 50 }).primaryKey(),

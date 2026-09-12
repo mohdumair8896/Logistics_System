@@ -6,8 +6,7 @@ import Header from '@/components/layout/Header';
 import LogiFlowChatbot from '@/components/layout/LogiFlowChatbot';
 
 
-import { getCurrentUser, CurrentUser } from '@/lib/useCurrentUser';
-import DemoBanner from '@/components/demo/DemoBanner';
+import { getCurrentUser } from '@/lib/useCurrentUser';
 
 const emptySubscribe = () => () => {};
 
@@ -32,7 +31,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null); // null = loading
-  const [userProfile, setUserProfile] = useState<CurrentUser | null>(null);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [prevPathname, setPrevPathname] = useState(pathname);
 
@@ -83,7 +81,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       .then(user => {
         if (user) {
           setIsLoggedIn(true);
-          setUserProfile(user);
         } else {
           setIsLoggedIn(false);
           router.replace('/login');
@@ -96,27 +93,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!isLoggedIn) return null; // redirect already triggered
 
   const info = pageTitles[pathname] || { title: 'LogiFlow', subtitle: 'Logistics Management' };
-  const isDemo = userProfile?.isDemo || (typeof window !== 'undefined' && window.location.search.includes('demo=true'));
+ 
+   return (
+     <div className="app-layout" data-collapsed={isSidebarCollapsed}>
+       {/* Mobile Drawer Backdrop */}
+       <div
+         className={`mobile-sidebar-backdrop ${isMobileSidebarOpen ? 'active' : ''}`}
+         onClick={() => setIsMobileSidebarOpen(false)}
+       />
 
-  return (
-    <div className="app-layout" data-collapsed={isSidebarCollapsed}>
-      {/* Mobile Drawer Backdrop */}
-      <div
-        className={`mobile-sidebar-backdrop ${isMobileSidebarOpen ? 'active' : ''}`}
-        onClick={() => setIsMobileSidebarOpen(false)}
-      />
+       {/* Sidebar with Drawer & Collapse Support */}
+       <Sidebar
+         isOpen={isMobileSidebarOpen}
+         onClose={() => setIsMobileSidebarOpen(false)}
+         isCollapsed={isSidebarCollapsed}
+         onToggleCollapse={handleToggleSidebarCollapse}
+       />
 
-      {/* Sidebar with Drawer & Collapse Support */}
-      <Sidebar
-        isOpen={isMobileSidebarOpen}
-        onClose={() => setIsMobileSidebarOpen(false)}
-        isCollapsed={isSidebarCollapsed}
-        onToggleCollapse={handleToggleSidebarCollapse}
-      />
-
-      <div className="main-content">
-        {isDemo && <DemoBanner />}
-        <Header
+       <div className="main-content">
+         <Header
           title={info.title}
           subtitle={info.subtitle}
           onToggleMobileMenu={() => setIsMobileSidebarOpen(prev => !prev)}

@@ -14,7 +14,6 @@ export interface CurrentUser {
   facility: string;
   avatar: string;
   tenantId?: string;
-  isDemo?: boolean;
   isConfigured?: boolean;
   plan?: string;
   companyName?: string;

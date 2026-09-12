@@ -193,13 +193,6 @@ export default function PricingPage() {
 
         <div className="flex items-center gap-3 text-sm">
           <Link
-            href="/demo"
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-mono text-xs hover:bg-amber-500/20 transition-colors"
-          >
-            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-            Live Demo Sandbox →
-          </Link>
-          <Link
             href="/login"
             className="px-4 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors"
           >
@@ -223,7 +216,7 @@ export default function PricingPage() {
         </h1>
 
         <p className="text-slate-400 text-base max-w-2xl mx-auto mb-8 leading-relaxed">
-          Test the live dummy demo freely anytime. When you subscribe, your first-time login questionnaire configures your exact operational model, modules, and AI autonomy policies.
+          Choose the right operational scale for your fleet. Upon subscription, complete the guided questionnaire to configure your organization, dispatch corridors, and autonomous policies.
         </p>
 
         {/* Billing Toggle */}
@@ -344,27 +337,6 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* ── Demo Callout Bar ── */}
-      <section className="px-6 pb-20 max-w-4xl mx-auto w-full">
-        <div className="p-6 rounded-2xl bg-gradient-to-r from-amber-500/10 via-slate-900 to-emerald-500/10 border border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div>
-            <h4 className="text-base font-bold text-white mb-1">
-              Want to see the platform in action before subscribing?
-            </h4>
-            <p className="text-xs text-slate-400">
-              Access the interactive dummy sandbox with 1-click. Test GPS corridors, order queues, and AI dispatch.
-            </p>
-          </div>
-          <Link
-            href="/demo"
-            className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-2 whitespace-nowrap shadow-md shadow-amber-500/20"
-          >
-            <span>🚀 Try Live Demo Sandbox</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-      </section>
-
       {/* ── Checkout Modal ── */}
       {isCheckoutOpen && selectedPlan && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
@@ -453,7 +425,7 @@ export default function PricingPage() {
               {/* Payment Rail Selector */}
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  Payment Method (Simulated Instant Approval)
+                  Payment Method (Instant Commercial Activation)
                 </label>
                 <div className="grid grid-cols-3 gap-2 text-xs">
                   <button

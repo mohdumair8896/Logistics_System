@@ -7,21 +7,12 @@ import { inventory, products } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
 import { requireAuth, isAuthError } from '@/lib/auth';
 
-const DEFAULT_INVENTORY_SEED = [
-  { productId: 'P001', warehouseId: 'W001', quantity: 35000, bay: 'Bay A-12' },
-  { productId: 'P002', warehouseId: 'W001', quantity: 22000, bay: 'Bay A-14' },
-  { productId: 'P003', warehouseId: 'W001', quantity: 45000, bay: 'Bay B-04' },
-  { productId: 'P004', warehouseId: 'W001', quantity: 18000, bay: 'Bay B-08' },
-  { productId: 'P005', warehouseId: 'W001', quantity: 12000, bay: 'Bay C-02' },
-  { productId: 'P006', warehouseId: 'W001', quantity: 9500, bay: 'Bay C-06' },
-];
-
 export async function GET(request: NextRequest) {
   const auth = await requireAuth(request);
   if (isAuthError(auth)) return auth;
 
   try {
-    let rows = await db.select({
+    const rows = await db.select({
       id: inventory.id,
       productId: inventory.productId,
       warehouseId: inventory.warehouseId,
@@ -33,29 +24,10 @@ export async function GET(request: NextRequest) {
     .from(inventory)
     .leftJoin(products, eq(inventory.productId, products.id));
 
-    // Auto-seed inventory if empty
-    if (rows.length === 0) {
-      for (const item of DEFAULT_INVENTORY_SEED) {
-        await db.insert(inventory).values(item).onConflictDoNothing();
-      }
-      rows = await db.select({
-        id: inventory.id,
-        productId: inventory.productId,
-        warehouseId: inventory.warehouseId,
-        quantity: inventory.quantity,
-        bay: inventory.bay,
-        productName: products.name,
-        unit: products.unit,
-      })
-      .from(inventory)
-      .leftJoin(products, eq(inventory.productId, products.id));
-    }
-
     return NextResponse.json(rows);
   } catch (err) {
     console.error('[GET /api/inventory]', err);
-    // Safe fallback to default inventory on DB connection issues
-    return NextResponse.json(DEFAULT_INVENTORY_SEED);
+    return NextResponse.json([]);
   }
 }
 

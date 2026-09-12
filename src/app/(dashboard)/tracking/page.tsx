@@ -403,8 +403,7 @@ export default function TrackingPage() {
             driver={driver}
             distDone={distDone}
             distLeft={distLeft}
-            simulating={false}
-            onStartSimulation={handleCompleteDelivery}
+            onCompleteDelivery={handleCompleteDelivery}
             onChatDriver={() => driver && setChatDriverId(driver.id)}
             onNavigateDelivery={() => router.push('/delivery')}
           />

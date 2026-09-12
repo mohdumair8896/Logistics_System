@@ -76,19 +76,19 @@ export function BugReportForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form id="form-rhf-demo" onSubmit={form.handleSubmit(onSubmit)}>
+        <form id="form-bug-report" onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup>
             <Controller
               name="title"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="form-rhf-demo-title">
+                  <FieldLabel htmlFor="form-bug-report-title">
                     Bug Title
                   </FieldLabel>
                   <Input
                     {...field}
-                    id="form-rhf-demo-title"
+                    id="form-bug-report-title"
                     aria-invalid={fieldState.invalid}
                     placeholder="Login button not working on mobile"
                     autoComplete="off"
@@ -104,13 +104,13 @@ export function BugReportForm() {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="form-rhf-demo-description">
+                  <FieldLabel htmlFor="form-bug-report-description">
                     Description
                   </FieldLabel>
                   <InputGroup>
                     <InputGroupTextarea
                       {...field}
-                      id="form-rhf-demo-description"
+                      id="form-bug-report-description"
                       placeholder="I'm having an issue with the login button on mobile."
                       rows={6}
                       className="min-h-24 resize-none"
@@ -140,7 +140,7 @@ export function BugReportForm() {
           <Button type="button" variant="outline" onClick={() => form.reset()}>
             Reset
           </Button>
-          <Button type="submit" form="form-rhf-demo">
+          <Button type="submit" form="form-bug-report">
             Submit
           </Button>
         </Field>

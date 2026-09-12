@@ -31,44 +31,27 @@ export interface NavSection {
   items: NavItem[];
 }
 
-// ─── Reference Presets for 1-Click Testing ───────────────────────────────────
+// ─── Default Clean Workspace Profile ──────────────────────────────────────────
+export const DEFAULT_TENANT: TenantProfile = {
+  id: 'ten_primary_workspace',
+  name: 'My Logistics Workspace',
+  archetype: 'FLEET_OWNER',
+  plan: 'GROWTH',
+  score: 0,
+  enabledModules: [
+    'FLEET', 'TMS', 'TRIPS', 'CORRIDOR_TRACKING',
+    'DELIVERY_POD', 'INVOICING', 'ALLOCATION', 'WAREHOUSE',
+    'DRIVER_AGENT', 'EXCEPTION_AGENT', 'CUSTOMER_PORTAL', 'LEADS_CRM',
+  ],
+  autonomyLevel: 2,
+  fleetSize: '0',
+  monthlyShipments: '0',
+  geography: 'NATIONAL',
+};
+
 export const PRESET_TENANTS: Record<string, TenantProfile> = {
-  ABC_TRANSPORT: {
-    id: 'ten_abc_transport',
-    name: 'ABC National Transport',
-    archetype: 'FLEET_OWNER',
-    plan: 'GROWTH',
-    score: 28,
-    enabledModules: ['FLEET', 'TMS', 'TRIPS', 'CORRIDOR_TRACKING', 'DELIVERY_POD', 'INVOICING', 'ALLOCATION', 'WAREHOUSE', 'DRIVER_AGENT'],
-    autonomyLevel: 3,
-    fleetSize: '26-100',
-    monthlyShipments: '500-2500',
-    geography: 'NATIONAL',
-  },
-  APEX_3PL: {
-    id: 'ten_apex_3pl',
-    name: 'Apex Global 3PL & Forwarding',
-    archetype: '3PL_PROVIDER',
-    plan: 'SCALE',
-    score: 38,
-    enabledModules: ['TMS', 'CORRIDOR_TRACKING', 'CUSTOMER_PORTAL', 'INVOICING', 'FREIGHT_AUDIT', 'EXCEPTION_AGENT', 'LEADS_CRM'],
-    autonomyLevel: 4,
-    fleetSize: '0',
-    monthlyShipments: '2500-10000',
-    geography: 'INTERNATIONAL',
-  },
-  SWIFTCITY_EXPRESS: {
-    id: 'ten_swiftcity',
-    name: 'SwiftCity Last-Mile Express',
-    archetype: 'COURIER_LAST_MILE',
-    plan: 'FLEX',
-    score: 16,
-    enabledModules: ['TMS', 'DRIVER_APP', 'DELIVERY_POD', 'CUSTOMER_PORTAL', 'DRIVER_AGENT'],
-    autonomyLevel: 2,
-    fleetSize: '6-25',
-    monthlyShipments: '2500-10000',
-    geography: 'LOCAL',
-  },
+  DEFAULT: DEFAULT_TENANT,
+  ABC_TRANSPORT: DEFAULT_TENANT,
 };
 
 // ─── Full Master Navigation Taxonomy ─────────────────────────────────────────
@@ -117,7 +100,7 @@ const MASTER_NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
 // ─── Active Tenant State Management ──────────────────────────────────────────
 export function getActiveTenant(): TenantProfile {
   if (typeof window === 'undefined') {
-    return PRESET_TENANTS.ABC_TRANSPORT;
+    return DEFAULT_TENANT;
   }
   try {
     const raw = localStorage.getItem('logiflow_active_tenant');
@@ -125,7 +108,7 @@ export function getActiveTenant(): TenantProfile {
       return JSON.parse(raw);
     }
   } catch {}
-  return PRESET_TENANTS.ABC_TRANSPORT;
+  return DEFAULT_TENANT;
 }
 
 export function setActiveTenant(tenant: TenantProfile) {

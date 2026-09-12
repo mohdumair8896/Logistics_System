@@ -46,7 +46,6 @@ export async function POST(request: NextRequest) {
       facility: companyName || auth.facility,
       avatar: auth.avatar,
       tenantId,
-      isDemo: false,
       isConfigured: true, // <<-- Now fully unlocked!
       plan: auth.plan || 'GROWTH',
       companyName: companyName || auth.companyName,

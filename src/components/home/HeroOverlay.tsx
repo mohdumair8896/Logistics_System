@@ -52,7 +52,7 @@ export const HeroOverlay: React.FC<HeroOverlayProps> = ({ onScrollClick }) => {
         {/* Nav actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           <Link
-            href="/demo"
+            href="/pricing"
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
               padding: '7px 14px', borderRadius: 99,
@@ -62,12 +62,12 @@ export const HeroOverlay: React.FC<HeroOverlayProps> = ({ onScrollClick }) => {
               boxShadow: '0 0 15px rgba(245,158,11,0.2)',
               transition: 'background 0.15s, border-color 0.15s',
             }}
-            title="Explore Interactive Demo Sandbox"
+            title="Explore Commercial Plans & Pricing"
             onMouseEnter={e => (e.currentTarget.style.background = 'rgba(245,158,11,0.3)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'rgba(245,158,11,0.15)')}
           >
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fbbf24', display: 'inline-block' }} />
-            <span>LIVE DEMO SANDBOX →</span>
+            <span>GET STARTED NOW →</span>
           </Link>
 
           <Link
@@ -146,9 +146,9 @@ export const HeroOverlay: React.FC<HeroOverlayProps> = ({ onScrollClick }) => {
         {/* Unified Call to Action & Social proof */}
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 14 }}>
 
-          {/* PRIMARY CALL TO ACTION: Try Live Interactive Demo */}
+          {/* PRIMARY CALL TO ACTION: Get Started & Choose Plan */}
           <Link
-            href="/demo"
+            href="/pricing"
             style={{
               padding: '13px 26px',
               borderRadius: 14,
@@ -174,7 +174,7 @@ export const HeroOverlay: React.FC<HeroOverlayProps> = ({ onScrollClick }) => {
             }}
           >
             <Sparkles style={{ width: 17, height: 17 }} />
-            <span>Try Live Interactive Demo</span>
+            <span>Start Free Trial</span>
             <ArrowRight style={{ width: 16, height: 16 }} />
           </Link>
 

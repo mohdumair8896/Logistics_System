@@ -764,7 +764,7 @@ export default function AgentOpsPage() {
               Common Indian Road Scenarios
             </h3>
             <p style={{ fontSize: 12, color: 'var(--text-mid)', marginBottom: 16 }}>
-              Click to simulate ground driver voice/text messages and watch the AI Operating Layer respond:
+              Dispatch rapid driver voice/text messages to evaluate real-time AI Operating Layer resolution:
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

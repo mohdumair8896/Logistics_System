@@ -57,7 +57,7 @@ export default function ConfigurePage() {
     setScreen('PROVISIONING');
     // Save tenant profile into localStorage so the dashboard and header can immediately read it
     const activeTenant = {
-      name: state.companyName || 'ABC National Transport',
+      name: state.companyName || 'My Logistics Workspace',
       archetype: state.archetype,
       plan: result.recommendedPlan,
       score: result.totalScore,
@@ -85,7 +85,7 @@ export default function ConfigurePage() {
       }),
     }).catch(e => console.warn('[Provisioning API error]:', e));
 
-    // Run simulated provisioning checklist
+    // Step through workspace provisioning checklist
     let step = 0;
     const interval = setInterval(() => {
       step += 1;

@@ -96,7 +96,7 @@ export const ARCHETYPES: Record<ArchetypeCode, ArchetypeDefinition> = {
     description: 'Direct vehicle ownership, driver settlements, GPS corridors, fuel tracking, and e-way bills.',
     recommendedModules: ['FLEET', 'TMS', 'TRIPS', 'CORRIDOR_TRACKING', 'DELIVERY_POD', 'INVOICING', 'DRIVER_AGENT'],
     defaultExcluded: ['CUSTOMS', 'OCEAN_BL', 'TENDERING'],
-    sampleCompany: 'ABC National Transport',
+    sampleCompany: 'e.g. National Freight Express',
   },
   '3PL_PROVIDER': {
     code: '3PL_PROVIDER',
@@ -105,7 +105,7 @@ export const ARCHETYPES: Record<ArchetypeCode, ArchetypeDefinition> = {
     description: 'Contract logistics, carrier procurement, shipper portals, exception control tower, and freight billing.',
     recommendedModules: ['TMS', 'CORRIDOR_TRACKING', 'CUSTOMER_PORTAL', 'INVOICING', 'FREIGHT_AUDIT', 'EXCEPTION_AGENT', 'LEADS_CRM'],
     defaultExcluded: ['MECHANIC_LOGS', 'FUEL_SLIPS'],
-    sampleCompany: 'Apex Global 3PL',
+    sampleCompany: 'e.g. Global Logistics 3PL',
   },
   FREIGHT_BROKER: {
     code: 'FREIGHT_BROKER',
@@ -388,7 +388,7 @@ export function calculateComplexityScore(state: OnboardingState): ComplexityResu
 }
 
 export const DEFAULT_ONBOARDING_STATE: OnboardingState = {
-  companyName: 'ABC National Transport',
+  companyName: '',
   archetype: 'FLEET_OWNER',
   geography: 'NATIONAL',
   modes: ['ROAD'],

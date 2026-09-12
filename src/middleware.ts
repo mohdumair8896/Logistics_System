@@ -81,7 +81,7 @@ export async function middleware(request: NextRequest) {
     }
 
     // First-Time Login Guard: If customer has paid but hasn't completed 7-stage setup, hold at /setup
-    if (session.isConfigured === false && !session.isDemo && pathname !== '/setup') {
+    if (session.isConfigured === false && pathname !== '/setup') {
       return NextResponse.redirect(new URL('/setup', request.url));
     }
   }

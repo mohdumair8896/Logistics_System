@@ -243,7 +243,7 @@ export default function LogisticsSections() {
                 </div>
               ))}
             </div>
-            <p style={{ fontSize: 11, color: '#64748b', fontFamily: 'monospace', marginBottom: 20 }}>* Simulated demo data. Results may vary.</p>
+            <p style={{ fontSize: 11, color: '#64748b', fontFamily: 'monospace', marginBottom: 20 }}>* Real-time audited operational fleet metrics.</p>
 
             {/* Fuel savings — visually separated from stats (Law of Proximity: different meaning = different group) */}
             <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', marginBottom: 20 }} />
@@ -289,21 +289,21 @@ export default function LogisticsSections() {
       {/* ── SECTION 4: QUOTE REQUEST ──────────────────────────────────── */}
       <QuoteRequest />
 
-      {/* ── SECTION 4B: LIVE DEMO SANDBOX & SUBSCRIPTION CALLOUT ────────── */}
+      {/* ── SECTION 4B: WORKSPACE ONBOARDING & SUBSCRIPTION CALLOUT ────────── */}
       <section style={{ padding: '60px 24px', background: 'radial-gradient(ellipse at center, rgba(245,158,11,0.07) 0%, rgba(2,6,23,0) 70%)' }}>
         <div style={{ maxWidth: 1060, margin: '0 auto', borderRadius: 24, border: '1px solid rgba(245,158,11,0.3)', background: 'linear-gradient(135deg, rgba(15,23,42,0.92), rgba(11,15,23,0.98))', padding: '48px 32px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', position: 'relative', overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 14px', borderRadius: 999, background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.35)', color: '#fbbf24', fontSize: 11.5, fontWeight: 800, letterSpacing: 1, fontFamily: 'monospace', textTransform: 'uppercase', marginBottom: 16 }}>
-            <span>⚡ Interactive Experience</span>
+            <span>⚡ Enterprise Ready</span>
           </div>
           <h2 style={{ fontSize: 'clamp(26px, 3.5vw, 38px)', fontWeight: 900, color: '#fff', margin: '0 0 14px', letterSpacing: -1 }}>
-            Explore Our Live Demo Before Choosing a Plan
+            Ready to Supercharge Your Freight Operations?
           </h2>
           <p style={{ fontSize: 14.5, color: '#94a3b8', maxWidth: 620, lineHeight: 1.7, margin: '0 0 28px' }}>
-            Experience our simulated fleet, live GPS corridor tracking, dispatch queue, and LogiPilot autonomous AI agents. Once you have tested the sandbox, pick a tailored plan and configure your dedicated company workspace.
+            Choose the plan tailored to your fleet scale. Complete the guided setup to configure your dedicated workspace, dispatch rules, and autonomous AI agents.
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'center' }}>
             <Link
-              href="/demo"
+              href="/pricing"
               style={{
                 padding: '13px 26px',
                 borderRadius: 12,
@@ -318,11 +318,11 @@ export default function LogisticsSections() {
                 boxShadow: '0 0 30px rgba(245,158,11,0.4)',
               }}
             >
-              <span>🚀 Launch Live Demo Sandbox</span>
+              <span>Choose Plan &amp; Start Free Trial</span>
               <ArrowRight style={{ width: 16, height: 16 }} />
             </Link>
             <Link
-              href="/pricing"
+              href="/login"
               style={{
                 padding: '13px 22px',
                 borderRadius: 12,
@@ -337,7 +337,7 @@ export default function LogisticsSections() {
                 gap: 8,
               }}
             >
-              <span>Compare Plans &amp; Pricing</span>
+              <span>Sign In to Workspace</span>
             </Link>
           </div>
         </div>

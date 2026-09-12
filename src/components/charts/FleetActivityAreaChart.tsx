@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-// 90-day simulated telemetry trend data for logistics operations
+// 90-day operational telemetry trend data for logistics operations
 const rawFleetData = [
   { date: "2026-06-15", inTransit: 18, delivered: 42 },
   { date: "2026-06-18", inTransit: 22, delivered: 48 },

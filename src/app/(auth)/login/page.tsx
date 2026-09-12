@@ -1,54 +1,23 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Truck, Eye, EyeOff, LogIn, ShieldCheck, KeyRound, X } from 'lucide-react';
 import { ModalPortal } from '@/components/ui/ModalPortal';
 import { DotSpinner } from '@/components/ui/DotSpinner';
 import { Toggle } from '@/components/ui/Toggle';
 
-const demoRoles = [
-  {
-    role: 'Operations Director',
-    email: 'admin@precisionlogistics.com',
-    name: 'Alex Morgan',
-    facility: 'Central Distribution Hub',
-    desc: 'Full command & control, billing approval, fleet assignment',
-  },
-  {
-    role: 'Fleet Dispatcher',
-    email: 'dispatch@precisionlogistics.com',
-    name: 'Sam Rivera',
-    facility: 'North Corridor Terminal',
-    desc: 'Live trip dispatch, truck allocation, driver communication',
-  },
-  {
-    role: 'Compliance Officer',
-    email: 'compliance@precisionlogistics.com',
-    name: 'Jordan Patel',
-    facility: 'West Regional Terminal',
-    desc: 'Driver licensing, safety checks, axle weight auditing',
-  },
-];
-
 export default function LoginPage() {
   const router = useRouter();
 
-  const [selectedRole, setSelectedRole] = useState(demoRoles[0]);
-  const [email, setEmail] = useState(demoRoles[0].email);
-  const [password, setPassword] = useState('Logistics2026!');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [forgotModal, setForgotModal] = useState(false);
   const [resetSent, setResetSent] = useState(false);
-
-  const handleSelectRole = (r: typeof demoRoles[0]) => {
-    setSelectedRole(r);
-    setEmail(r.email);
-    setPassword('Logistics2026!');
-    setError('');
-  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,41 +106,6 @@ export default function LoginPage() {
           borderRadius: 14, padding: '24px 26px',
           boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
         }}>
-          {/* Role picker */}
-          <div style={{ marginBottom: 18 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <div style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
-                Select Role
-              </div>
-              <div style={{ fontSize: 10.5, color: 'var(--brand)', background: 'var(--brand-10)', padding: '2px 7px', borderRadius: 6, fontWeight: 600 }}>
-                Demo Auto-Filled
-              </div>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
-              {demoRoles.map(r => {
-                const isSelected = selectedRole.email === r.email;
-                return (
-                  <button
-                    key={r.role}
-                    type="button"
-                    onClick={() => handleSelectRole(r)}
-                    style={{
-                      padding: '8px 6px', borderRadius: 8,
-                      border: `1px solid ${isSelected ? 'var(--brand)' : 'var(--border)'}`,
-                      background: isSelected ? 'var(--brand-10)' : 'var(--surface-2)',
-                      color: isSelected ? 'var(--brand)' : 'var(--text-mid)',
-                      fontSize: 11, fontWeight: isSelected ? 700 : 500,
-                      cursor: 'pointer', textAlign: 'center', lineHeight: 1.2,
-                      transition: 'all 0.13s',
-                    }}
-                  >
-                    {r.role}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 13 }}>
             <div className="form-group">
               <label className="form-label">Email Address</label>
@@ -180,7 +114,7 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder="name@logiflow.io"
+                placeholder="name@company.com"
                 required
               />
             </div>
@@ -255,6 +189,13 @@ export default function LoginPage() {
                 </>
               )}
             </button>
+
+            <div style={{ textAlign: 'center', marginTop: 10, fontSize: 12, color: 'var(--text-mid)' }}>
+              New company?{' '}
+              <Link href="/pricing" style={{ color: 'var(--brand)', fontWeight: 600, textDecoration: 'none' }}>
+                Choose a Plan &amp; Activate Workspace →
+              </Link>
+            </div>
           </form>
         </div>
 

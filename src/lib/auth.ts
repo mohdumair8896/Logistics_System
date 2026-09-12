@@ -19,7 +19,6 @@ export interface SessionPayload {
   avatar: string;
   exp: number; // Unix timestamp (seconds)
   tenantId?: string;
-  isDemo?: boolean;
   isConfigured?: boolean;
   plan?: string;
   companyName?: string;

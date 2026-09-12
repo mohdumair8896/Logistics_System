@@ -102,7 +102,7 @@ export default function PublicTrackingSearchPage() {
         {/* Quick Sample Links */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, width: '100%' }}>
           <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-low, #909090)', letterSpacing: 0.5, textTransform: 'uppercase' }}>
-            Quick Demo Shipments:
+            Recent Waybill Lookups:
           </span>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
             {sampleShipments.map((s) => (

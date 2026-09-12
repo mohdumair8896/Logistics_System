@@ -92,7 +92,6 @@ export async function POST(request: NextRequest) {
       facility: cleanCompany,
       avatar,
       tenantId,
-      isDemo: false,
       isConfigured: false, // <<-- Gates user directly into first-time questionnaire!
       plan: chosenPlan,
       companyName: cleanCompany,

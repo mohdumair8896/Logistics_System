@@ -32,7 +32,7 @@ export default function VehiclesPage() {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div className="page-title">Fleet Roster &amp; Telematics</div>
-            <span className="badge badge-blue" style={{ fontSize: 11, fontWeight: 700 }}>142 Total Fleet Vehicles</span>
+            <span className="badge badge-blue" style={{ fontSize: 11, fontWeight: 700 }}>{vehicles.length} Total Fleet Vehicles</span>
           </div>
           <div className="page-subtitle">Real-time asset telemetry, maintenance records &amp; driver pairing</div>
         </div>

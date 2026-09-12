@@ -1,5 +1,5 @@
 'use client';
-import { Gauge, Fuel, Thermometer, ShieldCheck, FastForward, MessageSquare, CheckCircle, MapPin } from 'lucide-react';
+import { Gauge, Fuel, Thermometer, ShieldCheck, MessageSquare, CheckCircle, MapPin } from 'lucide-react';
 import type { Trip } from '@/features/trips/types';
 import type { Vehicle } from '@/features/vehicles/types';
 import type { Driver } from '@/features/drivers/types';
@@ -10,15 +10,14 @@ interface Props {
   driver: Driver | null;
   distDone: number;
   distLeft: number;
-  simulating: boolean;
-  onStartSimulation: () => void;
+  onCompleteDelivery?: () => void;
   onChatDriver: () => void;
   onNavigateDelivery: () => void;
 }
 
 export default function TelemetryPanel({
   trip, vehicle, driver, distDone, distLeft,
-  simulating, onStartSimulation, onChatDriver, onNavigateDelivery
+  onCompleteDelivery, onChatDriver, onNavigateDelivery
 }: Props) {
   return (
     <>
@@ -133,22 +132,15 @@ export default function TelemetryPanel({
 
       {/* Action buttons */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {trip.status === 'In Transit' && !simulating && trip.progress < 100 && (
+        {trip.status === 'In Transit' && trip.progress < 100 && onCompleteDelivery && (
           <button
             className="btn btn-primary"
             style={{ justifyContent: 'center' }}
-            onClick={onStartSimulation}
+            onClick={onCompleteDelivery}
           >
-            <FastForward size={14} />
-            Simulate Transit
+            <CheckCircle size={14} />
+            Confirm Delivery / Arrival
           </button>
-        )}
-
-        {simulating && (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, padding: '9px 16px', background: 'var(--brand-10)', border: '1px solid var(--brand-20)', borderRadius: 8 }}>
-            <div style={{ width: 12, height: 12, border: '2px solid var(--brand-20)', borderTopColor: 'var(--brand)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-            <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--brand)' }}>Simulating transit…</span>
-          </div>
         )}
 
         {driver && (
