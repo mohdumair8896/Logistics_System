@@ -329,3 +329,67 @@ export const operationalEvents = pgTable('operational_events', {
   index('idx_op_events_event_type').on(table.eventType),
 ]);
 
+// ─────────────────────────────────────────────────────────────────────────────
+// MULTI-TENANT CONTROL PLANE (Composable Logistics OS)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const tenants = pgTable('tenants', {
+  id: varchar('id', { length: 36 }).primaryKey(), // e.g. 'ten_abc_transport'
+  name: varchar('name', { length: 150 }).notNull(),
+  slug: varchar('slug', { length: 80 }).unique().notNull(),
+  archetype: varchar('archetype', { length: 40 }).notNull(), // 'FLEET_OWNER' | '3PL_PROVIDER' | 'COURIER_LAST_MILE' etc.
+  country: varchar('country', { length: 10 }).default('IN'),
+  currency: varchar('currency', { length: 5 }).default('INR'),
+  timezone: varchar('timezone', { length: 50 }).default('Asia/Kolkata'),
+  complexityScore: integer('complexity_score').default(25),
+  createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`),
+});
+
+export const tenantSubscriptions = pgTable('tenant_subscriptions', {
+  id: varchar('id', { length: 36 }).primaryKey(),
+  tenantId: varchar('tenant_id', { length: 36 }).references(() => tenants.id).notNull(),
+  plan: varchar('plan', { length: 30 }).notNull(), // 'FLEX' | 'GROWTH' | 'SCALE' | 'ENTERPRISE'
+  status: varchar('status', { length: 20 }).default('ACTIVE'), // 'ACTIVE' | 'TRIAL' | 'PAST_DUE'
+  maxVehicles: integer('max_vehicles').default(100),
+  maxMonthlyShipments: integer('max_monthly_shipments').default(2500),
+  maxAiActions: integer('max_ai_actions').default(7500),
+  renewsAt: timestamp('renews_at', { withTimezone: true }),
+  spendingLimitCap: decimal('spending_limit_cap', { precision: 12, scale: 2 }).default('50000'),
+  createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`),
+});
+
+export const tenantModules = pgTable('tenant_modules', {
+  id: varchar('id', { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar('tenant_id', { length: 36 }).references(() => tenants.id).notNull(),
+  moduleCode: varchar('module_code', { length: 50 }).notNull(), // 'FLEET', 'WAREHOUSE', 'TMS', etc.
+  isEnabled: boolean('is_enabled').default(true),
+  enabledAt: timestamp('enabled_at', { withTimezone: true }).default(sql`now()`),
+}, (table) => [
+  index('idx_tenant_modules_lookup').on(table.tenantId, table.moduleCode),
+]);
+
+export const tenantConfigs = pgTable('tenant_configs', {
+  tenantId: varchar('tenant_id', { length: 36 }).primaryKey().references(() => tenants.id),
+  autonomyLevel: integer('autonomy_level').default(2), // 0 to 5
+  autoApproveLimitAmount: decimal('auto_approve_limit_amount', { precision: 10, scale: 2 }).default('5000'),
+  detentionGraceHours: integer('detention_grace_hours').default(2),
+  slaGraceMinutes: integer('sla_grace_minutes').default(60),
+  driverCommChannel: varchar('driver_comm_channel', { length: 30 }).default('WHATSAPP'),
+  customFields: json('custom_fields').$type<Record<string, unknown>>().default({}),
+  activeIntegrations: json('active_integrations').$type<string[]>().default([]),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).default(sql`now()`),
+});
+
+export const usageCounters = pgTable('usage_counters', {
+  id: varchar('id', { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar('tenant_id', { length: 36 }).references(() => tenants.id).notNull(),
+  metricPeriod: varchar('metric_period', { length: 7 }).notNull(), // '2026-09'
+  shipmentsCount: integer('shipments_count').default(0),
+  aiActionsCount: integer('ai_actions_count').default(0),
+  whatsappMessagesCount: integer('whatsapp_messages_count').default(0),
+  ocrDocumentsCount: integer('ocr_documents_count').default(0),
+  createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`),
+}, (table) => [
+  index('idx_usage_tenant_period').on(table.tenantId, table.metricPeriod),
+]);
+

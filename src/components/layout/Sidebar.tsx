@@ -12,44 +12,7 @@ import { invalidateUserCache } from '@/lib/useCurrentUser';
 import { toast } from 'sonner';
 import { Tooltip } from '@/components/ui/Tooltip';
 
-interface NavItem {
-  href: string;
-  icon: LucideIcon;
-  label: string;
-  badge?: string;
-}
-
-interface NavSection {
-  label: string;
-  items: NavItem[];
-}
-
-const navItems: NavSection[] = [
-  { label: 'OVERVIEW', items: [
-    { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { href: '/agent-ops', icon: Cpu, label: 'LogiPilot AI Ops' },
-  ]},
-  { label: 'OPERATIONS', items: [
-    { href: '/orders',     icon: ShoppingCart, label: 'Orders',           badge: 'orders' },
-    { href: '/allocation', icon: MapPin,        label: 'Allocation',       badge: 'allocation' },
-    { href: '/warehouse',  icon: Warehouse,     label: 'Warehouse & Bays' },
-    { href: '/trips',      icon: Navigation,    label: 'Trips' },
-  ]},
-  { label: 'DELIVERY & BILLING', items: [
-    { href: '/tracking',   icon: Package,      label: 'Live Tracking',    badge: 'activeTrips' },
-    { href: '/track',      icon: Search,       label: 'Customer Tracking' },
-    { href: '/delivery',   icon: PackageCheck, label: 'Delivery & POD' },
-    { href: '/invoices',   icon: FileText,     label: 'Invoices' },
-  ]},
-  { label: 'FLEET & ROSTER', items: [
-    { href: '/vehicles', icon: Truck,  label: 'Vehicles', badge: 'vehicles' },
-    { href: '/drivers',  icon: Users,  label: 'Drivers' },
-  ]},
-  { label: 'TOOLS', items: [
-    { href: '/leads',          icon: Sparkles, label: 'Leads CRM',     badge: 'leads' },
-    { href: '/knowledge-base', icon: BookOpen, label: 'Knowledge Base' },
-  ]},
-];
+import { getActiveTenant, getTenantNavigation, TenantProfile } from '@/lib/entitlements';
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -66,7 +29,17 @@ export default function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const [activeTenant, setActiveTenantState] = useState<TenantProfile>(getActiveTenant());
   const [navCounts, setNavCounts] = useState({ pendingOrders: 0, activeTrips: 0, newLeads: 0 });
+
+  useEffect(() => {
+    const handleTenantChange = (e: any) => {
+      if (e.detail) setActiveTenantState(e.detail);
+      else setActiveTenantState(getActiveTenant());
+    };
+    window.addEventListener('logiflow_tenant_changed', handleTenantChange);
+    return () => window.removeEventListener('logiflow_tenant_changed', handleTenantChange);
+  }, []);
 
   useEffect(() => {
     let isCancelled = false;
@@ -112,6 +85,8 @@ export default function Sidebar({
     return 0;
   };
 
+  const navSections = getTenantNavigation(activeTenant);
+
   return (
     <>
       {/* Mobile backdrop */}
@@ -147,8 +122,8 @@ export default function Sidebar({
             </div>
             {!isCollapsed && (
               <div className="logo-text">
-                <div className="name">LogiFlow</div>
-                <div className="sub">Logistics Platform</div>
+                <div className="name truncate max-w-[130px]">{activeTenant.name || 'LogiFlow'}</div>
+                <div className="sub truncate max-w-[130px]">{activeTenant.plan} · {activeTenant.archetype?.replace('_', ' ') || 'Platform'}</div>
               </div>
             )}
           </Link>
@@ -170,7 +145,7 @@ export default function Sidebar({
 
         {/* Navigation */}
         <nav className="sidebar-nav">
-          {navItems.map(section => (
+          {navSections.map(section => (
             <div key={section.label} className="nav-section">
               {!isCollapsed && <div className="nav-section-label">{section.label}</div>}
               {isCollapsed && <div className="my-2 mx-auto w-7 h-px bg-[var(--border,#E6E4DF)]" />}

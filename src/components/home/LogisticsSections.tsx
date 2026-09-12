@@ -342,19 +342,32 @@ export default function LogisticsSections() {
           <h2 style={{ fontSize: 'clamp(24px, 3vw, 36px)', fontWeight: 900, color: '#fff', letterSpacing: -1, marginBottom: 20 }}>
             Move your first load today
           </h2>
-          <a
-            href="#quote-section"
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 10,
-              background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-              color: '#1c1917', padding: '14px 28px', borderRadius: 14,
-              fontSize: 14, fontWeight: 700, textDecoration: 'none',
-              boxShadow: '0 0 30px rgba(245,158,11,0.3)',
-            }}
-          >
-            <ArrowRight style={{ width: 18, height: 18 }} aria-hidden="true" />
-            Get Instant Rate
-          </a>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 14 }}>
+            <Link
+              href="/configure"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 10,
+                background: 'linear-gradient(135deg, #2563eb, #4f46e5)',
+                color: '#fff', padding: '14px 28px', borderRadius: 14,
+                fontSize: 14, fontWeight: 700, textDecoration: 'none',
+                boxShadow: '0 0 30px rgba(37,99,235,0.3)',
+              }}
+            >
+              <ArrowRight style={{ width: 18, height: 18 }} aria-hidden="true" />
+              Configure Your Logistics Workspace
+            </Link>
+            <a
+              href="#quote-section"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 10,
+                background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)',
+                color: '#fff', padding: '14px 28px', borderRadius: 14,
+                fontSize: 14, fontWeight: 700, textDecoration: 'none',
+              }}
+            >
+              Get Instant Rate
+            </a>
+          </div>
         </div>
       </div>
 
