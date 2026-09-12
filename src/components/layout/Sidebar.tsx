@@ -36,8 +36,8 @@ export default function Sidebar({
       if (customEvent.detail) setActiveTenantState(customEvent.detail);
       else setActiveTenantState(getActiveTenant());
     };
-    window.addEventListener('logiflow_tenant_changed', handleTenantChange);
-    return () => window.removeEventListener('logiflow_tenant_changed', handleTenantChange);
+    window.addEventListener('logisticsedge_tenant_changed', handleTenantChange);
+    return () => window.removeEventListener('logisticsedge_tenant_changed', handleTenantChange);
   }, []);
 
   useEffect(() => {
@@ -121,7 +121,7 @@ export default function Sidebar({
             </div>
             {!isCollapsed && (
               <div className="logo-text">
-                <div className="name truncate max-w-[130px]">{activeTenant.name || 'LogiFlow'}</div>
+                <div className="name truncate max-w-[130px]">{activeTenant.name || 'LogisticsEdge'}</div>
                 <div className="sub truncate max-w-[130px]">{activeTenant.plan} · {activeTenant.archetype?.replace('_', ' ') || 'Platform'}</div>
               </div>
             )}

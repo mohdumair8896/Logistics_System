@@ -93,7 +93,7 @@ export default function LoginPage() {
             <Truck size={26} color="#fff" />
           </div>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-high)', letterSpacing: '-0.3px', marginBottom: 4, fontFamily: 'var(--font-heading)' }}>
-            LogiFlow Platform
+            LogisticsEdge Platform
           </h1>
           <p style={{ fontSize: 11.5, color: 'var(--text-low)', fontWeight: 600, letterSpacing: '0.7px', textTransform: 'uppercase' }}>
             Fleet Intelligence System
@@ -212,7 +212,7 @@ export default function LoginPage() {
         </div>
 
         <div style={{ textAlign: 'center', marginTop: 18, fontSize: 10.5, color: 'var(--text-low)' }}>
-          © 2026 LogiFlow Platform. All rights reserved.
+          © 2026 LogisticsEdge Platform. All rights reserved.
         </div>
       </div>
 

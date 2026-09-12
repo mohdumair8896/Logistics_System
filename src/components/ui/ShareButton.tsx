@@ -25,7 +25,7 @@ export interface ShareButtonProps {
 export function ShareButton({
   url,
   title = 'Live Consignment Tracking',
-  text = 'Track this shipment in real time on LogiFlow:',
+  text = 'Track this shipment in real time on LogisticsEdge:',
   buttonText = 'Share Link',
   className = '',
   style = {},

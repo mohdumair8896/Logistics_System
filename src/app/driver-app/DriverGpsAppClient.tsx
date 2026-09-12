@@ -165,7 +165,7 @@ function DriverGpsApp() {
       {/* Logo */}
       <div style={{ marginBottom: 28, textAlign: 'center' }}>
         <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: -0.5, color: '#fff' }}>
-          🚛 LogiFlow
+          🚛 LogisticsEdge
         </div>
         <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 2, letterSpacing: 1.5, textTransform: 'uppercase' }}>
           Driver GPS App
@@ -323,7 +323,7 @@ function DriverGpsApp() {
       </div>
 
       <div style={{ marginTop: 20, fontSize: 11, color: 'rgba(255,255,255,0.2)', textAlign: 'center' }}>
-        LogiFlow Fleet Operations • GPS pings every 5s
+        LogisticsEdge Fleet Operations • GPS pings every 5s
       </div>
 
       <style>{`

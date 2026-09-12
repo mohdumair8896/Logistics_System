@@ -61,7 +61,7 @@ function ChatbotDrawer({ onClose }: { onClose: () => void }) {
     {
       id: 'welcome',
       sender: 'bot',
-      text: 'Hello! I am your LogiFlow AI Dispatch Copilot. I have real-time visibility over fleet GPS, bay staging manifests, corridor freight tariffs, and cold-chain telemetry. How can I assist dispatch today?',
+      text: 'Hello! I am your LogisticsEdge AI Dispatch Copilot. I have real-time visibility over fleet GPS, bay staging manifests, corridor freight tariffs, and cold-chain telemetry. How can I assist dispatch today?',
       time: '10:00 AM',
     }
   ]);
@@ -216,7 +216,7 @@ function ChatbotDrawer({ onClose }: { onClose: () => void }) {
       id,
       sender: 'bot',
       time,
-      text: `I've analyzed your query against LogiFlow's operational models. I can assist you with:\n• **Fleet & GPS HUD**: Track active vehicles and trips.\n• **Corridor Tariffs**: Inquire tariffs for Lucknow, Kanpur, Delhi NCR.\n• **Bay Allocation & Loading**: Verify staged orders for dispatch.\n• **SOP Compliance**: Reefer temperature limits, emergency breakdown rules, and GST tax billing.`,
+      text: `I've analyzed your query against LogisticsEdge's operational models. I can assist you with:\n• **Fleet & GPS HUD**: Track active vehicles and trips.\n• **Corridor Tariffs**: Inquire tariffs for Lucknow, Kanpur, Delhi NCR.\n• **Bay Allocation & Loading**: Verify staged orders for dispatch.\n• **SOP Compliance**: Reefer temperature limits, emergency breakdown rules, and GST tax billing.`,
       actionLink: {
         href: '/dashboard',
         label: 'View Operations Command Dashboard →'
@@ -293,7 +293,7 @@ function ChatbotDrawer({ onClose }: { onClose: () => void }) {
           </div>
           <div>
             <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--text-high)', display: 'flex', alignItems: 'center', gap: 6 }}>
-              LogiFlow AI Copilot
+              LogisticsEdge AI Copilot
             </div>
             <div style={{ fontSize: 11, color: 'var(--brand)', display: 'flex', alignItems: 'center', gap: 4 }}>
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#16A34A' }} />
@@ -504,7 +504,7 @@ function ChatbotDrawer({ onClose }: { onClose: () => void }) {
 }
 
 // ─── Main Export: Floating Toggle Button + Lazy Drawer ─────────────────────────
-export default function LogiFlowChatbot() {
+export default function LogisticsEdgeChatbot() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -512,7 +512,7 @@ export default function LogiFlowChatbot() {
       {/* Floating Action Trigger Button (Bottom Right) */}
       <button
         onClick={() => setIsOpen(prev => !prev)}
-        aria-label="Open LogiFlow AI Dispatch Copilot"
+        aria-label="Open LogisticsEdge AI Dispatch Copilot"
         style={{
           position: 'fixed',
           bottom: 24,

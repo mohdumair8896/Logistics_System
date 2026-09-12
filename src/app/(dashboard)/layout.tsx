@@ -3,7 +3,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
-import LogiFlowChatbot from '@/components/layout/LogiFlowChatbot';
+import LogisticsEdgeChatbot from '@/components/layout/LogisticsEdgeChatbot';
 
 
 import { getCurrentUser } from '@/lib/useCurrentUser';
@@ -45,7 +45,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     // Load persisted collapse state
     try {
-      const saved = localStorage.getItem('logiflow_sidebar_collapsed');
+      const saved = localStorage.getItem('logisticsedge_sidebar_collapsed');
       if (saved === 'true') setIsSidebarCollapsed(true);
     } catch {}
 
@@ -55,7 +55,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         setIsSidebarCollapsed((prev) => {
           const next = !prev;
           try {
-            localStorage.setItem('logiflow_sidebar_collapsed', String(next));
+            localStorage.setItem('logisticsedge_sidebar_collapsed', String(next));
           } catch {}
           return next;
         });
@@ -70,7 +70,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     setIsSidebarCollapsed((prev) => {
       const next = !prev;
       try {
-        localStorage.setItem('logiflow_sidebar_collapsed', String(next));
+        localStorage.setItem('logisticsedge_sidebar_collapsed', String(next));
       } catch {}
       return next;
     });
@@ -92,7 +92,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!mounted || isLoggedIn === null) return null; // still checking session
   if (!isLoggedIn) return null; // redirect already triggered
 
-  const info = pageTitles[pathname] || { title: 'LogiFlow', subtitle: 'Logistics Management' };
+  const info = pageTitles[pathname] || { title: 'LogisticsEdge', subtitle: 'Logistics Management' };
  
    return (
      <div className="app-layout" data-collapsed={isSidebarCollapsed}>
@@ -120,7 +120,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </div>
 
       {/* Global AI Dispatch Copilot / Chatbot */}
-      <LogiFlowChatbot />
+      <LogisticsEdgeChatbot />
     </div>
   );
 }

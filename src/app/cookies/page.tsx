@@ -4,8 +4,8 @@ import { ArrowLeft, Cookie, ShieldCheck, BarChart2, Settings, Globe } from 'luci
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Cookie Policy | LogiFlow Logistics',
-  description: 'How LogiFlow uses cookies and similar tracking technologies — what we set, why, and how to control them.',
+  title: 'Cookie Policy | LogisticsEdge Logistics',
+  description: 'How LogisticsEdge uses cookies and similar tracking technologies — what we set, why, and how to control them.',
   alternates: { canonical: '/cookies' },
 };
 
@@ -47,15 +47,15 @@ const breadcrumbSchema = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://logiflow.io" },
-    { "@type": "ListItem", "position": 2, "name": "Cookie Policy", "item": "https://logiflow.io/cookies" },
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://logisticsedge.io" },
+    { "@type": "ListItem", "position": 2, "name": "Cookie Policy", "item": "https://logisticsedge.io/cookies" },
   ]
 };
 
 export default function CookiePolicyPage() {
   const essentialCookies: CookieRow[] = [
     { name: 'lms_session', type: 'Essential', purpose: 'Secures your authenticated dispatch session using HMAC-SHA256 signing. Required for all dashboard functionality.', duration: '8 hours' },
-    { name: 'logiflow_cookie_consent_v1', type: 'Essential', purpose: 'Stores your cookie preferences so the banner does not reappear on every page load.', duration: '365 days' },
+    { name: 'logisticsedge_cookie_consent_v1', type: 'Essential', purpose: 'Stores your cookie preferences so the banner does not reappear on every page load.', duration: '365 days' },
   ];
 
   const analyticsCookies: CookieRow[] = [
@@ -99,7 +99,7 @@ export default function CookiePolicyPage() {
             Cookie Policy
           </h1>
           <p style={{ fontSize: 14, color: 'var(--text-mid, #525252)', margin: 0 }}>
-            Effective: September 1, 2026 &bull; Applies to all LogiFlow web properties &bull; GDPR Article 13 &bull; DPDP Act 2023
+            Effective: September 1, 2026 &bull; Applies to all LogisticsEdge web properties &bull; GDPR Article 13 &bull; DPDP Act 2023
           </p>
         </div>
 
@@ -153,7 +153,7 @@ export default function CookiePolicyPage() {
             <ul style={{ paddingLeft: 24, display: 'flex', flexDirection: 'column', gap: 10 }}>
               <li><strong style={{ color: 'var(--text-high, #141414)' }}>Cookie Banner:</strong> Use the &ldquo;Customize&rdquo; option in our cookie banner at the bottom of the page to accept or reject analytics cookies.</li>
               <li><strong style={{ color: 'var(--text-high, #141414)' }}>Browser Settings:</strong> Most browsers allow you to block or delete cookies. See your browser&apos;s help documentation for instructions.</li>
-              <li><strong style={{ color: 'var(--text-high, #141414)' }}>Clear localStorage:</strong> Open browser DevTools → Application → Local Storage → delete <code style={{ fontFamily: 'var(--font-mono, monospace)', color: 'var(--brand, #0057FF)', background: 'var(--surface-2, #F3F2EF)', padding: '2px 6px', borderRadius: 4 }}>logiflow_cookie_consent_v1</code> to reset your preferences.</li>
+              <li><strong style={{ color: 'var(--text-high, #141414)' }}>Clear localStorage:</strong> Open browser DevTools → Application → Local Storage → delete <code style={{ fontFamily: 'var(--font-mono, monospace)', color: 'var(--brand, #0057FF)', background: 'var(--surface-2, #F3F2EF)', padding: '2px 6px', borderRadius: 4 }}>logisticsedge_cookie_consent_v1</code> to reset your preferences.</li>
               <li><strong style={{ color: 'var(--text-high, #141414)' }}>Opt-Out Links:</strong> Plausible Analytics operates cookieless and does not require a separate opt-out link.</li>
             </ul>
             <p style={{ marginTop: 8, fontSize: 13, color: 'var(--text-low, #909090)' }}>
@@ -169,7 +169,7 @@ export default function CookiePolicyPage() {
             <ul style={{ paddingLeft: 24, display: 'flex', flexDirection: 'column', gap: 10 }}>
               <li><strong style={{ color: 'var(--text-high, #141414)' }}>India (DPDP Act 2023):</strong> Consent is our lawful basis for analytics processing. Strictly necessary cookies are processed under &ldquo;legitimate interest&rdquo; for platform security.</li>
               <li><strong style={{ color: 'var(--text-high, #141414)' }}>European Union (GDPR Article 6):</strong> Strictly necessary cookies → legitimate interest. Analytics → explicit consent (opt-in). Analytics are not activated until you click &ldquo;Accept All.&rdquo;</li>
-              <li><strong style={{ color: 'var(--text-high, #141414)' }}>United States (California CCPA):</strong> We do not sell or share personal information. Cookies we set do not constitute &ldquo;selling&rdquo; under CCPA. California residents may submit a data access/deletion request to <a href="mailto:privacy@logiflow.io" style={{ color: 'var(--brand, #0057FF)' }}>privacy@logiflow.io</a>.</li>
+              <li><strong style={{ color: 'var(--text-high, #141414)' }}>United States (California CCPA):</strong> We do not sell or share personal information. Cookies we set do not constitute &ldquo;selling&rdquo; under CCPA. California residents may submit a data access/deletion request to <a href="mailto:privacy@logisticsedge.io" style={{ color: 'var(--brand, #0057FF)' }}>privacy@logisticsedge.io</a>.</li>
             </ul>
           </section>
 
@@ -182,7 +182,7 @@ export default function CookiePolicyPage() {
               We will notify you of material changes by updating the &ldquo;Effective Date&rdquo; above and, where required by law, displaying a notice on the platform. Continued use of the platform after changes constitutes acceptance of the revised policy.
             </p>
             <p>
-              For cookie-related questions or to exercise your data rights, contact: <a href="mailto:privacy@logiflow.io" style={{ color: 'var(--brand, #0057FF)' }}>privacy@logiflow.io</a>
+              For cookie-related questions or to exercise your data rights, contact: <a href="mailto:privacy@logisticsedge.io" style={{ color: 'var(--brand, #0057FF)' }}>privacy@logisticsedge.io</a>
             </p>
           </section>
 

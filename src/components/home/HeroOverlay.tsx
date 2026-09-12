@@ -43,7 +43,7 @@ export const HeroOverlay: React.FC<HeroOverlayProps> = ({ onScrollClick }) => {
           </div>
           <div>
             <h1 style={{ fontSize: 18, fontWeight: 900, color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: 8, letterSpacing: -0.5 }}>
-              LogiFlow
+              LogisticsEdge
             </h1>
             <p style={{ fontSize: 11, color: '#94a3b8', margin: 0, fontWeight: 500 }}>Enterprise Autonomous Freight</p>
           </div>

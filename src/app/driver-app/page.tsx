@@ -9,8 +9,8 @@
 import DriverGpsAppClient from './DriverGpsAppClient';
 
 export const metadata = {
-  title: 'Driver GPS App | LogiFlow',
-  description: 'Live GPS tracking for LogiFlow drivers. Open this on your smartphone to share your location with dispatch.',
+  title: 'Driver GPS App | LogisticsEdge',
+  description: 'Live GPS tracking for LogisticsEdge drivers. Open this on your smartphone to share your location with dispatch.',
 };
 
 export default function DriverAppPage() {

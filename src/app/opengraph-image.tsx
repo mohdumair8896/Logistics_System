@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 
-export const alt = 'LogiFlow — Next-Gen Fleet Logistics Platform';
+export const alt = 'LogisticsEdge — Next-Gen Fleet Logistics Platform';
 export const size = {
   width: 1200,
   height: 630,
@@ -44,7 +44,7 @@ export default async function Image() {
               LF
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', fontSize: 32, fontWeight: 900, letterSpacing: -1 }}>LogiFlow</div>
+              <div style={{ display: 'flex', fontSize: 32, fontWeight: 900, letterSpacing: -1 }}>LogisticsEdge</div>
               <div style={{ display: 'flex', fontSize: 16, color: '#94a3b8', fontWeight: 600 }}>Autonomous Freight & Telematics</div>
             </div>
           </div>
@@ -123,7 +123,7 @@ export default async function Image() {
           </div>
 
           <div style={{ display: 'flex', fontSize: 20, color: '#64748b', fontFamily: 'monospace' }}>
-            logiflow.io
+            logisticsedge.io
           </div>
         </div>
       </div>

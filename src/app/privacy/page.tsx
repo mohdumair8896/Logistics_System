@@ -4,8 +4,8 @@ import { ArrowLeft, ShieldCheck, Lock, Eye, FileText, Database, Server, Globe, S
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | LogiFlow Logistics',
-  description: 'LogiFlow data processing and privacy practices — GDPR, DPDP Act 2023, CCPA, and India Consumer Protection Act compliance.',
+  title: 'Privacy Policy | LogisticsEdge Logistics',
+  description: 'LogisticsEdge data processing and privacy practices — GDPR, DPDP Act 2023, CCPA, and India Consumer Protection Act compliance.',
   alternates: { canonical: '/privacy' },
 };
 
@@ -19,8 +19,8 @@ const breadcrumbSchema = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://logiflow.io" },
-    { "@type": "ListItem", "position": 2, "name": "Privacy Policy", "item": "https://logiflow.io/privacy" },
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://logisticsedge.io" },
+    { "@type": "ListItem", "position": 2, "name": "Privacy Policy", "item": "https://logisticsedge.io/privacy" },
   ]
 };
 
@@ -82,10 +82,10 @@ export default function PrivacyPolicyPage() {
               <strong style={{ color: 'var(--brand, #0057FF)' }}>Precision Logistics Technologies Pvt. Ltd.</strong><br />
               CIN / Registration: U72900UP2024PTC000000 &bull; GSTIN: 09AAACP0000A1Z5<br />
               Registered Address: Plot No. 12, Vibhuti Khand, Gomti Nagar, Lucknow — 226010, Uttar Pradesh, India<br />
-              Email: <a href="mailto:privacy@logiflow.io" style={{ color: 'var(--brand, #0057FF)' }}>privacy@logiflow.io</a> &bull;{' '}
-              <a href="mailto:security@logiflow.io" style={{ color: 'var(--brand, #0057FF)' }}>security@logiflow.io</a><br />
-              Grievance Officer (CPA 2019): Grievance Redressal Desk &bull; <a href="mailto:grievance@logiflow.io" style={{ color: 'var(--brand, #0057FF)' }}>grievance@logiflow.io</a><br />
-              DPO (GDPR): Data Protection Operations Desk &bull; <a href="mailto:dpo@logiflow.io" style={{ color: 'var(--brand, #0057FF)' }}>dpo@logiflow.io</a>
+              Email: <a href="mailto:privacy@logisticsedge.io" style={{ color: 'var(--brand, #0057FF)' }}>privacy@logisticsedge.io</a> &bull;{' '}
+              <a href="mailto:security@logisticsedge.io" style={{ color: 'var(--brand, #0057FF)' }}>security@logisticsedge.io</a><br />
+              Grievance Officer (CPA 2019): Grievance Redressal Desk &bull; <a href="mailto:grievance@logisticsedge.io" style={{ color: 'var(--brand, #0057FF)' }}>grievance@logisticsedge.io</a><br />
+              DPO (GDPR): Data Protection Operations Desk &bull; <a href="mailto:dpo@logisticsedge.io" style={{ color: 'var(--brand, #0057FF)' }}>dpo@logisticsedge.io</a>
             </div>
           </section>
 
@@ -213,7 +213,7 @@ export default function PrivacyPolicyPage() {
               <li><strong>Right to Correct:</strong> Request correction of inaccurate personal information.</li>
             </ul>
             <p style={{ marginTop: 8, fontSize: 13, color: 'var(--text-mid, #525252)' }}>
-              Submit requests to <a href="mailto:privacy@logiflow.io" style={{ color: 'var(--brand, #0057FF)' }}>privacy@logiflow.io</a>. We respond within 45 days. We may request verification of identity before processing requests.
+              Submit requests to <a href="mailto:privacy@logisticsedge.io" style={{ color: 'var(--brand, #0057FF)' }}>privacy@logisticsedge.io</a>. We respond within 45 days. We may request verification of identity before processing requests.
             </p>
           </section>
 

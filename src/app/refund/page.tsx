@@ -4,8 +4,8 @@ import { ArrowLeft, RefreshCw, XCircle, Clock, Phone, Mail, FileText } from 'luc
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Refund & Cancellation Policy | LogiFlow Logistics',
-  description: 'LogiFlow freight cancellation terms, refund eligibility, and dispute resolution process under the Consumer Protection Act 2019.',
+  title: 'Refund & Cancellation Policy | LogisticsEdge Logistics',
+  description: 'LogisticsEdge freight cancellation terms, refund eligibility, and dispute resolution process under the Consumer Protection Act 2019.',
   alternates: { canonical: '/refund' },
 };
 
@@ -19,8 +19,8 @@ const breadcrumbSchema = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://logiflow.io" },
-    { "@type": "ListItem", "position": 2, "name": "Refund Policy", "item": "https://logiflow.io/refund" },
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://logisticsedge.io" },
+    { "@type": "ListItem", "position": 2, "name": "Refund Policy", "item": "https://logisticsedge.io/refund" },
   ]
 };
 
@@ -75,7 +75,7 @@ export default function RefundPolicyPage() {
               1. Cancellation Window
             </h2>
             <p>
-              Orders booked through the LogiFlow platform may be cancelled <strong style={{ color: 'var(--text-high, #141414)' }}>free of charge within 2 hours</strong> of booking confirmation, provided the assigned vehicle has not yet been dispatched from the origin facility.
+              Orders booked through the LogisticsEdge platform may be cancelled <strong style={{ color: 'var(--text-high, #141414)' }}>free of charge within 2 hours</strong> of booking confirmation, provided the assigned vehicle has not yet been dispatched from the origin facility.
             </p>
             <div style={{
               background: 'rgba(217, 119, 6, 0.08)', border: '1px solid rgba(217, 119, 6, 0.25)',
@@ -94,7 +94,7 @@ export default function RefundPolicyPage() {
             </h2>
             <p>Refunds are issued under the following circumstances:</p>
             <ul style={{ paddingLeft: 24, display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <li><strong style={{ color: 'var(--text-high, #141414)' }}>Service failure:</strong> LogiFlow failed to deliver within the confirmed delivery window and no force majeure event applies — 100% freight refund.</li>
+              <li><strong style={{ color: 'var(--text-high, #141414)' }}>Service failure:</strong> LogisticsEdge failed to deliver within the confirmed delivery window and no force majeure event applies — 100% freight refund.</li>
               <li><strong style={{ color: 'var(--text-high, #141414)' }}>Cargo damage in transit:</strong> Verified damage attributable to carrier handling — refund up to declared cargo value subject to our liability limit of ₹10,00,000 per consignment (or as declared in the manifest).</li>
               <li><strong style={{ color: 'var(--text-high, #141414)' }}>Duplicate payment:</strong> Duplicate charge identified on our payment gateway — 100% refund within 5–7 business days.</li>
               <li><strong style={{ color: 'var(--text-high, #141414)' }}>Pre-dispatch cancellation:</strong> Cancelled within the 2-hour window — 100% refund of any prepaid freight charges.</li>
@@ -165,7 +165,7 @@ export default function RefundPolicyPage() {
               Grievance Redressal Officer<br />
               Precision Logistics Technologies Pvt. Ltd.<br />
               Plot No. 12, Vibhuti Khand, Gomti Nagar, Lucknow — 226010, Uttar Pradesh, India<br />
-              Email: <a href="mailto:grievance@logiflow.io" style={{ color: 'var(--brand, #0057FF)' }}>grievance@logiflow.io</a><br />
+              Email: <a href="mailto:grievance@logisticsedge.io" style={{ color: 'var(--brand, #0057FF)' }}>grievance@logisticsedge.io</a><br />
               Phone: +91 522 400 1200 &bull; Available Mon–Fri, 9 AM – 6 PM IST
             </div>
           </section>
@@ -193,7 +193,7 @@ export default function RefundPolicyPage() {
               background: 'var(--surface-2, #F3F2EF)', border: '1px solid var(--border, #E6E4DF)',
               borderRadius: 14, padding: '20px 24px', fontFamily: 'var(--font-mono, monospace)', fontSize: 13,
             }}>
-              Email: <a href="mailto:billing@logiflow.io" style={{ color: 'var(--brand, #0057FF)' }}>billing@logiflow.io</a><br />
+              Email: <a href="mailto:billing@logisticsedge.io" style={{ color: 'var(--brand, #0057FF)' }}>billing@logisticsedge.io</a><br />
               Support Portal: Dashboard → Help &amp; Support → Raise Ticket<br />
               Phone: 1800-PRE-LMS (Toll Free) &bull; Mon–Fri, 9 AM – 6 PM IST<br />
               Response SLA: 48 hours on business days

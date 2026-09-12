@@ -4,8 +4,8 @@ import { Home, Search, Truck, Radio } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: '404 - Route Diverted | LogiFlow Logistics',
-  description: 'The requested manifest, telemetry node, or waybill page was not found on the LogiFlow logistics network.',
+  title: '404 - Route Diverted | LogisticsEdge Logistics',
+  description: 'The requested manifest, telemetry node, or waybill page was not found on the LogisticsEdge logistics network.',
 };
 
 export default function NotFound() {
@@ -181,7 +181,7 @@ export default function NotFound() {
 
       {/* Footer hint */}
       <div style={{ marginTop: 28, fontSize: 12, color: 'var(--text-low, #909090)', fontFamily: 'var(--font-mono, monospace)' }}>
-        LogiFlow Autonomous Mesh Gateway &bull; Node ID #ERR-404-GEO
+        LogisticsEdge Autonomous Mesh Gateway &bull; Node ID #ERR-404-GEO
       </div>
     </div>
   );

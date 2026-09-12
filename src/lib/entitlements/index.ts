@@ -103,7 +103,7 @@ export function getActiveTenant(): TenantProfile {
     return DEFAULT_TENANT;
   }
   try {
-    const raw = localStorage.getItem('logiflow_active_tenant');
+    const raw = localStorage.getItem('logisticsedge_active_tenant');
     if (raw) {
       return JSON.parse(raw);
     }
@@ -114,8 +114,8 @@ export function getActiveTenant(): TenantProfile {
 export function setActiveTenant(tenant: TenantProfile) {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem('logiflow_active_tenant', JSON.stringify(tenant));
-    window.dispatchEvent(new CustomEvent('logiflow_tenant_changed', { detail: tenant }));
+    localStorage.setItem('logisticsedge_active_tenant', JSON.stringify(tenant));
+    window.dispatchEvent(new CustomEvent('logisticsedge_tenant_changed', { detail: tenant }));
   } catch {}
 }
 

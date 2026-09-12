@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://logiflow.io';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://logisticsedge.io';
   const lastModified = new Date();
 
   // Only public-facing, unauthenticated pages belong in sitemap

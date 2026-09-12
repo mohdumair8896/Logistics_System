@@ -6,7 +6,7 @@
  * Expanded = QR code + copy-link button with animated spring transitions.
  *
  * Usage:
- *   <ShipmentQR value="https://logiflow.app/track/TR-001" label="Track Shipment" />
+ *   <ShipmentQR value="https://logisticsedge.app/track/TR-001" label="Track Shipment" />
  */
 
 import { useState, useEffect } from 'react';

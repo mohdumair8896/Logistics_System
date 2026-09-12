@@ -4,7 +4,7 @@ import React, { useState, useEffect, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { Cookie, X, Check, SlidersHorizontal } from 'lucide-react';
 
-const STORAGE_KEY = 'logiflow_cookie_consent_v1';
+const STORAGE_KEY = 'logisticsedge_cookie_consent_v1';
 
 const emptySubscribe = () => () => {};
 
@@ -36,7 +36,7 @@ export default function CookieConsent() {
         version: 'v1',
       }));
       // Dispatch event so analytics can initialize or shut down accordingly
-      window.dispatchEvent(new CustomEvent('logiflow_consent_change', {
+      window.dispatchEvent(new CustomEvent('logisticsedge_consent_change', {
         detail: { acceptedAll, analytics }
       }));
     } catch {

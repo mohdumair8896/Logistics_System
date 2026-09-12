@@ -95,7 +95,7 @@ export default function KnowledgeBasePage() {
     });
 
     toast.success('Knowledge Base Updated', {
-      description: `Article "${form.title}" added to LogiFlow training repository.`
+      description: `Article "${form.title}" added to LogisticsEdge training repository.`
     });
 
     setShowAddModal(false);
@@ -135,7 +135,7 @@ export default function KnowledgeBasePage() {
             Knowledge Base & Corridor Policy Portal
           </div>
           <div className="page-subtitle">
-            Configure freight tariffs, hub operating guidelines & cold-chain SOPs queryable by LogiFlow
+            Configure freight tariffs, hub operating guidelines & cold-chain SOPs queryable by LogisticsEdge
           </div>
           <div style={{ marginTop: 8 }}>
             <BadgeGroup
@@ -283,7 +283,7 @@ export default function KnowledgeBasePage() {
                       <AlertDialogHeader>
                         <AlertDialogTitle>Delete Policy Document?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Are you sure you want to delete &ldquo;{item.title}&rdquo;? This will permanently remove it from the LogiFlow RAG indexing repository.
+                          Are you sure you want to delete &ldquo;{item.title}&rdquo;? This will permanently remove it from the LogisticsEdge RAG indexing repository.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>

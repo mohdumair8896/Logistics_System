@@ -115,7 +115,7 @@ export default function LogisticsSections() {
 
   const faqs = [
     {
-      q: 'What shipping corridors and regions does LogiFlow operate in?',
+      q: 'What shipping corridors and regions does LogisticsEdge operate in?',
       a: 'We operate across India’s national highway network including the Golden Quadrilateral (NH-44, NH-48, NH-19, NH-16), key industrial corridors (Delhi-Mumbai, Eastern Dedicated Freight Corridor), and regional feeder routes connecting Tier-2 and Tier-3 cities across Uttar Pradesh, Maharashtra, Gujarat, and Rajasthan.',
     },
     {
@@ -433,7 +433,7 @@ export default function LogisticsSections() {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
                 <div style={{ width: 34, height: 34, borderRadius: 10, background: 'linear-gradient(135deg, #f59e0b, #d97706)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 13, color: '#1c1917', boxShadow: '0 0 20px rgba(245,158,11,0.3)' }}>LF</div>
-                <span style={{ fontWeight: 800, fontSize: 16, color: '#fff' }}>LogiFlow</span>
+                <span style={{ fontWeight: 800, fontSize: 16, color: '#fff' }}>LogisticsEdge</span>
               </div>
               <p style={{ fontSize: 13, color: '#a8b8c8', lineHeight: 1.7 }}>
                 Autonomous logistics infrastructure. Connecting industrial shippers, cross-docks, and final-mile electric delivery fleets.

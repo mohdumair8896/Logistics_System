@@ -4,8 +4,8 @@ import { ArrowLeft, FileCheck, Scale, AlertTriangle, Truck, CheckCircle2, Shield
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Terms & Conditions | LogiFlow Logistics',
-  description: 'LogiFlow master service terms, carrier network conditions, freight liability policies, and service level agreements.',
+  title: 'Terms & Conditions | LogisticsEdge Logistics',
+  description: 'LogisticsEdge master service terms, carrier network conditions, freight liability policies, and service level agreements.',
   alternates: { canonical: '/terms' },
 };
 
@@ -13,8 +13,8 @@ const breadcrumbSchema = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://logiflow.io" },
-    { "@type": "ListItem", "position": 2, "name": "Terms & Conditions", "item": "https://logiflow.io/terms" },
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://logisticsedge.io" },
+    { "@type": "ListItem", "position": 2, "name": "Terms & Conditions", "item": "https://logisticsedge.io/terms" },
   ]
 };
 
@@ -80,7 +80,7 @@ export default function TermsPage() {
               1. Acceptance of Terms
             </h2>
             <p>
-              By accessing, browsing, submitting freight manifests, or integrating APIs with the LogiFlow Logistics Platform (&ldquo;Platform&rdquo;), you (&ldquo;Customer&rdquo;, &ldquo;Shipper&rdquo;, or &ldquo;Carrier&rdquo;) agree to be bound unconditionally by these Terms and Conditions. If you are accepting on behalf of an enterprise entity, you warrant that you hold legal signing authority.
+              By accessing, browsing, submitting freight manifests, or integrating APIs with the LogisticsEdge Logistics Platform (&ldquo;Platform&rdquo;), you (&ldquo;Customer&rdquo;, &ldquo;Shipper&rdquo;, or &ldquo;Carrier&rdquo;) agree to be bound unconditionally by these Terms and Conditions. If you are accepting on behalf of an enterprise entity, you warrant that you hold legal signing authority.
             </p>
           </section>
 
@@ -90,7 +90,7 @@ export default function TermsPage() {
               2. Logistics Services & Dispatch
             </h2>
             <p>
-              LogiFlow provides digital freight brokerage, autonomous dispatch coordination, automated manifest verification, IoT sensory tracking, and cross-dock allocation software:
+              LogisticsEdge provides digital freight brokerage, autonomous dispatch coordination, automated manifest verification, IoT sensory tracking, and cross-dock allocation software:
             </p>
             <ul style={{ paddingLeft: 24, display: 'flex', flexDirection: 'column', gap: 8 }}>
               <li>
@@ -121,7 +121,7 @@ export default function TermsPage() {
               4. Service Availability & SLA
             </h2>
             <p>
-              LogiFlow guarantees a 99.9% uptime SLA for operational dispatch APIs and live tracking webhooks. Planned maintenance windows are communicated at least 72 hours in advance. In no event shall LogiFlow be liable for indirect, incidental, consequential, or punitive damages resulting from third-party road blockages, acts of God (force majeure), or carrier labor disputes.
+              LogisticsEdge guarantees a 99.9% uptime SLA for operational dispatch APIs and live tracking webhooks. Planned maintenance windows are communicated at least 72 hours in advance. In no event shall LogisticsEdge be liable for indirect, incidental, consequential, or punitive damages resulting from third-party road blockages, acts of God (force majeure), or carrier labor disputes.
             </p>
           </section>
 
@@ -139,7 +139,7 @@ export default function TermsPage() {
 
         {/* Footer */}
         <div style={{ marginTop: 60, paddingTop: 24, borderTop: '1px solid var(--border, #E6E4DF)', textAlign: 'center', fontSize: 13, color: 'var(--text-mid, #525252)' }}>
-          &copy; 2026 LogiFlow Technologies Inc. All rights reserved. &bull; <Link href="/privacy" style={{ color: 'var(--brand, #0057FF)', textDecoration: 'none' }}>Privacy Policy</Link>
+          &copy; 2026 LogisticsEdge Technologies Inc. All rights reserved. &bull; <Link href="/privacy" style={{ color: 'var(--brand, #0057FF)', textDecoration: 'none' }}>Privacy Policy</Link>
         </div>
 
       </div>

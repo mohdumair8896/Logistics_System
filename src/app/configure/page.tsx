@@ -68,7 +68,7 @@ export default function ConfigurePage() {
       geography: state.geography,
     };
     try {
-      localStorage.setItem('logiflow_active_tenant', JSON.stringify(activeTenant));
+      localStorage.setItem('logisticsedge_active_tenant', JSON.stringify(activeTenant));
     } catch {}
 
     // Persist to server API and update session cookie

@@ -175,7 +175,7 @@ export default function PublicTrackingSearchPage() {
 
       {/* Footer */}
       <footer style={{ borderTop: '1px solid var(--border, #E6E4DF)', padding: '20px', textAlign: 'center', fontSize: 12, color: 'var(--text-low, #909090)', background: 'var(--surface, #F8F7F4)' }}>
-        © {new Date().getFullYear()} LogiFlow Logistics Platform. Real-time freight tracking and electronic proof of delivery.
+        © {new Date().getFullYear()} LogisticsEdge Logistics Platform. Real-time freight tracking and electronic proof of delivery.
       </footer>
     </div>
   );

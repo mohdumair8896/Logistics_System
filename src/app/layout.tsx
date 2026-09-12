@@ -21,13 +21,13 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://logiflow.io';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://logisticsedge.io';
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "LogiFlow — Freight & Fleet Logistics Management Platform",
-    template: "%s | LogiFlow Logistics",
+    default: "LogisticsEdge — Freight & Fleet Logistics Management Platform",
+    template: "%s | LogisticsEdge Logistics",
   },
   description: "Enterprise logistics platform for freight dispatch, fleet telematics, GPS shipment tracking, e-POD, GST invoicing, and warehouse management.",
   keywords: [
@@ -39,29 +39,29 @@ export const metadata: Metadata = {
     "cross-dock dispatch",
     "cold chain monitoring",
     "proof of delivery",
-    "LogiFlow"
+    "LogisticsEdge"
   ],
-  authors: [{ name: "LogiFlow Technologies Inc." }],
-  creator: "LogiFlow Technologies",
-  publisher: "LogiFlow Logistics",
+  authors: [{ name: "LogisticsEdge Technologies Inc." }],
+  creator: "LogisticsEdge Technologies",
+  publisher: "LogisticsEdge Logistics",
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
   openGraph: {
-    title: "LogiFlow — Freight Dispatch & Fleet Telematics Platform",
+    title: "LogisticsEdge — Freight Dispatch & Fleet Telematics Platform",
     description: "Manage freight orders, live vehicle tracking, driver dispatch, warehouse staging, e-POD capture, and GST invoicing from one dashboard.",
     url: siteUrl,
-    siteName: "LogiFlow Logistics",
+    siteName: "LogisticsEdge Logistics",
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "LogiFlow — Fleet Logistics & Shipment Tracking",
+    title: "LogisticsEdge — Fleet Logistics & Shipment Tracking",
     description: "Freight dispatch, live GPS tracking, driver management, warehouse staging, e-POD, and GST billing — built for logistics operations teams.",
-    creator: "@LogiFlowAI",
+    creator: "@LogisticsEdgeAI",
   },
   robots: {
     index: true,
@@ -92,7 +92,7 @@ const organizationSchema = {
   "@context": "https://schema.org",
   "@type": ["Organization", "LocalBusiness"],
   "name": "Precision Logistics Technologies Pvt. Ltd.",
-  "alternateName": "LogiFlow",
+  "alternateName": "LogisticsEdge",
   "url": siteUrl,
   "description": "Enterprise autonomous logistics infrastructure connecting industrial shippers, cross-docks, dispatch, real-time IoT sensory tracking, and electric fleet routing across India.",
   "foundingDate": "2024",
@@ -109,7 +109,7 @@ const organizationSchema = {
   "contactPoint": {
     "@type": "ContactPoint",
     "contactType": "customer support",
-    "email": "support@logiflow.io",
+    "email": "support@logisticsedge.io",
     "availableLanguage": ["English", "Hindi"]
   },
   "sameAs": []

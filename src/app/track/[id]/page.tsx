@@ -473,7 +473,7 @@ export default function PublicCustomerTrackingPage({ params }: Props) {
                   <Phone size={13} /> Call Driver
                 </a>
                 <button
-                  onClick={() => toast.info('Consignee Support Desk: +91 800-LOGIFLOW (Toll Free)')}
+                  onClick={() => toast.info('Consignee Support Desk: +91 800-LOGISTICSEDGE (Toll Free)')}
                   style={{
                     flex: 1,
                     padding: '8px 12px',
@@ -533,7 +533,7 @@ export default function PublicCustomerTrackingPage({ params }: Props) {
 
       {/* Footer */}
       <footer style={{ borderTop: '1px solid var(--border, #E6E4DF)', padding: '20px', textAlign: 'center', fontSize: 12, color: 'var(--text-low, #909090)', background: 'var(--surface, #F8F7F4)' }}>
-        LogiFlow Real-Time Freight Telematics • Encrypted Live Consignee Gateway
+        LogisticsEdge Real-Time Freight Telematics • Encrypted Live Consignee Gateway
       </footer>
     </div>
   );

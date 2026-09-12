@@ -165,7 +165,7 @@ export default function PricingPage() {
       }
 
       toast.success('Payment Approved! Subscription Activated.', {
-        description: `Welcome to LogiFlow, ${adminName}! Launching your setup questionnaire...`,
+        description: `Welcome to LogisticsEdge, ${adminName}! Launching your setup questionnaire...`,
       });
 
       // Forward to first-time setup questionnaire
