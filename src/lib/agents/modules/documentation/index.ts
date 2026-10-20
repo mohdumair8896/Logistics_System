@@ -1,8 +1,11 @@
 // ─── Module 5: Autonomous Documentation & Compliance Agent ────────────────────
 // Audits physical and digital documents: PODs, e-Way bills, LR, and driver credentials.
 
+import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
+import { currentTenantId } from '@/lib/tenancy';
 import { invoices, drivers, systemAlerts } from '@/lib/schema';
+import { maskLicence } from '@/lib/masking';
 import type { AgentModule, LogisticsEvent, AgentResult, AgentReasoningStep } from '../../core/types';
 
 export interface DocAuditPayload {
@@ -32,7 +35,7 @@ export class DocumentationAgent implements AgentModule<DocAuditPayload> {
     const discrepanciesFound: string[] = [];
 
     // 1. Audit Invoices for missing POD signatures on delivered goods
-    const allInvoices = await db.select().from(invoices);
+    const allInvoices = await db.select().from(invoices).where(eq(invoices.tenantId, currentTenantId()));
     const missingPods = allInvoices.filter((inv) => !inv.podSigned);
 
     if (missingPods.length > 0) {
@@ -40,15 +43,15 @@ export class DocumentationAgent implements AgentModule<DocAuditPayload> {
     }
 
     // 2. Audit Drivers for expired or near-expiry licenses (within 30 days)
-    const allDrivers = await db.select().from(drivers);
+    const allDrivers = await db.select().from(drivers).where(eq(drivers.tenantId, currentTenantId()));
     const todayStr = new Date().toISOString().split('T')[0];
     const expiredDrivers = allDrivers.filter((d) => d.licenseExpiry && d.licenseExpiry <= todayStr);
 
     if (expiredDrivers.length > 0) {
       discrepanciesFound.push(`${expiredDrivers.length} driver(s) operating with expired or non-compliant commercial licenses`);
       for (const exp of expiredDrivers) {
-        await db.insert(systemAlerts).values({
-          title: `Compliance Breach: Driver ${exp.name} (${exp.licenseNo})`,
+        await db.insert(systemAlerts).values({ tenantId: currentTenantId(),
+          title: `Compliance Breach: Driver ${exp.name} (licence ${maskLicence(exp.licenseNo)})`,
           description: `License expired on ${exp.licenseExpiry}. Immediate grounding recommended.`,
           severity: 'critical',
           category: 'Driver',

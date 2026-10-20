@@ -4,6 +4,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import type { Driver } from './types';
+import { apiMutate } from '@/lib/apiClient';
 import type { Vehicle } from '@/features/vehicles/types';
 
 export function mapDriver(r: Record<string, unknown>): Driver {
@@ -44,31 +45,22 @@ export function useDrivers() {
   }, [fetchDrivers]);
 
   const addDriver = useCallback(async (d: Omit<Driver, 'id'>) => {
-    const res = await fetch('/api/drivers', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(d),
-    });
-    if (res.ok) await fetchDrivers();
+    const result = await apiMutate('/api/drivers', 'POST', d);
+    if (result.ok) await fetchDrivers();
+    return result.ok;
   }, [fetchDrivers]);
 
-  const updateDriver = useCallback(async (id: string, updates: Partial<Driver>) => {
-    await fetch(`/api/drivers/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updates),
-    });
-    setDrivers((prev) => prev.map((d) => (d.id === id ? { ...d, ...updates } : d)));
+  const updateDriver = useCallback(async (id: string, updates: Partial<Driver>): Promise<boolean> => {
+    const result = await apiMutate(`/api/drivers/${id}`, 'PATCH', updates);
+    if (result.ok) setDrivers((prev) => prev.map((d) => (d.id === id ? { ...d, ...updates } : d)));
+    return result.ok;
   }, []);
 
   const reassignDriverVehicle = useCallback(
     async (driverId: string, newVehicleId: string | null) => {
-      await fetch(`/api/drivers/${driverId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ _action: 'reassignVehicle', newVehicleId }),
-      });
+      const result = await apiMutate(`/api/drivers/${driverId}`, 'PATCH', { _action: 'reassignVehicle', newVehicleId });
       await fetchDrivers();
+      return result.ok;
     },
     [fetchDrivers]
   );

@@ -1,422 +1,390 @@
 'use client';
+// ─── Rate calculator → call-back request ──────────────────────────────────────
+// Step 1 works out an indicative price in the browser (src/lib/pricing/indicativeQuote.ts).
+// Step 2 sends name and mobile to /api/public/leads, which recomputes the estimate server-side.
+// Layout: heading row, then the form beside a tall photo card, then three ways to reach us underneath.
+// Funnel events (src/lib/analytics.ts) fire only with analytics consent; first-touch campaign tags travel with the
+// request the visitor submits. WhatsApp options appear only when NEXT_PUBLIC_WHATSAPP_NUMBER is set.
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-
-import {
-  PackageSearch,
-  Calculator,
-  MapPin,
-  Send,
-  ShieldCheck,
-  CheckCircle2,
-  AlertCircle,
-  Truck,
-  RotateCcw,
-} from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { AlertCircle, Check, CheckCircle2, LogIn, MessageCircle, Phone, RotateCcw, Search } from 'lucide-react';
+import { firstTouch, track } from '@/lib/analytics';
+import { waLink, whatsappConfigured } from '@/lib/whatsapp';
 import { toast } from 'sonner';
+import {
+  CITIES,
+  RATE_CARD,
+  CARGO_TYPES,
+  estimateQuote,
+  type CargoCode,
+  type QuoteEstimate,
+  type QuoteInput,
+} from '@/lib/pricing/indicativeQuote';
 
-const glass = {
-  background: 'rgba(15,23,42,0.65)',
-  border: '1px solid rgba(255,255,255,0.08)',
-  backdropFilter: 'blur(24px)',
-  WebkitBackdropFilter: 'blur(24px)',
-  boxShadow: '0 25px 60px rgba(0,0,0,0.5)',
-} as const;
+const inr = (n: number) => `₹${n.toLocaleString('en-IN')}`;
 
-const inputStyle = {
-  width: '100%',
-  height: 52,
-  background: 'rgba(2,6,23,0.7)',
-  border: '1px solid rgba(255,255,255,0.12)',
-  borderRadius: 12,
-  padding: '0 16px 0 48px',
-  fontSize: 14,
-  color: '#f8fafc',
-  outline: 'none',
-  transition: 'border-color 0.2s',
-  boxSizing: 'border-box' as const,
-};
-
-const labelStyle = {
-  fontSize: 12,
-  fontWeight: 600,
-  color: '#cbd5e1',
-  letterSpacing: 0.3,
-  marginBottom: 8,
-  display: 'block',
-} as const;
-
-const iconWrap = {
-  position: 'absolute' as const,
-  left: 14,
-  top: '50%',
-  transform: 'translateY(-50%)',
-  pointerEvents: 'none' as const,
-};
-
-interface QuoteResult {
-  quoteId: string;
-  distanceMiles: number;
-  estCostUsd: number;
-  transitHours: number;
-  carbonSavingsPct: number;
-  origin: string;
-  destination: string;
-  cargo: string;
+function FieldError({ id, message }: { id: string; message?: string }) {
+  if (!message) return null;
+  return (
+    <span id={id} className="mk-field-error">
+      <AlertCircle size={14} aria-hidden="true" />
+      {message}
+    </span>
+  );
 }
 
+type Step = 'form' | 'estimate' | 'contact' | 'done';
+
+/** Field name → input id, so a failed check can put the cursor where the fix is. */
+const FIELD_INPUT: Record<string, string> = {
+  origin: 'quote-origin', destination: 'quote-dest', vehicleCode: 'quote-vehicle', weightKg: 'quote-weight',
+  name: 'quote-name', phone: 'quote-phone',
+};
+const focusField = (field: string) => document.getElementById(FIELD_INPUT[field] ?? '')?.focus();
+
 const QuoteRequest: React.FC = () => {
-  const router = useRouter();
-
-
-  // Occam's Razor: removed Customer ID field — it added zero value to the user
   const [origin, setOrigin]           = useState('');
   const [destination, setDestination] = useState('');
-  const [cargoType, setCargoType]     = useState('Refrigerated High-Value Freight');
+  const [vehicleCode, setVehicleCode] = useState<string>('CONTAINER_32FT_SXL');
+  const [cargoCode, setCargoCode]     = useState<CargoCode>('GENERAL');
+  const [weightKg, setWeightKg]       = useState('');
   const [honeypot, setHoneypot]       = useState('');
   const [loadTime]                    = useState<number>(() => Date.now());
 
-  const [errors, setErrors]         = useState<Record<string, string>>({});
+  const [name, setName]       = useState('');
+  const [phone, setPhone]     = useState('');
+  const [company, setCompany] = useState('');
+  const [contactPref, setContactPref] = useState<'call' | 'whatsapp'>('call');
+  const [shipFrequency, setShipFrequency] = useState('');
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
+  const [started, setStarted] = useState(false);
+
+  const [errors, setErrors]             = useState<Record<string, string>>({});
+  const [step, setStep]                 = useState<Step>('form');
+  const [estimate, setEstimate]         = useState<QuoteEstimate | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [quoteResult, setQuoteResult]   = useState<QuoteResult | null>(null);
+  const [reference, setReference]       = useState<string | null>(null);
 
-  const validate = (): boolean => {
-    const errs: Record<string, string> = {};
+  // The "Book this load" button disappears with this step, so hand focus to the first field
+  useEffect(() => {
+    if (step === 'contact') focusField('name');
+  }, [step]);
 
-    // Postel's Law: accept short inputs liberally, give helpful errors
-    if (!origin.trim()) {
-      errs.origin = 'Enter a pick-up ZIP code or port code (e.g. 400001 or INBOM)';
-    } else if (origin.trim().length < 3) {
-      errs.origin = 'At least 3 characters needed (e.g. 400001 or LAX)';
+  const quoteInput = (): QuoteInput => ({
+    origin, destination, vehicleCode, cargoCode, weightKg: Number(weightKg),
+  });
+
+  const handleEstimate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (honeypot) return; // Bot trap — silent discard
+
+    const result = estimateQuote(quoteInput());
+    if (!result.ok) {
+      setErrors({ [result.field]: result.message });
+      focusField(result.field);
+      return;
     }
-
-    if (!destination.trim()) {
-      errs.destination = 'Enter a delivery ZIP code or port code (e.g. 110001 or INDEL)';
-    } else if (destination.trim().length < 3) {
-      errs.destination = 'At least 3 characters needed (e.g. 110001 or DEL)';
-    }
-
-    if (!cargoType.trim()) {
-      errs.cargoType = 'Please select what you are shipping';
-    }
-
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
+    setErrors({});
+    setEstimate(result.estimate);
+    setStep('estimate');
+    track('quote_shown', { lane: `${result.estimate.origin.name}-${result.estimate.destination.name}`, truck: vehicleCode });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmitLead = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (honeypot || Date.now() - loadTime < 1500) return; // Bot traps
 
-    if (honeypot) return; // Bot trap — silent discard
-    if (Date.now() - loadTime < 800) return; // Speed bot trap
-
-    if (!validate()) {
-      toast.error('Please fill in the required fields.');
+    const errs: Record<string, string> = {};
+    if (name.trim().length < 2) errs.name = 'Enter your name';
+    if (!/^(\+91)?[6-9]\d{9}$/.test(phone.replace(/[\s-]/g, ''))) errs.phone = 'Enter a 10-digit Indian mobile number';
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) {
+      focusField(Object.keys(errs)[0]);
       return;
     }
 
     setIsSubmitting(true);
-
-    setTimeout(() => {
-      setIsSubmitting(false);
-
-      const pseudoDist    = Math.max(350, (origin.charCodeAt(0) * 12 + destination.charCodeAt(0) * 15) % 2400 + 400);
-      const ratePerMile   = cargoType.toLowerCase().includes('refrigerated') || cargoType.toLowerCase().includes('pharma') ? 2.85 : 2.25;
-      const calculatedCost = Math.round(pseudoDist * ratePerMile + 180);
-      const hours         = Math.round((pseudoDist / 55) * 10) / 10;
-      const quoteNum      = `LE-Q-${Math.floor(10000 + Math.random() * 90000)}`;
-
-      const result: QuoteResult = {
-        quoteId: quoteNum,
-        distanceMiles: pseudoDist,
-        estCostUsd: calculatedCost,
-        transitHours: hours,
-        carbonSavingsPct: 24.8,
-        origin: origin.toUpperCase(),
-        destination: destination.toUpperCase(),
-        cargo: cargoType,
-      };
-
-      setQuoteResult(result);
-      // Analytics: re-wire trackEvent here when a real provider is configured
-
-      toast.success('Rate Calculated!', {
-        description: `Quote #${quoteNum} — ${origin.toUpperCase()} → ${destination.toUpperCase()}`,
+    try {
+      const res = await fetch('/api/public/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...quoteInput(), name, phone, company: company || undefined,
+          contactPreference: contactPref,
+          shipFrequency: shipFrequency || undefined,
+          marketingOptIn,
+          firstTouch: firstTouch(),
+        }),
       });
-    }, 700);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast.error(data.error || 'Could not send your request. Please try again.');
+        return;
+      }
+      setReference(data.reference);
+      setStep('done');
+      track('lead_submitted', { contact: contactPref, frequency: shipFrequency || 'unknown' });
+    } catch {
+      toast.error('Network error. Please check your connection and try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleReset = () => {
-    setQuoteResult(null);
-    setOrigin('');
-    setDestination('');
+    setStep('form');
+    setEstimate(null);
+    setReference(null);
     setErrors({});
   };
 
-  const handleBookLoad = async () => {
-    if (!quoteResult) return;
-    // POST to /api/leads when the route is created in a future phase
-    // For now capture intent and redirect to login/dashboard
-    const leadRef = `LE-Q-${Math.floor(10000 + Math.random() * 90000)}`;
-    toast.success('Freight Booking Confirmed!', {
-      description: `Quote #${quoteResult.quoteId} registered. Ref: ${leadRef}. Transferring to dispatch...`,
-    });
-
-    setTimeout(() => {
-      router.push('/leads');
-    }, 700);
-  };
+  const clearError = (field: string) => { if (errors[field]) setErrors({ ...errors, [field]: '' }); };
+  const invalid = (field: string) => (errors[field] ? { 'aria-invalid': true, 'aria-describedby': `${field}-error` } : {});
 
   return (
-    <section
-      id="quote-section"
-      style={{
-        padding: '96px 24px',
-        background: '#020617',
-        borderTop: '1px solid rgba(255,255,255,0.05)',
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Ambient glow */}
-      <div style={{
-        position: 'absolute', top: '50%', left: '20%',
-        transform: 'translate(-50%, -50%)',
-        width: 500, height: 500,
-        background: 'radial-gradient(circle, rgba(245,158,11,0.08) 0%, transparent 70%)',
-        pointerEvents: 'none',
-      }} />
+    <section id="quote" className="mk-section mk-quote-sec" aria-labelledby="quote-title">
+      <datalist id="quote-cities">
+        {CITIES.map(c => <option key={c.name} value={c.name}>{c.state}</option>)}
+      </datalist>
 
-      <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 64, position: 'relative', zIndex: 1 }}>
-
-        {/* Left: copy */}
-        <div style={{ flex: '1 1 340px' }}>
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: '#fbbf24', fontFamily: 'monospace', marginBottom: 12, display: 'block' }}>
-            Integrated Freight Partnership
-          </span>
-          <h2 style={{ fontSize: 'clamp(32px, 4vw, 56px)', fontWeight: 900, letterSpacing: -2, lineHeight: 1.05, color: '#fff', marginBottom: 20 }}>
-            Your Reliable{' '}
-            <span style={{ background: 'linear-gradient(90deg, #fbbf24, #a1a1aa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              Delivery Partner!
-            </span>
-          </h2>
-          <p style={{ fontSize: 15, color: '#a8b8c8', lineHeight: 1.75, maxWidth: 480, marginBottom: 40 }}>
-            Our system matches your shipment to the optimal verified carrier — minimum transit time, maximum route efficiency, real-time tracking from pickup to proof of delivery.
+      <div className="mk-wrap">
+        <div className="mk-split-head">
+          <div>
+            <p className="mk-kicker">Get a rate</p>
+            <h2 id="quote-title" className="mk-h2">Need a truck? See the rate <mark className="mk-mark">first</mark>.</h2>
+          </div>
+          <p className="mk-section-lede">
+            Pick the cities, the truck and the weight. You get an indicative price straight away. Leave your number and
+            our team calls to confirm the rate and the pickup slot.
           </p>
-
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 24 }}>
-            {/* Trust badges — Uniform Connectedness: same style = same category */}
-            {[
-              { icon: <ShieldCheck style={{ width: 14, height: 14, color: '#34d399' }} />, text: 'FMCSA / SmartWay Verified' },
-              { icon: <CheckCircle2 style={{ width: 14, height: 14, color: 'var(--brand, #0057FF)' }} />, text: 'ISO 9001 Carrier Network' },
-            ].map(b => (
-              <div key={b.text} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px', borderRadius: 10, background: '#0f172a', border: '1px solid rgba(255,255,255,0.07)', fontSize: 12, color: '#cbd5e1', fontFamily: 'monospace' }}>
-                {b.icon}
-                {b.text}
-              </div>
-            ))}
-          </div>
         </div>
 
-        {/* Right: form card */}
-        <div style={{ ...glass, width: '100%', maxWidth: 500, padding: 'clamp(24px, 4vw, 40px)', borderRadius: 32, flexShrink: 0, border: '1px solid rgba(245,158,11,0.18)' }}>
+        <div className="mk-quote-grid">
+          <div className="mk-card">
+            <h3 className="mk-card-title">Indicative rate</h3>
+            <p className="mk-card-sub">No sign-up needed. Prices exclude GST.</p>
 
-          {/* Card header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, paddingBottom: 20, borderBottom: '1px solid rgba(255,255,255,0.07)', marginBottom: 24 }}>
-            <div style={{ padding: 12, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', borderRadius: 12 }}>
-              <Calculator style={{ width: 22, height: 22, color: '#fbbf24' }} aria-hidden="true" />
+            {/* Spam honeypot — hidden from people and screen readers */}
+            <div className="mk-honeypot" aria-hidden="true">
+              <label htmlFor="quote-website">Website</label>
+              <input id="quote-website" type="text" name="website" tabIndex={-1} autoComplete="off" value={honeypot} onChange={e => setHoneypot(e.target.value)} />
             </div>
-            <div>
-              <h3 style={{ fontSize: 18, fontWeight: 700, color: '#fff', margin: 0 }}>Instant Rate Calculator</h3>
-              <p style={{ fontSize: 13, color: '#a8b8c8', margin: '4px 0 0' }}>Get a freight quote in seconds — no sign-up needed</p>
-            </div>
-          </div>
 
-          {/* Result state */}
-          {quoteResult ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 20, animation: 'fadeIn 0.3s ease-out' }}>
-              <div style={{
-                background: 'rgba(245,158,11,0.08)',
-                border: '1px solid rgba(245,158,11,0.3)',
-                borderRadius: 16, padding: 20,
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <span style={{ fontSize: 11, fontFamily: 'monospace', color: '#fbbf24', fontWeight: 700 }}>ESTIMATED RATE</span>
-                  <span style={{ fontSize: 11, fontFamily: 'monospace', color: '#a8b8c8' }}>{quoteResult.quoteId}</span>
-                </div>
-                <div style={{ fontSize: 36, fontWeight: 900, color: '#fff', fontFamily: 'monospace', marginBottom: 4 }}>
-                  ${quoteResult.estCostUsd.toLocaleString('en-US')}.00
-                </div>
-                <div style={{ fontSize: 12, color: '#34d399', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <CheckCircle2 style={{ width: 14, height: 14 }} aria-hidden="true" />
-                  Guaranteed rate valid for 72 hours
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                {[
-                  { label: 'Route Distance',     value: `${quoteResult.distanceMiles} mi`,        color: '#fff' },
-                  { label: 'Transit Time',        value: `~${quoteResult.transitHours} hrs`,       color: '#22d3ee' },
-                  { label: 'Route',               value: `${quoteResult.origin} → ${quoteResult.destination}`, color: '#fff' },
-                  { label: 'Carbon Reduction',    value: `-${quoteResult.carbonSavingsPct}% CO₂`, color: '#34d399' },
-                ].map(s => (
-                  <div key={s.label} style={{ background: 'rgba(2,6,23,0.7)', padding: '12px 16px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>
-                    <span style={{ fontSize: 10, color: '#a8b8c8', fontFamily: 'monospace', textTransform: 'uppercase' }}>{s.label}</span>
-                    <p style={{ fontSize: 14, fontWeight: 700, color: s.color, margin: '4px 0 0', fontFamily: 'monospace' }}>{s.value}</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Minimize target distance: primary + secondary CTA side by side */}
-              <div style={{ display: 'flex', gap: 12 }}>
-                <button type="button" onClick={handleReset} style={{
-                  flex: 1, height: 48,
-                  background: 'rgba(255,255,255,0.06)', color: '#cbd5e1',
-                  border: '1px solid rgba(255,255,255,0.12)', borderRadius: 14,
-                  fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                }}>
-                  <RotateCcw style={{ width: 15, height: 15 }} aria-hidden="true" />
-                  New Quote
-                </button>
-                <button
-                  type="button"
-                  onClick={handleBookLoad}
-                  style={{
-                    flex: 1.5, height: 48,
-                    background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                    color: '#1c1917', borderRadius: 14, fontSize: 13, fontWeight: 700,
-                    border: 'none', cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                    boxShadow: '0 0 20px rgba(245,158,11,0.25)',
-                  }}
-                >
-                  <Truck style={{ width: 16, height: 16 }} aria-hidden="true" />
-                  Book This Load →
-                </button>
-              </div>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-
-              {/* Spam honeypot — hidden from humans */}
-              <input
-                type="text" name="company_tax_reference_bypass" tabIndex={-1}
-                autoComplete="off" value={honeypot} onChange={e => setHoneypot(e.target.value)}
-                style={{ display: 'none', opacity: 0, position: 'absolute', left: '-9999px' }}
-                aria-hidden="true"
-              />
-
-              {/* Route grid — Law of Proximity: origin + destination side by side */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-
-                {/* Pick-up Location — Law of Prägnanz: plain English, not jargon */}
-                <div>
-                  <label htmlFor="quote-origin" style={labelStyle}>
-                    Pick-up Location <span style={{ color: '#f59e0b' }}>*</span>
-                  </label>
-                  <div style={{ position: 'relative' }}>
-                    <span style={iconWrap}><MapPin style={{ width: 18, height: 18, color: '#fbbf24' }} aria-hidden="true" /></span>
-                    <input
-                      id="quote-origin" type="text" required
-                      placeholder="ZIP or port code"
-                      value={origin}
-                      onChange={e => { setOrigin(e.target.value); if (errors.origin) setErrors({ ...errors, origin: '' }); }}
-                      // Postel's Law: auto-uppercase on blur
-                      onBlur={e => { setOrigin(e.target.value.toUpperCase()); e.target.style.borderColor = errors.origin ? '#ef4444' : 'rgba(255,255,255,0.12)'; }}
-                      onFocus={e => (e.target.style.borderColor = errors.origin ? '#ef4444' : 'rgba(245,158,11,0.6)')}
-                      style={{ ...inputStyle, fontSize: 13, borderColor: errors.origin ? '#ef4444' : 'rgba(255,255,255,0.12)' }}
-                      aria-describedby={errors.origin ? 'origin-error' : undefined}
-                      aria-invalid={!!errors.origin}
-                    />
-                  </div>
-                  {errors.origin && (
-                    <span id="origin-error" role="alert" style={{ fontSize: 11, color: '#ef4444', display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
-                      <AlertCircle style={{ width: 12, height: 12 }} aria-hidden="true" />
-                      {errors.origin}
-                    </span>
-                  )}
-                </div>
-
-                {/* Delivery Location */}
-                <div>
-                  <label htmlFor="quote-dest" style={labelStyle}>
-                    Delivery Location <span style={{ color: '#f59e0b' }}>*</span>
-                  </label>
-                  <div style={{ position: 'relative' }}>
-                    <span style={iconWrap}><MapPin style={{ width: 18, height: 18, color: '#fbbf24' }} aria-hidden="true" /></span>
-                    <input
-                      id="quote-dest" type="text" required
-                      placeholder="ZIP or port code"
-                      value={destination}
-                      onChange={e => { setDestination(e.target.value); if (errors.destination) setErrors({ ...errors, destination: '' }); }}
-                      onBlur={e => { setDestination(e.target.value.toUpperCase()); e.target.style.borderColor = errors.destination ? '#ef4444' : 'rgba(255,255,255,0.12)'; }}
-                      onFocus={e => (e.target.style.borderColor = errors.destination ? '#ef4444' : 'rgba(245,158,11,0.6)')}
-                      style={{ ...inputStyle, fontSize: 13, borderColor: errors.destination ? '#ef4444' : 'rgba(255,255,255,0.12)' }}
-                      aria-describedby={errors.destination ? 'dest-error' : undefined}
-                      aria-invalid={!!errors.destination}
-                    />
-                  </div>
-                  {errors.destination && (
-                    <span id="dest-error" role="alert" style={{ fontSize: 11, color: '#ef4444', display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
-                      <AlertCircle style={{ width: 12, height: 12 }} aria-hidden="true" />
-                      {errors.destination}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* What are you shipping? — Law of Prägnanz: plain English */}
-              <div>
-                <label htmlFor="quote-cargo" style={labelStyle}>
-                  What are you shipping? <span style={{ color: '#f59e0b' }}>*</span>
-                </label>
-                <div style={{ position: 'relative' }}>
-                  <span style={iconWrap}><PackageSearch style={{ width: 18, height: 18, color: '#a8b8c8' }} aria-hidden="true" /></span>
-                  <select
-                    id="quote-cargo"
-                    value={cargoType}
-                    onChange={e => setCargoType(e.target.value)}
-                    style={{ ...inputStyle, fontSize: 13, appearance: 'none', cursor: 'pointer' }}
-                    onFocus={e => (e.target.style.borderColor = 'rgba(245,158,11,0.6)')}
-                    onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.12)')}
-                  >
-                    <option value="Refrigerated High-Value Freight"  style={{ background: '#0f172a', color: '#fff' }}>Cold-Chain / Refrigerated Freight</option>
-                    <option value="General Dry Van Freight"           style={{ background: '#0f172a', color: '#fff' }}>General Dry Van Freight</option>
-                    <option value="Expedited Intermodal Container"    style={{ background: '#0f172a', color: '#fff' }}>Intermodal Container (Sea / Rail)</option>
-                    <option value="Flatbed Industrial & Machinery"    style={{ background: '#0f172a', color: '#fff' }}>Flatbed — Industrial & Machinery</option>
-                    <option value="Pharma & Temperature Controlled"   style={{ background: '#0f172a', color: '#fff' }}>Pharma & Temperature Controlled</option>
-                    {/* Postel's Law: accept what doesn't fit the standard options */}
-                    <option value="Other / Custom Cargo"              style={{ background: '#0f172a', color: '#fff' }}>Other / Custom Cargo Type</option>
-                  </select>
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                aria-busy={isSubmitting}
-                style={{
-                  width: '100%', height: 52, marginTop: 6,
-                  background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                  color: '#1c1917', border: 'none', borderRadius: 16,
-                  fontSize: 15, fontWeight: 700, cursor: isSubmitting ? 'wait' : 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                  boxShadow: '0 0 30px rgba(245,158,11,0.25)',
-                  transition: 'transform 0.15s, box-shadow 0.15s',
-                  opacity: isSubmitting ? 0.8 : 1,
-                }}
-                onMouseEnter={e => { if (!isSubmitting) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 0 40px rgba(245,158,11,0.4)'; }}}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 0 30px rgba(245,158,11,0.25)'; }}
+            {step === 'form' && (
+              <form
+                onSubmit={handleEstimate}
+                noValidate
+                className="mk-form"
+                onFocusCapture={() => { if (!started) { setStarted(true); track('quote_started'); } }}
               >
-                {isSubmitting ? 'Calculating…' : 'Get Instant Rate'}
-                <Send style={{ width: 18, height: 18 }} aria-hidden="true" />
-              </button>
+                <div className="mk-row">
+                  <div className="mk-field">
+                    <label htmlFor="quote-origin" className="mk-label">Pickup city</label>
+                    <input
+                      id="quote-origin" type="text" list="quote-cities" autoComplete="off" placeholder="e.g. Pune"
+                      className="form-input mk-input" value={origin}
+                      onChange={e => { setOrigin(e.target.value); clearError('origin'); }}
+                      {...invalid('origin')}
+                    />
+                    <FieldError id="origin-error" message={errors.origin} />
+                  </div>
+                  <div className="mk-field">
+                    <label htmlFor="quote-dest" className="mk-label">Delivery city</label>
+                    <input
+                      id="quote-dest" type="text" list="quote-cities" autoComplete="off" placeholder="e.g. Bengaluru"
+                      className="form-input mk-input" value={destination}
+                      onChange={e => { setDestination(e.target.value); clearError('destination'); }}
+                      {...invalid('destination')}
+                    />
+                    <FieldError id="destination-error" message={errors.destination} />
+                  </div>
+                </div>
 
-            </form>
-          )}
+                <div className="mk-field">
+                  <label htmlFor="quote-vehicle" className="mk-label">Truck type</label>
+                  <select
+                    id="quote-vehicle" className="form-select mk-input" value={vehicleCode}
+                    onChange={e => { setVehicleCode(e.target.value); clearError('vehicleCode'); clearError('weightKg'); }}
+                    {...invalid('vehicleCode')}
+                  >
+                    {RATE_CARD.map(v => <option key={v.code} value={v.code}>{v.label}</option>)}
+                  </select>
+                  <FieldError id="vehicleCode-error" message={errors.vehicleCode} />
+                </div>
+
+                <div className="mk-row">
+                  <div className="mk-field">
+                    <label htmlFor="quote-weight" className="mk-label">Load weight (kg)</label>
+                    <input
+                      id="quote-weight" type="number" inputMode="numeric" min={1} placeholder="e.g. 6000"
+                      className="form-input mk-input" value={weightKg}
+                      onChange={e => { setWeightKg(e.target.value); clearError('weightKg'); }}
+                      {...invalid('weightKg')}
+                    />
+                    <FieldError id="weightKg-error" message={errors.weightKg} />
+                  </div>
+                  <div className="mk-field">
+                    <label htmlFor="quote-cargo" className="mk-label">Cargo</label>
+                    <select
+                      id="quote-cargo" className="form-select mk-input" value={cargoCode}
+                      onChange={e => setCargoCode(e.target.value as CargoCode)}
+                    >
+                      {CARGO_TYPES.map(c => <option key={c.code} value={c.code}>{c.label}</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                <button type="submit" className="btn btn-primary mk-submit">Show the rate</button>
+              </form>
+            )}
+
+            {(step === 'estimate' || step === 'contact') && estimate && (
+              <>
+                <div className="mk-estimate" role="status">
+                  <div className="mk-estimate-label">{estimate.origin.name} → {estimate.destination.name}, excl. GST</div>
+                  <div className="mk-estimate-price">{inr(estimate.priceLow)} – {inr(estimate.priceHigh)}</div>
+                  <p className="mk-estimate-note">An estimate, not a booking. Tolls, loading and the final rate are confirmed by our team.</p>
+                  <dl className="mk-dl">
+                    <dt>Road distance</dt><dd>about {estimate.roadKm.toLocaleString('en-IN')} km</dd>
+                    <dt>Typical transit</dt><dd>{estimate.transitDays} {estimate.transitDays === 1 ? 'day' : 'days'}</dd>
+                    <dt>Truck</dt><dd>{estimate.vehicle.label}</dd>
+                  </dl>
+                </div>
+
+                {step === 'estimate' ? (
+                  <div className="mk-actions">
+                    <button type="button" className="btn btn-secondary" onClick={handleReset}>
+                      <RotateCcw size={15} aria-hidden="true" /> Change details
+                    </button>
+                    <button type="button" className="btn btn-primary" onClick={() => { setStep('contact'); track('quote_contact_opened'); }}>
+                      Book this load
+                    </button>
+                    {whatsappConfigured && (
+                      <a
+                        className="btn btn-secondary mk-wa-btn"
+                        href={waLink(`Hi, I need a ${estimate.vehicle.label} from ${estimate.origin.name} to ${estimate.destination.name}. Your site shows ${inr(estimate.priceLow)}–${inr(estimate.priceHigh)}.`)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => track('whatsapp_clicked', { where: 'quote' })}
+                      >
+                        <MessageCircle size={16} aria-hidden="true" /> Ask on WhatsApp
+                      </a>
+                    )}
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmitLead} noValidate className="mk-form">
+                    <div className="mk-field">
+                      <label htmlFor="quote-name" className="mk-label">Your name</label>
+                      <input
+                        id="quote-name" type="text" autoComplete="name" className="form-input mk-input" value={name}
+                        onChange={e => { setName(e.target.value); clearError('name'); }}
+                        {...invalid('name')}
+                      />
+                      <FieldError id="name-error" message={errors.name} />
+                    </div>
+                    <div className="mk-row">
+                      <div className="mk-field">
+                        <label htmlFor="quote-phone" className="mk-label">Mobile number</label>
+                        <input
+                          id="quote-phone" type="tel" inputMode="tel" autoComplete="tel" placeholder="98xxxxxxxx"
+                          className="form-input mk-input" value={phone}
+                          onChange={e => { setPhone(e.target.value); clearError('phone'); }}
+                          {...invalid('phone')}
+                        />
+                        <FieldError id="phone-error" message={errors.phone} />
+                      </div>
+                      <div className="mk-field">
+                        <label htmlFor="quote-company" className="mk-label">Company <span className="mk-optional">(optional)</span></label>
+                        <input
+                          id="quote-company" type="text" autoComplete="organization" className="form-input mk-input" value={company}
+                          onChange={e => setCompany(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <fieldset className="mk-field mk-choice">
+                      <legend className="mk-label">How should we reach you?</legend>
+                      <div className="mk-choice-row">
+                        <label><input type="radio" name="quote-contact" value="call" checked={contactPref === 'call'} onChange={() => setContactPref('call')} /> Phone call</label>
+                        <label><input type="radio" name="quote-contact" value="whatsapp" checked={contactPref === 'whatsapp'} onChange={() => setContactPref('whatsapp')} /> WhatsApp</label>
+                      </div>
+                    </fieldset>
+                    <div className="mk-field">
+                      <label htmlFor="quote-frequency" className="mk-label">How often do you ship? <span className="mk-optional">(optional)</span></label>
+                      <select id="quote-frequency" className="form-select mk-input" value={shipFrequency} onChange={e => setShipFrequency(e.target.value)}>
+                        <option value="">Choose…</option>
+                        <option value="once">Just this load</option>
+                        <option value="monthly">About once a month</option>
+                        <option value="weekly">Every week</option>
+                        <option value="daily">Every day</option>
+                      </select>
+                    </div>
+                    <p className="mk-notice">
+                      We use your name and number only to contact you about this load and keep a record of the request. See our{' '}
+                      <a href="/privacy">privacy policy</a>.
+                    </p>
+                    <label className="mk-optin">
+                      <input type="checkbox" checked={marketingOptIn} onChange={e => setMarketingOptIn(e.target.checked)} />
+                      <span>Also send me occasional updates about LogisticsEdge. <span className="mk-optional">(optional, you can stop any time)</span></span>
+                    </label>
+                    <button type="submit" className="btn btn-primary mk-submit" disabled={isSubmitting} aria-busy={isSubmitting}>
+                      {isSubmitting ? 'Sending…' : contactPref === 'whatsapp' ? 'Request a WhatsApp message' : 'Request a call back'}
+                    </button>
+                  </form>
+                )}
+              </>
+            )}
+
+            {step === 'done' && (
+              <div className="mk-done" role="status">
+                <div className="mk-done-title"><CheckCircle2 size={20} aria-hidden="true" /> Request received</div>
+                <p>
+                  Our team will {contactPref === 'whatsapp' ? 'message' : 'call'} {name.trim().split(' ')[0]} on {phone}
+                  {contactPref === 'whatsapp' ? ' on WhatsApp' : ''} to confirm the rate and the pickup slot.
+                </p>
+                {reference && <div className="mk-ref">Reference {reference}</div>}
+                <button type="button" className="btn btn-secondary" onClick={handleReset}>
+                  <RotateCcw size={15} aria-hidden="true" /> Price another load
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Tall photo card beside the form, carrying what the rate covers */}
+          <figure className="mk-quote-photo">
+            {/* eslint-disable-next-line @next/next/no-img-element -- a sized WebP still from the hero film */}
+            <img src="/frames/frame_215.webp" alt="" width={1280} height={720} loading="lazy" decoding="async" />
+            <figcaption>
+              <span className="mk-quote-chip">Door to door</span>
+              <ul className="mk-checks">
+                <li><Check size={16} aria-hidden="true" />Full truck loads between major Indian cities</li>
+                <li><Check size={16} aria-hidden="true" />Price shown before you share any details</li>
+                <li><Check size={16} aria-hidden="true" />A GST invoice for every trip</li>
+              </ul>
+            </figcaption>
+          </figure>
         </div>
+
+        <ul className="mk-quote-tiles">
+          <li>
+            <Phone size={18} aria-hidden="true" />
+            <h3>Call us</h3>
+            <a href="tel:+915224001200" onClick={() => track('call_clicked', { where: 'quote-tiles' })}>+91 522 400 1200</a>
+            <p>Mon–Fri, 9 AM – 6 PM IST</p>
+          </li>
+          <li>
+            <Search size={18} aria-hidden="true" />
+            <h3>Track a shipment</h3>
+            <Link href="/track">Open the tracking page</Link>
+            <p>With an order or trip number. No login.</p>
+          </li>
+          <li>
+            <LogIn size={18} aria-hidden="true" />
+            <h3>Already on LogisticsEdge?</h3>
+            <Link href="/login">Sign in</Link>
+            <p>Back to your workspace.</p>
+          </li>
+        </ul>
       </div>
     </section>
   );

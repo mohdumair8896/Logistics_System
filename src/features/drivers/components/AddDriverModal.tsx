@@ -22,12 +22,12 @@ export default function AddDriverModal({ onClose }: Props) {
     name: '', phone: '', licenseNo: '', licenseExpiry: '',
     vehicleId: null as string | null,
     status: 'Available' as const,
-    trips: 0, rating: 4.8, documentVerified: true
+    trips: 0, rating: 0, documentVerified: false // server sets these; verification is a compliance step
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await addDriver({ ...form, phone: form.phone });
+    if (!(await addDriver({ ...form, phone: form.phone }))) return; // error already shown
     toast.success('Driver Added', { description: `${form.name} has been added to the fleet roster.` });
     onClose();
   };

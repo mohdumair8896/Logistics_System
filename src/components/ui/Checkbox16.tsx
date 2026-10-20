@@ -44,7 +44,7 @@ export const Checkbox16: FC<Checkbox16Props> = ({
         htmlFor={id}
         className={cn(
           'relative flex items-center justify-between gap-3.5 px-4 py-3 transition-colors cursor-pointer select-none border-b last:border-b-0 border-[var(--border)]',
-          checked ? 'bg-[rgba(0,87,255,0.02)]' : 'hover:bg-[var(--surface-2)]',
+          checked ? 'bg-[rgba(11, 107, 78,0.02)]' : 'hover:bg-[var(--surface-2)]',
           disabled && 'opacity-50 cursor-not-allowed',
           className
         )}
@@ -115,7 +115,7 @@ export const Checkbox16: FC<Checkbox16Props> = ({
       className={cn(
         'relative flex items-center gap-3.5 rounded-xl border transition-all cursor-pointer select-none',
         checked
-          ? 'bg-[rgba(0,87,255,0.03)] border-[rgba(0,87,255,0.32)] shadow-xs hover:border-[var(--brand)]'
+          ? 'bg-[rgba(11, 107, 78,0.03)] border-[rgba(11, 107, 78,0.32)] shadow-xs hover:border-[var(--brand)]'
           : 'bg-[var(--surface-1)] border-[var(--border)] hover:border-[var(--border-mid)] hover:bg-[var(--surface-2)]',
         disabled && 'opacity-50 cursor-not-allowed',
         className

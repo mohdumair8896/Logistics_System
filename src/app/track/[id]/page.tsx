@@ -6,11 +6,9 @@ import {
   ArrowLeft,
   CheckCircle2,
   ExternalLink,
-  Phone,
   FileCheck2,
   AlertTriangle,
 } from 'lucide-react';
-import { toast } from 'sonner';
 import { CopyButton } from '@/components/ui/CopyButton';
 import { ShareButton } from '@/components/ui/ShareButton';
 import { DotSpinner } from '@/components/ui/DotSpinner';
@@ -27,12 +25,12 @@ interface TrackingData {
   destination: string;
   distance: number;
   progress: number;
-  eta: string;
+  eta: string | null;
   startedAt: string | null;
   completedAt: string | null;
-  speedKmH: number;
-  customerName: string;
-  driver: { name: string; phone: string } | null;
+  speedKmH: number | null;
+  customerName: string | null;
+  driver: { name: string } | null;
   vehicle: { vehicleNo: string; type: string } | null;
   checkpoints: { name: string; location: string; passed: boolean; time?: string }[];
 }
@@ -103,7 +101,7 @@ export default function PublicCustomerTrackingPage({ params }: Props) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--surface, #F8F7F4)', color: 'var(--text-high, #141414)', display: 'flex', flexDirection: 'column' }}>
         <header style={{ borderBottom: '1px solid var(--border, #E6E4DF)', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-1, #FFFFFF)' }}>
-          <Link href="/track" style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--brand, #0057FF)', textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>
+          <Link href="/track" style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--brand, #0B6B4E)', textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>
             <ArrowLeft size={16} /> Back to Tracking
           </Link>
           <LogisticsEdgeLogo size="sm" variant="full" />
@@ -114,7 +112,7 @@ export default function PublicCustomerTrackingPage({ params }: Props) {
           </div>
           <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 8, color: 'var(--text-high, #141414)' }}>Shipment ID Not Found</h2>
           <p style={{ color: 'var(--text-mid, #525252)', maxWidth: 440, marginBottom: 24, fontSize: 14, lineHeight: 1.6 }}>
-            We could not locate any active or archived freight matching <code style={{ color: 'var(--brand, #0057FF)', fontFamily: 'var(--font-mono, monospace)', background: 'var(--surface-2, #F3F2EF)', padding: '2px 6px', borderRadius: 4 }}>{rawId}</code>. Please verify your tracking number.
+            We could not locate any active or archived freight matching <code style={{ color: 'var(--brand, #0B6B4E)', fontFamily: 'var(--font-mono, monospace)', background: 'var(--surface-2, #F3F2EF)', padding: '2px 6px', borderRadius: 4 }}>{rawId}</code>. Please verify your tracking number.
           </p>
           <div style={{ display: 'flex', gap: 12 }}>
             <Link
@@ -122,12 +120,12 @@ export default function PublicCustomerTrackingPage({ params }: Props) {
               style={{
                 padding: '10px 20px',
                 borderRadius: 10,
-                background: 'var(--brand, #0057FF)',
+                background: 'var(--brand, #0B6B4E)',
                 color: '#fff',
                 fontSize: 14,
                 fontWeight: 700,
                 textDecoration: 'none',
-                boxShadow: '0 2px 8px rgba(0,87,255,0.25)',
+                boxShadow: '0 2px 8px rgba(11, 107, 78,0.25)',
               }}
             >
               Search Another Waybill
@@ -176,7 +174,7 @@ export default function PublicCustomerTrackingPage({ params }: Props) {
           <div style={{ width: 1, height: 20, background: 'var(--border, #E6E4DF)' }} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <LogisticsEdgeLogo size="sm" variant="full" />
-            <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: 'rgba(0,87,255,0.08)', color: 'var(--brand, #0057FF)', border: '1px solid rgba(0,87,255,0.2)' }}>
+            <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: 'rgba(11, 107, 78,0.08)', color: 'var(--brand, #0B6B4E)', border: '1px solid rgba(11, 107, 78,0.2)' }}>
               Live Consignee View
             </span>
           </div>
@@ -192,12 +190,12 @@ export default function PublicCustomerTrackingPage({ params }: Props) {
             style={{
               fontSize: 12,
               fontWeight: 600,
-              color: 'var(--brand, #0057FF)',
+              color: 'var(--brand, #0B6B4E)',
               textDecoration: 'none',
               padding: '6px 12px',
               borderRadius: 8,
-              background: 'rgba(0,87,255,0.08)',
-              border: '1px solid rgba(0,87,255,0.2)',
+              background: 'rgba(11, 107, 78,0.08)',
+              border: '1px solid rgba(11, 107, 78,0.2)',
             }}
           >
             Staff Dashboard
@@ -242,7 +240,7 @@ export default function PublicCustomerTrackingPage({ params }: Props) {
               {originName.split(' ')[0]} ➔ {destName.split(' ')[0]}
             </h1>
             <div style={{ fontSize: 13, color: 'var(--text-mid, #525252)' }}>
-              Consignee Account: <strong style={{ color: 'var(--text-high, #141414)' }}>{data.customerName}</strong>
+              Consignee Account: <strong style={{ color: 'var(--text-high, #141414)' }}>{data.customerName ?? '—'}</strong>
             </div>
           </div>
 
@@ -251,20 +249,20 @@ export default function PublicCustomerTrackingPage({ params }: Props) {
               <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-low, #909090)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>
                 Estimated Delivery (ETA)
               </div>
-              <div style={{ fontSize: 22, fontWeight: 800, color: isDelivered ? '#16A34A' : 'var(--brand, #0057FF)', fontFamily: 'var(--font-mono, monospace)' }}>
-                {data.eta}
+              <div style={{ fontSize: 22, fontWeight: 800, color: isDelivered ? '#16A34A' : 'var(--brand, #0B6B4E)', fontFamily: 'var(--font-mono, monospace)' }}>
+                {data.eta ?? 'Awaiting GPS'}
               </div>
             </div>
 
             <div style={{
-              background: 'rgba(0,87,255,0.06)',
-              border: '1px solid rgba(0,87,255,0.18)',
+              background: 'rgba(11, 107, 78,0.06)',
+              border: '1px solid rgba(11, 107, 78,0.18)',
               borderRadius: 16,
               padding: '12px 18px',
               textAlign: 'center',
               minWidth: 90
             }}>
-              <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--brand, #0057FF)', fontFamily: 'var(--font-mono, monospace)', lineHeight: 1 }}>
+              <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--brand, #0B6B4E)', fontFamily: 'var(--font-mono, monospace)', lineHeight: 1 }}>
                 {progressPercent}%
               </div>
               <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-low, #909090)', textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 4 }}>
@@ -303,8 +301,8 @@ export default function PublicCustomerTrackingPage({ params }: Props) {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  background: m.done ? 'var(--brand, #0057FF)' : 'var(--surface-2, #F3F2EF)',
-                  border: `2px solid ${m.done ? 'var(--brand, #0057FF)' : 'var(--border, #E6E4DF)'}`,
+                  background: m.done ? 'var(--brand, #0B6B4E)' : 'var(--surface-2, #F3F2EF)',
+                  border: `2px solid ${m.done ? 'var(--brand, #0B6B4E)' : 'var(--border, #E6E4DF)'}`,
                   color: m.done ? '#fff' : 'var(--text-low, #909090)',
                   fontSize: 12,
                   fontWeight: 700,
@@ -333,7 +331,7 @@ export default function PublicCustomerTrackingPage({ params }: Props) {
           }}>
             <div style={{
               height: '100%',
-              background: 'linear-gradient(90deg, #0057FF, #3378FF)',
+              background: 'linear-gradient(90deg, #0B6B4E, #1C8A65)',
               width: `${Math.min(100, Math.max(10, progressPercent))}%`,
               borderRadius: 4,
               transition: 'width 0.4s ease-out',
@@ -353,7 +351,7 @@ export default function PublicCustomerTrackingPage({ params }: Props) {
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-high, #141414)' }}>Corridor Transit Checkpoints</div>
-              <span style={{ fontSize: 11, color: 'var(--brand, #0057FF)', fontWeight: 600, background: 'rgba(0,87,255,0.08)', padding: '2px 8px', borderRadius: 12 }}>
+              <span style={{ fontSize: 11, color: 'var(--brand, #0B6B4E)', fontWeight: 600, background: 'rgba(11, 107, 78,0.08)', padding: '2px 8px', borderRadius: 12 }}>
                 {checkpoints.filter(c => c.passed).length} / {checkpoints.length} Cleared
               </span>
             </div>
@@ -411,12 +409,12 @@ export default function PublicCustomerTrackingPage({ params }: Props) {
               </div>
               <div>
                 <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-low, #909090)', textTransform: 'uppercase', marginBottom: 4 }}>Remaining</div>
-                <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--brand, #0057FF)', fontFamily: 'var(--font-mono, monospace)' }}>{distanceRemaining} km</div>
+                <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--brand, #0B6B4E)', fontFamily: 'var(--font-mono, monospace)' }}>{distanceRemaining} km</div>
               </div>
               <div>
                 <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-low, #909090)', textTransform: 'uppercase', marginBottom: 4 }}>Speed</div>
                 <div style={{ fontSize: 16, fontWeight: 800, color: isDelivered ? 'var(--text-low, #909090)' : '#16A34A', fontFamily: 'var(--font-mono, monospace)' }}>
-                  {data.speedKmH} km/h
+                  {data.speedKmH != null ? `${data.speedKmH} km/h` : '—'}
                 </div>
               </div>
             </div>
@@ -435,56 +433,20 @@ export default function PublicCustomerTrackingPage({ params }: Props) {
 
               <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
                 <Avatar
-                  name={driver?.name || 'Verified Fleet Captain'}
+                  name={driver?.name || 'Driver'}
                   size="lg"
                   status={isDelivered ? 'offline' : 'online'}
                 />
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-high, #141414)' }}>{driver?.name || 'Verified Fleet Captain'}</div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-high, #141414)' }}>{driver?.name || 'Driver not yet assigned'}</div>
                   <div style={{ fontSize: 12, color: 'var(--text-mid, #525252)' }}>
-                    Vehicle: <span style={{ color: 'var(--text-high, #141414)', fontFamily: 'var(--font-mono, monospace)' }}>{vehicle?.vehicleNo || 'UP32-BN-8821'}</span> ({vehicle?.type || 'Heavy Cargo Liner'})
+                    Vehicle: <span style={{ color: 'var(--text-high, #141414)', fontFamily: 'var(--font-mono, monospace)' }}>{vehicle?.vehicleNo || '—'}</span>{vehicle?.type ? ` (${vehicle.type})` : ''}
                   </div>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: 10 }}>
-                <a
-                  href={`tel:${driver?.phone || '+919876543210'}`}
-                  style={{
-                    flex: 1,
-                    padding: '8px 12px',
-                    borderRadius: 8,
-                    background: 'rgba(0,87,255,0.08)',
-                    border: '1px solid rgba(0,87,255,0.25)',
-                    color: 'var(--brand, #0057FF)',
-                    fontSize: 12,
-                    fontWeight: 700,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 6,
-                    textDecoration: 'none',
-                    transition: 'background 0.2s',
-                  }}
-                >
-                  <Phone size={13} /> Call Driver
-                </a>
-                <button
-                  onClick={() => toast.info('Consignee Support Desk: +91 800-LOGISTICSEDGE (Toll Free)')}
-                  style={{
-                    flex: 1,
-                    padding: '8px 12px',
-                    borderRadius: 8,
-                    background: 'var(--surface-2, #F3F2EF)',
-                    border: '1px solid var(--border, #E6E4DF)',
-                    color: 'var(--text-high, #141414)',
-                    fontSize: 12,
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
-                >
-                  Help Desk
-                </button>
+              <div style={{ fontSize: 12, color: 'var(--text-mid, #525252)', background: 'var(--surface-2, #F3F2EF)', border: '1px solid var(--border, #E6E4DF)', borderRadius: 8, padding: '8px 12px' }}>
+                For delivery questions, contact the company that shared this tracking link with you.
               </div>
             </div>
 

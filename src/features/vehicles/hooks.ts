@@ -4,6 +4,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import type { Vehicle } from './types';
+import { apiMutate } from '@/lib/apiClient';
 import type { Driver } from '@/features/drivers/types';
 
 // ─── DB row → Vehicle type mapper ─────────────────────────────────────────────
@@ -48,23 +49,17 @@ export function useVehicles() {
 
   const addVehicle = useCallback(
     async (v: Omit<Vehicle, 'id'>) => {
-      const res = await fetch('/api/vehicles', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(v),
-      });
-      if (res.ok) await fetchVehicles();
+      const result = await apiMutate('/api/vehicles', 'POST', v);
+      if (result.ok) await fetchVehicles();
+      return result.ok;
     },
     [fetchVehicles]
   );
 
-  const updateVehicle = useCallback(async (id: string, updates: Partial<Vehicle>) => {
-    await fetch(`/api/vehicles/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updates),
-    });
-    setVehicles((prev) => prev.map((v) => (v.id === id ? { ...v, ...updates } : v)));
+  const updateVehicle = useCallback(async (id: string, updates: Partial<Vehicle>): Promise<boolean> => {
+    const result = await apiMutate(`/api/vehicles/${id}`, 'PATCH', updates);
+    if (result.ok) setVehicles((prev) => prev.map((v) => (v.id === id ? { ...v, ...updates } : v)));
+    return result.ok;
   }, []);
 
   return { vehicles, loading, addVehicle, updateVehicle, refetch: fetchVehicles };

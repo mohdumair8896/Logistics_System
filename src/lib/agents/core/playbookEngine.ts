@@ -5,6 +5,7 @@
 import { ExceptionCode, AutonomyLevel, OperationalEvidence } from './types';
 import { LogisticsEventGraph } from './eventGraph';
 import { db } from '@/lib/db';
+import { currentTenantId } from '@/lib/tenancy';
 import { incidents } from '@/lib/schema';
 
 export interface PlaybookDefinition {
@@ -367,7 +368,7 @@ export class PlaybookEngine {
     // 2. Persist in incidents table for cross-compatibility
     const incidentId = `INC-${Date.now().toString().slice(-6)}`;
     try {
-      await db.insert(incidents).values({
+      await db.insert(incidents).values({ tenantId: currentTenantId(),
         id: incidentId,
         orderId: params.shipmentId || null,
         tripId: params.tripId || null,

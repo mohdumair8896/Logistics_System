@@ -88,9 +88,9 @@ export function AlertDialog({
         Icon: AlertTriangle,
       },
       info: {
-        badgeBg: 'rgba(0, 87, 255, 0.12)',
-        badgeColor: '#0057FF',
-        btnBg: 'var(--brand, #0057FF)',
+        badgeBg: 'rgba(11, 107, 78, 0.12)',
+        badgeColor: '#0B6B4E',
+        btnBg: 'var(--brand, #0B6B4E)',
         Icon: Info,
       },
     }[variant];
@@ -379,7 +379,7 @@ export function AlertDialogAction({
         'px-4 py-2 text-xs font-bold rounded-lg shadow-sm hover:opacity-90 transition cursor-pointer',
         variant === 'destructive'
           ? 'bg-red-600 text-white hover:bg-red-700'
-          : 'bg-[var(--brand,#0057FF)] text-white hover:bg-[var(--brand-dark,#0040CC)]',
+          : 'bg-[var(--brand,#0B6B4E)] text-white hover:bg-[var(--brand-dark,#07523C)]',
         className
       )}
       {...props}

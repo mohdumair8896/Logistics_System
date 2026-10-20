@@ -1,6 +1,8 @@
 'use client';
 import { useState, useRef, useCallback } from 'react';
 import { useInvoices } from '@/features/invoices/hooks';
+import { invoiceGst } from '@/features/invoices/gst';
+import { GstOptionCard } from '@/features/invoices/GstOptionCard';
 import { useOrders } from '@/features/orders/hooks';
 import { useCustomers } from '@/features/customers/hooks';
 import { useVehicles } from '@/features/vehicles/hooks';
@@ -31,6 +33,9 @@ import {
   ContextMenuShortcut,
 } from '@/components/ui/ContextMenu';
 
+/** Tax amounts are to the paisa, so show them exactly (formatINR rounds to the rupee) */
+const formatTax = (n: number) => `₹${n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
 export default function InvoicesPage() {
   const { invoices, markInvoicePaid } = useInvoices();
   const { orders } = useOrders();
@@ -45,7 +50,7 @@ export default function InvoicesPage() {
 
   const inv = invoices.find(i => i.id === (selectedInv || invoices[0]?.id)) || invoices[0] || null;
   const order = inv ? orders.find(o => o.id === inv.orderId) : null;
-  const customer = order ? customers.find(c => c.id === order.customerId) : null;
+  const customer = inv ? customers.find(c => c.id === inv.customerId) : null;
   const vehicle = order ? vehicles.find(v => v.id === order.vehicleId) : null;
   const driver = order ? drivers.find(d => d.id === order.driverId) : null;
 
@@ -90,6 +95,39 @@ export default function InvoicesPage() {
     win.print();
   };
 
+  const tax = inv ? invoiceGst(inv, customer?.gstin) : null;
+
+  // ── "Send to Tally": XML of the ticked invoices for TallyPrime import ──────
+  const [ticked, setTicked] = useState<string[]>([]);
+  const [exporting, setExporting] = useState(false);
+  const allTicked = invoices.length > 0 && ticked.length === invoices.length;
+  const toggleTicked = (id: string) => setTicked(prev => prev.includes(id) ? prev.filter(t => t !== id) : [...prev, id]);
+
+  const handleTallyExport = async () => {
+    setExporting(true);
+    try {
+      const res = await fetch('/api/invoices/tally-export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: ticked }),
+      });
+      if (!res.ok) throw new Error((await res.json().catch(() => null))?.error ?? 'Tally export failed');
+      const url = URL.createObjectURL(await res.blob());
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = res.headers.get('Content-Disposition')?.match(/filename="([^"]+)"/)?.[1] ?? 'Tally-Invoices.xml';
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('Tally file downloaded', {
+        description: `${ticked.length} invoice(s). In TallyPrime use Import > Transactions, or post the file to Tally's XML port (9000).`,
+      });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Tally export failed');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="animate-slide-in">
       <div className="mb-4">
@@ -117,6 +155,8 @@ export default function InvoicesPage() {
         </div>
       </div>
 
+      <GstOptionCard />
+
       {/* Pending invoice alert — watermelon Alert28 pattern */}
       {invoices.filter(i => i.status === 'Pending').length > 0 && (
         <AlertBanner variant="warning" title={`${invoices.filter(i => i.status === 'Pending').length} invoice(s) pending payment settlement`} dismissible>
@@ -130,8 +170,19 @@ export default function InvoicesPage() {
       <div className="responsive-split-2">
         {/* Invoice List Sidebar */}
         <div className="card" style={{ padding: 0, overflow: 'hidden', height: 'fit-content' }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', fontWeight: 700, fontSize: 13, color: 'var(--text-mid)' }}>
-            All Tax Invoices ({invoices.length})
+          <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 10 }}>
+            <input
+              type="checkbox"
+              aria-label="Select all invoices for Tally"
+              checked={allTicked}
+              disabled={invoices.length === 0}
+              onChange={() => setTicked(allTicked ? [] : invoices.map(i => i.id))}
+            />
+            <span style={{ flex: 1, fontWeight: 700, fontSize: 13, color: 'var(--text-mid)' }}>All Tax Invoices ({invoices.length})</span>
+            <button className="btn btn-ghost btn-sm" onClick={handleTallyExport} disabled={ticked.length === 0 || exporting}
+              title="Download a TallyPrime XML file with ledgers and sales vouchers for the ticked invoices">
+              <Download size={13} /> {exporting ? 'Exporting…' : `Send to Tally${ticked.length ? ` (${ticked.length})` : ''}`}
+            </button>
           </div>
           {invoices.length === 0 ? (
             <div style={{ padding: '36px 16px' }}>
@@ -161,7 +212,16 @@ export default function InvoicesPage() {
                       }}
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span className="mono" style={{ fontWeight: 800, color: 'var(--brand)', fontSize: 12.5 }}>{i.id}</span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <input
+                            type="checkbox"
+                            aria-label={`Select ${i.id} for Tally`}
+                            checked={ticked.includes(i.id)}
+                            onClick={e => e.stopPropagation()}
+                            onChange={() => toggleTicked(i.id)}
+                          />
+                          <span className="mono" style={{ fontWeight: 800, color: 'var(--brand)', fontSize: 12.5 }}>{i.id}</span>
+                        </span>
                         <BadgeWithDot
                           color={i.status === 'Paid' ? 'success' : 'warning'}
                           pulse={i.status === 'Pending'}
@@ -250,21 +310,21 @@ export default function InvoicesPage() {
                 }}
               >
                 {/* Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid var(--brand, #0057FF)', paddingBottom: 16, marginBottom: 20 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid var(--brand, #0B6B4E)', paddingBottom: 16, marginBottom: 20 }}>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <div style={{ width: 32, height: 32, background: 'var(--brand, #0057FF)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff' }}>
+                      <div style={{ width: 32, height: 32, background: 'var(--brand, #0B6B4E)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff' }}>
                         <Building2 size={18} />
                       </div>
                       <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-high, #141414)' }}>LogisticsEdge LMS</div>
                     </div>
                     <div style={{ fontSize: 11.5, color: 'var(--text-mid, #525252)', marginTop: 4 }}>
-                      Central Logistics Hub, Lucknow, UP • GSTIN: 09AAACP1234F1Z9
+                      Plot No. 12, Vibhuti Khand, Gomti Nagar, Lucknow — 226010, UP
                     </div>
                   </div>
 
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--brand, #0057FF)', fontFamily: 'var(--font-mono, monospace)' }}>{inv.id}</div>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--brand, #0B6B4E)', fontFamily: 'var(--font-mono, monospace)' }}>{inv.id}</div>
                     <div style={{ fontSize: 11.5, color: 'var(--text-low, #909090)', marginTop: 2 }}>Issue Date: {inv.createdAt}</div>
                     <div style={{ fontSize: 11.5, color: 'var(--text-low, #909090)' }}>Dispatch Order: {inv.orderId}</div>
                     <div style={{ marginTop: 6, display: 'flex', justifyContent: 'flex-end' }}>
@@ -282,6 +342,9 @@ export default function InvoicesPage() {
                     <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-high, #141414)' }}>{customer?.name}</div>
                     <div style={{ color: 'var(--text-mid, #525252)', marginTop: 2 }}>{customer?.address}</div>
                     <div style={{ color: 'var(--text-mid, #525252)', marginTop: 2 }}>GSTIN: <strong>{customer?.gstin}</strong></div>
+                    <div style={{ color: 'var(--text-mid, #525252)', marginTop: 2 }}>
+                      Place of supply: {tax ? `${tax.placeOfSupply.name} (${tax.placeOfSupply.code})${tax.placeOfSupply.assumed ? ', assumed: no valid customer GSTIN' : ''}` : '—'}
+                    </div>
                   </div>
 
                   <div style={{ background: 'var(--surface-2, #F3F2EF)', padding: 12, borderRadius: 8, border: '1px solid var(--border, #E6E4DF)' }}>
@@ -338,16 +401,29 @@ export default function InvoicesPage() {
                     <span>Taxable Subtotal</span>
                     <span style={{ fontFamily: 'var(--font-mono, monospace)', fontWeight: 600, color: 'var(--text-high, #141414)' }}>{formatINR(inv.subtotal)}</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-mid, #525252)' }}>
-                    <span>GST @ 18% (Integrated IGST)</span>
-                    <span style={{ fontFamily: 'var(--font-mono, monospace)', color: 'var(--text-high, #141414)' }}>{formatINR(inv.gst)}</span>
-                  </div>
+                  {tax?.reverseCharge ? (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-mid, #525252)' }}>
+                      <span>GST (reverse charge)</span>
+                      <span style={{ fontFamily: 'var(--font-mono, monospace)', color: 'var(--text-high, #141414)' }}>{formatTax(0)}</span>
+                    </div>
+                  ) : tax?.lines.map(line => (
+                    <div key={line.label} style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-mid, #525252)' }}>
+                      <span>{line.label} @ {line.rate}%</span>
+                      <span style={{ fontFamily: 'var(--font-mono, monospace)', color: 'var(--text-high, #141414)' }}>{formatTax(line.amount)}</span>
+                    </div>
+                  ))}
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '2px solid var(--text-high, #141414)', paddingTop: 8, marginTop: 4 }}>
                     <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-high, #141414)' }}>TOTAL PAYABLE</span>
-                    <span style={{ fontSize: 18, fontWeight: 800, color: 'var(--brand, #0057FF)', fontFamily: 'var(--font-mono, monospace)' }}>
+                    <span style={{ fontSize: 18, fontWeight: 800, color: 'var(--brand, #0B6B4E)', fontFamily: 'var(--font-mono, monospace)' }}>
                       {formatINR(inv.total)}
                     </span>
                   </div>
+                  {tax?.reverseCharge && (
+                    <div style={{ fontSize: 11.5, color: 'var(--text-mid, #525252)', background: 'var(--surface-2, #F3F2EF)', padding: '8px 10px', borderRadius: 6, marginTop: 4 }}>
+                      <strong style={{ color: 'var(--text-high, #141414)' }}>Tax payable on reverse charge: Yes.</strong>{' '}
+                      The recipient pays GST at {tax.rate}%: {tax.lines.map(line => `${line.label} @ ${line.rate}% ${formatTax(line.amount)}`).join(' + ')}.
+                    </div>
+                  )}
                 </div>
 
                 {/* Authentication & Signature Badge */}

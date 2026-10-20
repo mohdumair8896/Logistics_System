@@ -136,7 +136,7 @@ export default function P44CorridorMap({
       const truckLng = liveCoords?.lng ?? (orig[1] + (dest[1] - orig[1]) * pct);
 
       const progLine = L.polyline([orig, [truckLat, truckLng]], {
-        color: '#0057FF',
+        color: '#0B6B4E',
         weight: 5,
         opacity: 1,
       }).addTo(map);
@@ -144,7 +144,7 @@ export default function P44CorridorMap({
 
       // Origin marker (blue circle)
       const originIcon = L.divIcon({
-        html: `<div style="width:14px;height:14px;border-radius:50%;background:#0057FF;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(0,87,255,0.5)"></div>`,
+        html: `<div style="width:14px;height:14px;border-radius:50%;background:#0B6B4E;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(11, 107, 78,0.5)"></div>`,
         className: '',
         iconSize: [14, 14],
         iconAnchor: [7, 7],
@@ -154,7 +154,7 @@ export default function P44CorridorMap({
 
       // Destination marker (outlined circle)
       const destIcon = L.divIcon({
-        html: `<div style="width:14px;height:14px;border-radius:50%;background:#fff;border:2.5px solid #0057FF;box-shadow:0 2px 8px rgba(0,87,255,0.3)"></div>`,
+        html: `<div style="width:14px;height:14px;border-radius:50%;background:#fff;border:2.5px solid #0B6B4E;box-shadow:0 2px 8px rgba(11, 107, 78,0.3)"></div>`,
         className: '',
         iconSize: [14, 14],
         iconAnchor: [7, 7],
@@ -164,7 +164,7 @@ export default function P44CorridorMap({
 
       // Truck marker (moving)
       const truckIcon = L.divIcon({
-        html: `<div style="width:22px;height:22px;border-radius:50%;background:#0057FF;border:2px solid #fff;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px rgba(0,87,255,0.6);font-size:11px">🚛</div>`,
+        html: `<div style="width:22px;height:22px;border-radius:50%;background:#0B6B4E;border:2px solid #fff;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px rgba(11, 107, 78,0.6);font-size:11px">🚛</div>`,
         className: '',
         iconSize: [22, 22],
         iconAnchor: [11, 11],
@@ -177,7 +177,7 @@ export default function P44CorridorMap({
       if (waypoints && waypoints.length > 0) {
         waypoints.forEach((wp, i) => {
           const wpIcon = L.divIcon({
-            html: `<div style="width:10px;height:10px;border-radius:50%;background:${wp.passed ? '#0057FF' : '#E3E1DC'};border:1.5px solid ${wp.passed ? '#0057FF' : '#CCCAC4'};"></div>`,
+            html: `<div style="width:10px;height:10px;border-radius:50%;background:${wp.passed ? '#0B6B4E' : '#E3E1DC'};border:1.5px solid ${wp.passed ? '#0B6B4E' : '#CCCAC4'};"></div>`,
             className: '',
             iconSize: [10, 10],
             iconAnchor: [5, 5],

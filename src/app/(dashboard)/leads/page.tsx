@@ -37,6 +37,7 @@ export default function LeadsCRMPage() {
 
   const handleConvertLead = async (leadId: string) => {
     const orderId = await convertLeadToOrder(leadId);
+    if (!orderId) return; // error already shown
     toast.success('Lead Dispatched to Active Fleet', {
       description: `Shipment order ${orderId} created from inbound lead. Ready for vehicle allocation.`
     });
@@ -186,7 +187,7 @@ export default function LeadsCRMPage() {
                       <tr
                         key={lead.id}
                         onClick={() => setSelectedLeadId(lead.id)}
-                        style={{ background: isSelected ? 'var(--brand-10, rgba(0,87,255,0.08))' : '' }}
+                        style={{ background: isSelected ? 'var(--brand-10, rgba(11, 107, 78,0.08))' : '' }}
                       >
                         <td>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -329,8 +330,8 @@ export default function LeadsCRMPage() {
                       justifyContent: 'center',
                       gap: 8,
                       padding: '11px',
-                      background: 'linear-gradient(135deg, #0057FF, #0040CC)',
-                      boxShadow: '0 4px 14px rgba(0, 87, 255, 0.25)',
+                      background: 'linear-gradient(135deg, #0B6B4E, #07523C)',
+                      boxShadow: '0 4px 14px rgba(11, 107, 78, 0.25)',
                       borderRadius: 10,
                       border: 'none',
                     }}

@@ -10,7 +10,7 @@ export interface CurrentUser {
   id: string;
   name: string;
   email: string;
-  role: 'Operations Director' | 'Fleet Dispatcher' | 'Compliance Officer';
+  role: string; // one of STAFF_ROLES in src/lib/permissions.ts
   facility: string;
   avatar: string;
   tenantId?: string;

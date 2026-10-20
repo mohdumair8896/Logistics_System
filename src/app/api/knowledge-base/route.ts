@@ -3,21 +3,33 @@
 // DELETE /api/knowledge-base/[id]  — delete an item
 
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { z } from 'zod';
 import { knowledgeBase } from '@/lib/schema';
-import { requireAuth, isAuthError } from '@/lib/auth';
-import { desc } from 'drizzle-orm';
+import { requireTenant, isAuthError } from '@/lib/auth';
+import { requirePermission } from '@/lib/permissions';
+import { withTenant } from '@/lib/tenancy';
+import { nextId } from '@/lib/ids';
+import { parseJsonBody } from '@/lib/validation';
+import { desc, eq } from 'drizzle-orm';
+
+const createItemSchema = z.object({
+  category: z.string().trim().min(1).max(50),
+  title: z.string().trim().min(1).max(300),
+  content: z.string().trim().min(1).max(20000),
+  keywords: z.array(z.string().trim().max(60)).max(50).optional().default([]),
+}).strict();
 
 // ─── GET /api/knowledge-base ──────────────────────────────────────────────────
 export async function GET(request: NextRequest) {
-  const auth = await requireAuth(request);
+  const auth = await requireTenant(request);
   if (isAuthError(auth)) return auth;
 
   try {
-    const rows = await db
+    const rows = await withTenant(auth.tenantId, tx => tx
       .select()
       .from(knowledgeBase)
-      .orderBy(desc(knowledgeBase.createdAt));
+      .where(eq(knowledgeBase.tenantId, auth.tenantId))
+      .orderBy(desc(knowledgeBase.createdAt)));
 
     const items = rows.map(r => ({
       id: r.id,
@@ -37,22 +49,19 @@ export async function GET(request: NextRequest) {
 
 // ─── POST /api/knowledge-base ─────────────────────────────────────────────────
 export async function POST(request: NextRequest) {
-  const auth = await requireAuth(request);
+  const auth = await requireTenant(request);
   if (isAuthError(auth)) return auth;
+  const denied = requirePermission(auth, 'kb.manage');
+  if (denied) return denied;
 
   try {
-    const body = await request.json();
-    const [latest] = await db.select({ id: knowledgeBase.id }).from(knowledgeBase).orderBy(desc(knowledgeBase.id)).limit(1);
-    const lastNum = latest ? parseInt(latest.id.replace('KB-', ''), 10) : 0;
-    const nextNum = (!isNaN(lastNum) && lastNum > 0) ? lastNum + 1 : 101;
-    const id = `KB-${nextNum}`;
+    const parsed = await parseJsonBody(request, createItemSchema);
+    if (!parsed.ok) return parsed.response;
 
-    await db.insert(knowledgeBase).values({
-      id,
-      category: body.category,
-      title: body.title,
-      content: body.content,
-      keywords: body.keywords ?? [],
+    const id = await withTenant(auth.tenantId, async tx => {
+      const newId = await nextId(tx, 'KB');
+      await tx.insert(knowledgeBase).values({ id: newId, tenantId: auth.tenantId, ...parsed.data });
+      return newId;
     });
 
     return NextResponse.json({ id }, { status: 201 });

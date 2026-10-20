@@ -2,8 +2,9 @@
 // Eradicates revenue leakage, overbilling, duplicate charges, and rate discrepancies.
 
 import { db } from '@/lib/db';
+import { currentTenantId } from '@/lib/tenancy';
 import { invoices, orders } from '@/lib/schema';
-import { eq, desc } from 'drizzle-orm';
+import { and, eq, desc } from 'drizzle-orm';
 import type { AgentModule, LogisticsEvent, AgentResult, AgentReasoningStep } from '../../core/types';
 import { LogisticsEventGraph } from '../../core/eventGraph';
 
@@ -30,7 +31,7 @@ export class BillingAgent implements AgentModule<FreightAuditPayload> {
       timestamp: new Date().toISOString(),
     });
 
-    const allInvoices = await db.select().from(invoices).orderBy(desc(invoices.createdAt)).limit(20);
+    const allInvoices = await db.select().from(invoices).where(eq(invoices.tenantId, currentTenantId())).orderBy(desc(invoices.createdAt)).limit(20);
     const auditedList: {
       invoiceId: string;
       billedFreight: number;
@@ -43,7 +44,7 @@ export class BillingAgent implements AgentModule<FreightAuditPayload> {
 
     for (const inv of allInvoices) {
       if (!inv.orderId) continue;
-      const [order] = await db.select().from(orders).where(eq(orders.id, inv.orderId)).limit(1);
+      const [order] = await db.select().from(orders).where(and(eq(orders.tenantId, currentTenantId()), eq(orders.id, inv.orderId))).limit(1);
       if (!order) continue;
 
       const weight = order.totalWeight || 0;

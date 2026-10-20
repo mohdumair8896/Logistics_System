@@ -3,10 +3,11 @@
 // Used by /api/invoices/[id]/pdf GET route.
 //
 // Compliant with Indian GST invoice requirements:
-//   - Company name, GSTIN, address
+//   - Company name, address (supplier GSTIN not set yet; required on a tax invoice)
 //   - Customer GSTIN, address
 //   - HSN/SAC code for freight services
-//   - CGST/SGST (intra-state) or IGST (inter-state) breakdown
+//   - Place of supply and reverse-charge declaration. Forward charge lists the CGST + SGST or
+//     IGST charged; reverse charge lists what the customer pays instead (see ./gst.ts)
 //   - e-Way Bill number field
 //   - QR code equivalent (text-based for now)
 
@@ -14,10 +15,11 @@ import React from 'react';
 import {
   Document, Page, Text, View, StyleSheet,
 } from '@react-pdf/renderer';
+import { invoiceGst, type StoredInvoiceGst } from './gst';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 export interface InvoicePdfData {
-  invoice: {
+  invoice: StoredInvoiceGst & {
     id: string;
     createdAt: string;
     status: 'Paid' | 'Pending';
@@ -51,7 +53,6 @@ export interface InvoicePdfData {
   driver?: { name: string; phone: string };
   vehicle?: { vehicleNo: string; type: string };
   products?: { id: string; name: string }[];
-  isInterState?: boolean; // IGST if true, CGST+SGST if false
 }
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
@@ -101,6 +102,9 @@ const s = StyleSheet.create({
   grandRow: { flexDirection: 'row', justifyContent: 'space-between', padding: '8 10', backgroundColor: BRAND, borderRadius: 6, marginTop: 6 },
   grandLabel: { fontSize: 11, fontWeight: 'bold', color: '#fff', fontFamily: 'Helvetica-Bold' },
   grandValue: { fontSize: 11, fontWeight: 'bold', color: '#fff', fontFamily: 'Helvetica-Bold' },
+  rcmNote: { marginTop: 6, padding: '6 8', backgroundColor: LIGHT, borderRadius: 4 },
+  rcmTitle: { fontSize: 8, color: DARK, fontFamily: 'Helvetica-Bold' },
+  rcmLine: { fontSize: 8, color: GRAY, marginTop: 2 },
   // Fleet strip
   fleetBox: { flexDirection: 'row', gap: 16, backgroundColor: LIGHT, borderRadius: 6, padding: 9, marginBottom: 14 },
   fleetLabel: { fontSize: 7, color: GRAY, textTransform: 'uppercase', letterSpacing: 0.7, marginBottom: 2 },
@@ -112,29 +116,29 @@ const s = StyleSheet.create({
   // Footer
   footer: { borderTop: `1px solid ${BORDER}`, paddingTop: 8, flexDirection: 'row', justifyContent: 'space-between' },
   footerText: { fontSize: 7, color: GRAY },
-  gstin: { fontSize: 8, fontFamily: 'Helvetica-Bold', color: BRAND },
 });
 
 const fmt = (n: number) => `₹${n.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
 
 export function InvoicePdf({ data }: { data: InvoicePdfData }) {
-  const { invoice, order, customer, driver, vehicle, products = [], isInterState = true } = data;
+  const { invoice, order, customer, driver, vehicle, products = [] } = data;
+  const tax = invoiceGst(invoice, customer.gstin);
 
   const getProductName = (id: string) => products.find(p => p.id === id)?.name || id;
 
   return (
-    <Document title={`Tax Invoice ${invoice.id}`} author="LogisticsEdge India Pvt. Ltd.">
+    <Document title={`Tax Invoice ${invoice.id}`} author="LogisticsEdge Technologies Pvt. Ltd.">
       <Page size="A4" style={s.page}>
 
         {/* ── Header ── */}
         <View style={s.headerRow}>
           <View>
             <Text style={s.companyName}>LOGISTICS EDGE</Text>
-            <Text style={s.companyTagline}>India Pvt. Ltd. — National Fleet Operations</Text>
+            <Text style={s.companyTagline}>Technologies Pvt. Ltd. — National Fleet Operations</Text>
             <Text style={s.companyMeta}>
-              Central Distribution Hub, Lucknow, UP{'\n'}
-              GSTIN: 09AABCP1234Q1Z5  |  CIN: U63090UP2021PTC145312{'\n'}
-              PAN: AABCP1234Q  |  support@logisticsedge.io
+              Plot No. 12, Vibhuti Khand, Gomti Nagar{'\n'}
+              Lucknow, UP — 226010{'\n'}
+              support@logisticsedge.io
             </Text>
           </View>
           <View>
@@ -158,13 +162,15 @@ export function InvoicePdf({ data }: { data: InvoicePdfData }) {
             <Text style={s.partyLine}>{customer.contact} | {customer.phone}</Text>
             <Text style={s.partyLine}>{customer.address}</Text>
             <Text style={[s.partyLine, { marginTop: 4, fontFamily: 'Helvetica-Bold', color: DARK }]}>GSTIN: {customer.gstin}</Text>
+            <Text style={s.partyLine}>
+              Place of Supply: {tax.placeOfSupply.name} ({tax.placeOfSupply.code}){tax.placeOfSupply.assumed ? ', assumed: no valid customer GSTIN' : ''}
+            </Text>
           </View>
           <View style={s.partyBox}>
             <Text style={s.partyLabel}>Service Provider</Text>
-            <Text style={s.partyName}>LogisticsEdge India Pvt. Ltd.</Text>
-            <Text style={s.partyLine}>Central Distribution Hub, Lucknow</Text>
-            <Text style={s.partyLine}>Uttar Pradesh — 226010</Text>
-            <Text style={[s.partyLine, { marginTop: 4, fontFamily: 'Helvetica-Bold', color: DARK }]}>GSTIN: 09AABCP1234Q1Z5</Text>
+            <Text style={s.partyName}>LogisticsEdge Technologies Pvt. Ltd.</Text>
+            <Text style={s.partyLine}>Plot No. 12, Vibhuti Khand, Gomti Nagar</Text>
+            <Text style={s.partyLine}>Lucknow, Uttar Pradesh — 226010</Text>
             <Text style={s.partyLine}>SAC Code: 996791 (Freight Transport Services)</Text>
           </View>
         </View>
@@ -188,8 +194,8 @@ export function InvoicePdf({ data }: { data: InvoicePdfData }) {
             <Text style={s.routeValue}>{order.totalWeight.toLocaleString()} kg</Text>
           </View>
           <View>
-            <Text style={s.routeLabel}>GST Type</Text>
-            <Text style={s.routeValue}>{isInterState ? 'IGST (Inter-State)' : 'CGST + SGST'}</Text>
+            <Text style={s.routeLabel}>Reverse Charge</Text>
+            <Text style={s.routeValue}>{tax.reverseCharge ? 'Yes' : 'No'}</Text>
           </View>
         </View>
 
@@ -240,27 +246,30 @@ export function InvoicePdf({ data }: { data: InvoicePdfData }) {
               <Text style={s.totalLabel}>Subtotal (excl. GST)</Text>
               <Text style={s.totalValue}>{fmt(invoice.subtotal)}</Text>
             </View>
-            {isInterState ? (
+            {tax.reverseCharge ? (
               <View style={s.totalRow}>
-                <Text style={s.totalLabel}>IGST @ 18%</Text>
-                <Text style={s.totalValue}>{fmt(invoice.gst)}</Text>
+                <Text style={s.totalLabel}>GST (reverse charge)</Text>
+                <Text style={s.totalValue}>{fmt(0)}</Text>
               </View>
-            ) : (
-              <>
-                <View style={s.totalRow}>
-                  <Text style={s.totalLabel}>CGST @ 9%</Text>
-                  <Text style={s.totalValue}>{fmt(invoice.gst / 2)}</Text>
-                </View>
-                <View style={s.totalRow}>
-                  <Text style={s.totalLabel}>SGST @ 9%</Text>
-                  <Text style={s.totalValue}>{fmt(invoice.gst / 2)}</Text>
-                </View>
-              </>
-            )}
+            ) : tax.lines.map(line => (
+              <View key={line.label} style={s.totalRow}>
+                <Text style={s.totalLabel}>{line.label} @ {line.rate}%</Text>
+                <Text style={s.totalValue}>{fmt(line.amount)}</Text>
+              </View>
+            ))}
             <View style={s.grandRow}>
               <Text style={s.grandLabel}>TOTAL PAYABLE</Text>
               <Text style={s.grandValue}>{fmt(invoice.total)}</Text>
             </View>
+            {tax.reverseCharge && (
+              <View style={s.rcmNote}>
+                <Text style={s.rcmTitle}>Tax payable on reverse charge: Yes</Text>
+                <Text style={s.rcmLine}>GST on this GTA service is paid by the recipient at {tax.rate}%:</Text>
+                {tax.lines.map(line => (
+                  <Text key={line.label} style={s.rcmLine}>{line.label} @ {line.rate}%: {fmt(line.amount)}</Text>
+                ))}
+              </View>
+            )}
           </View>
         </View>
 
@@ -306,11 +315,10 @@ export function InvoicePdf({ data }: { data: InvoicePdfData }) {
         <View style={s.footer}>
           <View>
             <Text style={s.footerText}>This is a computer-generated invoice. No physical signature required.</Text>
-            <Text style={s.footerText}>For disputes, contact: accounts@logisticsedge.io | +91-522-4001234</Text>
+            <Text style={s.footerText}>For disputes, contact: accounts@logisticsedge.io | +91 522 400 1200</Text>
           </View>
           <View style={{ alignItems: 'flex-end' }}>
-            <Text style={s.gstin}>GSTIN: 09AABCP1234Q1Z5</Text>
-            <Text style={s.footerText}>LogisticsEdge India Pvt. Ltd. | CIN: U63090UP2021PTC145312</Text>
+            <Text style={s.footerText}>LogisticsEdge Technologies Pvt. Ltd.</Text>
           </View>
         </View>
 

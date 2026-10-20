@@ -54,12 +54,12 @@ export default function TermsPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
             <div style={{
               width: 36, height: 36, borderRadius: 10,
-              background: 'rgba(0, 87, 255, 0.08)', border: '1px solid rgba(0, 87, 255, 0.2)',
+              background: 'rgba(11, 107, 78, 0.08)', border: '1px solid rgba(11, 107, 78, 0.2)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <FileCheck style={{ width: 20, height: 20, color: 'var(--brand, #0057FF)' }} />
+              <FileCheck style={{ width: 20, height: 20, color: 'var(--brand, #0B6B4E)' }} />
             </div>
-            <span style={{ fontSize: 12, fontFamily: 'var(--font-mono, monospace)', textTransform: 'uppercase', letterSpacing: 2, color: 'var(--brand, #0057FF)', fontWeight: 700 }}>
+            <span style={{ fontSize: 12, fontFamily: 'var(--font-mono, monospace)', textTransform: 'uppercase', letterSpacing: 2, color: 'var(--brand, #0B6B4E)', fontWeight: 700 }}>
               Master Service Agreement
             </span>
           </div>
@@ -76,7 +76,7 @@ export default function TermsPage() {
           
           <section>
             <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-high, #141414)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
-              <Scale style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
+              <Scale style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
               1. Acceptance of Terms
             </h2>
             <p>
@@ -86,7 +86,7 @@ export default function TermsPage() {
 
           <section>
             <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-high, #141414)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
-              <Truck style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
+              <Truck style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
               2. Logistics Services & Dispatch
             </h2>
             <p>
@@ -102,12 +102,15 @@ export default function TermsPage() {
               <li>
                 <strong style={{ color: 'var(--text-high, #141414)' }}>Proof of Delivery (POD):</strong> Digital signatures, geo-stamped receipts, and optical photos uploaded via the Driver Portal constitute conclusive proof of handover.
               </li>
+              <li>
+                <strong style={{ color: 'var(--text-high, #141414)' }}>Driver Trip Links:</strong> A trip link shares the phone&apos;s location with the transporter running that trip until the trip is closed. Send trip links only to adult drivers; never send one to anyone under 18.
+              </li>
             </ul>
           </section>
 
           <section>
             <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-high, #141414)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
-              <Shield style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
+              <Shield style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
               3. Carrier Liability & Cargo Insurance
             </h2>
             <p>
@@ -117,7 +120,7 @@ export default function TermsPage() {
 
           <section>
             <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-high, #141414)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
-              <AlertTriangle style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
+              <AlertTriangle style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
               4. Service Availability & SLA
             </h2>
             <p>
@@ -127,7 +130,7 @@ export default function TermsPage() {
 
           <section id="security">
             <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-high, #141414)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
-              <CheckCircle2 style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
+              <CheckCircle2 style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
               5. Security, Invoicing & Billing
             </h2>
             <p>
@@ -139,7 +142,7 @@ export default function TermsPage() {
 
         {/* Footer */}
         <div style={{ marginTop: 60, paddingTop: 24, borderTop: '1px solid var(--border, #E6E4DF)', textAlign: 'center', fontSize: 13, color: 'var(--text-mid, #525252)' }}>
-          &copy; 2026 LogisticsEdge Technologies Inc. All rights reserved. &bull; <Link href="/privacy" style={{ color: 'var(--brand, #0057FF)', textDecoration: 'none' }}>Privacy Policy</Link>
+          &copy; 2026 LogisticsEdge Technologies Inc. All rights reserved. &bull; <Link href="/privacy" style={{ color: 'var(--brand, #0B6B4E)', textDecoration: 'none' }}>Privacy Policy</Link>
         </div>
 
       </div>

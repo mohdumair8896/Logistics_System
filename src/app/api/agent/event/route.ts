@@ -2,13 +2,17 @@
 // Ingests any structured or unformatted event and routes it through the Event Bus.
 
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth, isAuthError } from '@/lib/auth';
+import { requireTenant, isAuthError } from '@/lib/auth';
+import { requirePermission } from '@/lib/permissions';
+import { runAsTenant } from '@/lib/tenancy';
 import { agents } from '@/lib/agents/core/registry';
 import type { LogisticsEvent } from '@/lib/agents/core/types';
 
 export async function POST(req: NextRequest) {
-  const auth = await requireAuth(req);
+  const auth = await requireTenant(req);
   if (isAuthError(auth)) return auth;
+  const denied = requirePermission(auth, 'agent.run');
+  if (denied) return denied;
 
   try {
     const body = await req.json();
@@ -32,7 +36,7 @@ export async function POST(req: NextRequest) {
       },
     };
 
-    const results = await agents.publish(event);
+    const results = await runAsTenant(auth.tenantId, () => agents.publish(event));
 
     return NextResponse.json({
       success: true,
@@ -40,7 +44,7 @@ export async function POST(req: NextRequest) {
       results,
     });
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-    return NextResponse.json({ success: false, message: msg }, { status: 500 });
+    console.error('[/api/agent/event]', err);
+    return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 });
   }
 }

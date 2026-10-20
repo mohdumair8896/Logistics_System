@@ -1,12 +1,21 @@
 'use client';
-import { useState, useRef } from 'react';
+// ─── e-POD & billing ──────────────────────────────────────────────────────────
+// Captures the proof of delivery for an arrived trip. The server stores it once, as a canonical record
+// with a SHA-256 fingerprint, its own clock time and the truck's last GPS position from the driver's
+// phone (src/app/api/trips/[id]/pod/route.ts), and the audit export lists it for a section 63 certificate.
+// Nothing on this page should claim the record is legally valid: it is evidence, not a verdict.
+
+import { useState, useRef, useEffect } from 'react';
 import { useDelivery } from '@/features/delivery/hooks';
-import type { AuditChecks } from '@/features/delivery/types';
+import type { AuditChecks, ConsigneeOtp, PodSummary } from '@/features/delivery/types';
+import { damageDeduction, DAMAGE_RATE_INR_PER_KG, type PodConfirmation, type PodRecord } from '@/features/delivery/pod';
 import {
-  PackageCheck, CheckCircle, PenLine,
-  RotateCcw, Camera, FileText
+  PackageCheck, CheckCircle, PenLine, RotateCcw, FileText, Download, Copy, KeyRound, MapPin, ShieldCheck,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { useCurrentUser } from '@/lib/useCurrentUser';
+import { can } from '@/lib/permissions';
 import { AlertBanner } from '@/components/ui/AlertBanner';
 import { Toggle } from '@/components/ui/Toggle';
 import { PinInput } from '@/components/ui/PinInput';
@@ -32,25 +41,41 @@ import {
 } from '@/components/ui/Drawer';
 import { Empty, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/Empty';
 
+const CONFIRMATION_OPTIONS: { id: PodConfirmation; label: string; hint: string }[] = [
+  { id: 'signature', label: 'Receiver signed', hint: 'The receiver signs below' },
+  { id: 'otp', label: 'Receiver gave the OTP', hint: 'The code sent to the consignee before delivery' },
+  { id: 'name_only', label: 'Name only', hint: 'No signature or OTP; the record says so' },
+];
+
+const CONFIRMATION_LABEL: Record<PodConfirmation, string> = {
+  signature: 'Receiver signed',
+  otp: 'OTP from the consignee matched',
+  name_only: 'Receiver name only',
+};
+
+const istDateTime = (iso: string) =>
+  new Date(iso).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
+
+const EMPTY_CHECKS: AuditChecks = { sealIntact: false, tempVerified: false, countVerified: false };
+
 export default function DeliveryPage() {
-  const { trips, deliveredTrips, vehicles, drivers, orders, completeDelivery, generateInvoice, customers } = useDelivery();
+  const { trips, deliveredTrips, vehicles, drivers, orders, customers, pods, capturePod, getConsigneeOtp, generateInvoice } = useDelivery();
+  const { user } = useCurrentUser();
   const [selectedTrip, setSelectedTrip] = useState<string | null>(null);
-  const [auditChecks, setAuditChecks] = useState<AuditChecks>({
-    sealIntact: true,
-    tempVerified: true,
-    countVerified: true
-  });
+  // Unticked until someone actually checks: these go into the hashed record as attestations
+  const [auditChecks, setAuditChecks] = useState<AuditChecks>(EMPTY_CHECKS);
   const [form, setForm] = useState({
     deliveredQty: 0,
     damagedQty: 0,
-    receiver: 'Rajesh Kumar (Authorized Consignee)',
-    remarks: 'Received in satisfactory condition without seal tampering.',
-    podUploaded: true,
-    hasSigned: false
+    receiver: '',
+    remarks: '',
+    hasSigned: false,
   });
-  const [completed, setCompleted] = useState(false);
-  const [invoiceId, setInvoiceId] = useState('');
-  const [otpPin, setOtpPin] = useState('749201');
+  const [confirmation, setConfirmation] = useState<PodConfirmation>('signature');
+  const [otpPin, setOtpPin] = useState('');
+  const [consigneeOtp, setConsigneeOtp] = useState<ConsigneeOtp | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [lastInvoice, setLastInvoice] = useState<{ tripId: string; invoiceId: string | null } | null>(null);
   const router = useRouter();
 
   // Canvas Signature Pad reference
@@ -62,13 +87,30 @@ export default function DeliveryPage() {
   const customer = order ? customers.find(c => c.id === order.customerId) : null;
   const driver = activeTrip ? drivers.find(d => d.id === activeTrip.driverId) : null;
   const vehicle = activeTrip ? vehicles.find(v => v.id === activeTrip.vehicleId) : null;
+  const activePod = activeTrip ? pods[activeTrip.id] : undefined;
+  const deduction = damageDeduction(form.damagedQty);
 
-  // Sync form defaults with active order when selected without cascading effect
-  const [prevOrderId, setPrevOrderId] = useState<string | null>(null);
-  if (order && order.id !== prevOrderId) {
-    setPrevOrderId(order.id);
-    setForm(f => ({ ...f, deliveredQty: order.totalWeight, receiver: customer?.contact || 'Authorized Receiver' }));
+  // Reset the form when another trip is selected (without a cascading effect)
+  const [prevTripId, setPrevTripId] = useState<string | null>(null);
+  if (activeTrip && activeTrip.id !== prevTripId) {
+    setPrevTripId(activeTrip.id);
+    setForm({ deliveredQty: order?.totalWeight ?? activeTrip.load ?? 0, damagedQty: 0, receiver: '', remarks: '', hasSigned: false });
+    setAuditChecks(EMPTY_CHECKS);
+    setConfirmation('signature');
+    setOtpPin('');
+    setConsigneeOtp(null);
   }
+
+  // Canvas pixels per CSS pixel: the canvas is drawn at a fixed size and stretched to the card width
+  const canvasPoint = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>, canvas: HTMLCanvasElement) => {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = 'clientX' in e ? e.clientX : e.touches[0].clientX;
+    const clientY = 'clientY' in e ? e.clientY : e.touches[0].clientY;
+    return {
+      x: (clientX - rect.left) * (canvas.width / rect.width),
+      y: (clientY - rect.top) * (canvas.height / rect.height),
+    };
+  };
 
   // Setup signature drawing
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
@@ -78,9 +120,7 @@ export default function DeliveryPage() {
     if (!ctx) return;
 
     isDrawing.current = true;
-    const rect = canvas.getBoundingClientRect();
-    const x = ('clientX' in e ? e.clientX : e.touches[0].clientX) - rect.left;
-    const y = ('clientY' in e ? e.clientY : e.touches[0].clientY) - rect.top;
+    const { x, y } = canvasPoint(e, canvas);
 
     ctx.beginPath();
     ctx.moveTo(x, y);
@@ -97,13 +137,10 @@ export default function DeliveryPage() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const rect = canvas.getBoundingClientRect();
-    const x = ('clientX' in e ? e.clientX : e.touches[0].clientX) - rect.left;
-    const y = ('clientY' in e ? e.clientY : e.touches[0].clientY) - rect.top;
-
+    const { x, y } = canvasPoint(e, canvas);
     ctx.lineTo(x, y);
     ctx.stroke();
-    setForm(f => ({ ...f, hasSigned: true }));
+    if (!form.hasSigned) setForm(f => ({ ...f, hasSigned: true }));
   };
 
   const stopDrawing = () => {
@@ -119,14 +156,45 @@ export default function DeliveryPage() {
     setForm(f => ({ ...f, hasSigned: false }));
   };
 
-  const handleComplete = async () => {
-    if (!activeTrip || !order) return;
-    const damageDeduction = form.damagedQty * 20;
-    await completeDelivery(activeTrip.id);
-    const invId = await generateInvoice(order.id, damageDeduction, form.receiver);
-    setInvoiceId(invId);
-    setCompleted(true);
+  const fetchConsigneeOtp = async () => {
+    if (!activeTrip) return;
+    const result = await getConsigneeOtp(activeTrip.id);
+    if ('error' in result) toast.error(result.error);
+    else setConsigneeOtp(result);
   };
+
+  const receiverOk = form.receiver.trim().length >= 2;
+  const confirmationOk = confirmation === 'otp' ? /^\d{6}$/.test(otpPin)
+    : confirmation === 'signature' ? form.hasSigned
+    : true;
+  const canSubmit = receiverOk && confirmationOk && !saving;
+
+  const handleComplete = async () => {
+    if (!activeTrip || !canSubmit) return;
+    setSaving(true);
+    try {
+      const signaturePng = form.hasSigned ? canvasRef.current?.toDataURL('image/png') : undefined;
+      // Recording the POD also closes the trip if it is still in transit, which stops the driver's trip link
+      const pod = await capturePod(activeTrip.id, {
+        receiverName: form.receiver.trim(),
+        confirmation,
+        otp: confirmation === 'otp' ? otpPin : undefined,
+        deliveredKg: Math.max(0, Math.round(form.deliveredQty)),
+        damagedKg: Math.max(0, Math.round(form.damagedQty)),
+        remarks: form.remarks.trim(),
+        checks: auditChecks,
+        signaturePng,
+      });
+      if (!pod) return; // the server's reason is already shown as a toast
+      // The POD stands even if invoicing fails; the invoice can be generated again later
+      const invoiceId = order ? await generateInvoice(order.id, pod.damageDeduction, form.receiver.trim()) : null;
+      setLastInvoice({ tripId: pod.tripId, invoiceId });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const nextTripWithoutPod = deliveredTrips.find(t => !pods[t.id] && t.id !== activeTrip?.id);
 
   return (
     <div className="animate-slide-in">
@@ -151,7 +219,7 @@ export default function DeliveryPage() {
       <div className="page-header">
         <div>
           <div className="page-title">Electronic Proof of Delivery (e-POD) & Billing</div>
-          <div className="page-subtitle">Digital consignee signature capture, goods acceptance & automated invoicing</div>
+          <div className="page-subtitle">Receiver confirmation, a fingerprinted delivery record, and the invoice</div>
         </div>
       </div>
 
@@ -165,7 +233,9 @@ export default function DeliveryPage() {
         <div className="card" style={{ padding: 0, overflow: 'hidden', height: 'fit-content' }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', fontWeight: 700, fontSize: 13, color: 'var(--text-mid)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span>Arrived Trips ({deliveredTrips.length})</span>
-            <span className="badge badge-green" style={{ fontSize: 10 }}>Ready for POD</span>
+            <span className="badge badge-green" style={{ fontSize: 10 }}>
+              {deliveredTrips.filter(t => !pods[t.id]).length} awaiting POD
+            </span>
           </div>
 
           {deliveredTrips.length === 0 ? (
@@ -183,22 +253,25 @@ export default function DeliveryPage() {
               const o = orders.find(ord => ord.id === t.orderId);
               const cust = customers.find(c => c.id === o?.customerId);
               const isSelected = (activeTrip?.id === t.id);
+              const recorded = !!pods[t.id];
 
               return (
                 <div
                   key={t.id}
-                  onClick={() => { setSelectedTrip(t.id); setCompleted(false); }}
+                  onClick={() => setSelectedTrip(t.id)}
                   style={{
                     padding: '14px 16px',
                     borderBottom: '1px solid var(--border)',
                     cursor: 'pointer',
-                    background: isSelected ? 'rgba(59,130,246,0.12)' : 'transparent',
+                    background: isSelected ? 'var(--brand-10)' : 'transparent',
                     borderLeft: isSelected ? '3px solid var(--brand)' : '3px solid transparent'
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span className="mono" style={{ fontWeight: 800, color: 'var(--brand)', fontSize: 12.5 }}>{t.id}</span>
-                    <BadgeWithDot color="success" size="sm">ARRIVED</BadgeWithDot>
+                    {recorded
+                      ? <BadgeWithDot color="neutral" size="sm">POD RECORDED</BadgeWithDot>
+                      : <BadgeWithDot color="success" size="sm">ARRIVED</BadgeWithDot>}
                   </div>
                   <div style={{ fontWeight: 600, color: 'var(--text-high)', fontSize: 13, marginTop: 4 }}>{cust?.name}</div>
                   <div style={{ fontSize: 11.5, color: 'var(--text-low)', marginTop: 2 }}>
@@ -210,26 +283,17 @@ export default function DeliveryPage() {
           )}
         </div>
 
-        {/* Right Column: e-POD Form & Canvas Pad (Stitch Screen 11) */}
+        {/* Right Column: recorded POD, or the e-POD form */}
         <div>
-          {completed ? (
-            <div className="card" style={{ textAlign: 'center', padding: 50 }}>
-              <div style={{ animation: 'float 1s ease-in-out infinite' }}>
-                <CheckCircle size={56} color="var(--brand)" style={{ margin: '0 auto 16px' }} />
-              </div>
-              <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--brand)' }}>Proof of Delivery Captured!</div>
-              <div style={{ fontSize: 14, color: 'var(--text-mid)', marginTop: 8 }}>
-                Invoice <strong style={{ color: 'var(--brand)', fontFamily: 'JetBrains Mono' }}>{invoiceId}</strong> has been automatically generated with GST.
-              </div>
-              <div style={{ display: 'flex', gap: 10, marginTop: 24, justifyContent: 'center' }}>
-                <button className="btn btn-primary btn-lg" onClick={() => router.push('/invoices')}>
-                  <FileText size={16} /> View Tax Invoice →
-                </button>
-                <button className="btn btn-ghost btn-lg" onClick={() => setCompleted(false)}>
-                  New POD Verification
-                </button>
-              </div>
-            </div>
+          {activeTrip && activePod ? (
+            <PodRecordCard
+              key={`${activeTrip.id}:${activePod.recordHash}`}
+              pod={activePod}
+              invoiceId={lastInvoice?.tripId === activeTrip.id ? lastInvoice.invoiceId : undefined}
+              canExport={can(user.role, 'pod.export')}
+              onViewInvoices={() => router.push('/invoices')}
+              onNext={nextTripWithoutPod ? () => setSelectedTrip(nextTripWithoutPod.id) : undefined}
+            />
           ) : !activeTrip ? (
             <div className="card" style={{ textAlign: 'center', padding: 48 }}>
               <PackageCheck size={40} color="var(--text-low)" style={{ margin: '0 auto 12px' }} />
@@ -256,7 +320,7 @@ export default function DeliveryPage() {
                       <DrawerContent className="p-6">
                         <DrawerHeader className="p-0 pb-4 border-b border-[var(--border)]">
                           <DrawerTitle>Consignment Audit Dossier</DrawerTitle>
-                          <DrawerDescription>Waybill manifest, cold-chain telemetry, and digital compliance trail</DrawerDescription>
+                          <DrawerDescription>Waybill details and the handover checks entered so far</DrawerDescription>
                         </DrawerHeader>
                         <div className="py-4 space-y-4 text-sm">
                           <div className="p-3 bg-[var(--surface-2)] rounded-lg space-y-1.5 border border-[var(--border)]">
@@ -289,12 +353,12 @@ export default function DeliveryPage() {
                                 <span className="font-semibold text-[var(--text-high)]">{driver?.name || 'N/A'}</span>
                               </div>
                               <div className="p-2.5 rounded-md border border-[var(--border)] bg-[var(--surface-2)]">
-                                <span className="text-[var(--text-low)] block">Recorded Seal Status</span>
-                                <span className="font-bold text-emerald-600">{auditChecks.sealIntact ? 'Verified Intact' : 'Broken'}</span>
+                                <span className="text-[var(--text-low)] block">Seal at handover</span>
+                                <span className="font-bold text-[var(--text-high)]">{auditChecks.sealIntact ? 'Confirmed intact' : 'Not confirmed'}</span>
                               </div>
                               <div className="p-2.5 rounded-md border border-[var(--border)] bg-[var(--surface-2)]">
-                                <span className="text-[var(--text-low)] block">Cold-Chain Telemetry</span>
-                                <span className="font-bold text-emerald-600">{auditChecks.tempVerified ? '2.4°C (Compliant)' : 'Out of Bounds'}</span>
+                                <span className="text-[var(--text-low)] block">Cargo temperature</span>
+                                <span className="font-bold text-[var(--text-high)]">{activeTrip.cargoTemp || 'Not recorded'}</span>
                               </div>
                             </div>
                           </div>
@@ -341,7 +405,8 @@ export default function DeliveryPage() {
                     <Alert variant="warning">
                       <AlertTitle>Cargo Discrepancy Flagged</AlertTitle>
                       <AlertDescription>
-                        {form.damagedQty} kg marked damaged/short. A debit penalty of ₹{(form.damagedQty * 20).toLocaleString()} will be automatically deducted from the final GST tax invoice.
+                        {form.damagedQty} kg marked damaged/short. ₹{deduction.toLocaleString('en-IN')} (₹{DAMAGE_RATE_INR_PER_KG}/kg) will be deducted on the invoice and written into the POD record.
+                        {/* TODO(photo upload): link this deduction to a photo of the damage once POD photos can be uploaded */}
                       </AlertDescription>
                     </Alert>
                   </div>
@@ -349,54 +414,119 @@ export default function DeliveryPage() {
 
                 <div className="grid-2" style={{ gap: 14, marginBottom: 14 }}>
                   <div className="form-group">
-                    <label className="form-label">Delivered Quantity (kg)</label>
+                    <label className="form-label" htmlFor="pod-delivered">Delivered Quantity (kg)</label>
                     <input
+                      id="pod-delivered"
                       className="form-input"
                       type="number"
+                      min={0}
                       value={form.deliveredQty}
-                      onChange={e => setForm({...form, deliveredQty: +e.target.value})}
+                      onChange={e => setForm({ ...form, deliveredQty: Math.max(0, +e.target.value) })}
                     />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Damaged / Short Quantity (kg)</label>
+                    <label className="form-label" htmlFor="pod-damaged">Damaged / Short Quantity (kg)</label>
                     <input
+                      id="pod-damaged"
                       className="form-input"
                       type="number"
+                      min={0}
                       value={form.damagedQty}
-                      onChange={e => setForm({...form, damagedQty: +e.target.value})}
+                      onChange={e => setForm({ ...form, damagedQty: Math.max(0, +e.target.value) })}
                     />
                   </div>
                 </div>
 
                 <div className="grid-2" style={{ gap: 14, marginBottom: 16 }}>
                   <div className="form-group">
-                    <label className="form-label">Receiver / Consignee Full Name</label>
+                    <label className="form-label" htmlFor="pod-receiver">Receiver&apos;s full name</label>
                     <input
+                      id="pod-receiver"
                       className="form-input"
                       value={form.receiver}
-                      onChange={e => setForm({...form, receiver: e.target.value})}
-                      placeholder="Receiver name..."
+                      onChange={e => setForm({ ...form, receiver: e.target.value })}
+                      placeholder={customer?.contact ? `e.g. ${customer.contact}` : 'Who received the goods'}
+                      maxLength={100}
                     />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Consignee Acceptance Remarks</label>
+                    <label className="form-label" htmlFor="pod-remarks">Receiver&apos;s remarks</label>
                     <input
+                      id="pod-remarks"
                       className="form-input"
                       value={form.remarks}
-                      onChange={e => setForm({...form, remarks: e.target.value})}
-                      placeholder="Remarks..."
+                      onChange={e => setForm({ ...form, remarks: e.target.value })}
+                      placeholder="Condition of goods, seal, shortages…"
+                      maxLength={500}
                     />
                   </div>
                 </div>
 
-                {/* Consignee Security Handover PIN (Untitled UI PinInput) */}
+                {/* How the receiver confirmed the handover */}
                 <div style={{ marginBottom: 18, padding: 14, background: 'var(--surface-2)', borderRadius: 10, border: '1px solid var(--border)' }}>
-                  <PinInput
-                    value={otpPin}
-                    onChange={setOtpPin}
-                    label="Consignee Security Handover OTP (6-Digit SMS PIN)"
-                    description="Enter the secure delivery authentication code transmitted to the consignee's registered phone."
-                  />
+                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-high)', marginBottom: 10 }}>
+                    How did the receiver confirm?
+                  </div>
+                  <div role="radiogroup" aria-label="Receiver confirmation" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 8 }}>
+                    {CONFIRMATION_OPTIONS.map(opt => (
+                      <label
+                        key={opt.id}
+                        style={{
+                          display: 'flex', gap: 8, alignItems: 'flex-start', padding: '10px 12px', cursor: 'pointer',
+                          borderRadius: 8, background: 'var(--surface-1)',
+                          border: `1px solid ${confirmation === opt.id ? 'var(--border-active)' : 'var(--border)'}`,
+                        }}
+                      >
+                        <input
+                          type="radio"
+                          name="pod-confirmation"
+                          value={opt.id}
+                          checked={confirmation === opt.id}
+                          onChange={() => setConfirmation(opt.id)}
+                          style={{ marginTop: 2, accentColor: 'var(--brand)' }}
+                        />
+                        <span>
+                          <span style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: 'var(--text-high)' }}>{opt.label}</span>
+                          <span style={{ display: 'block', fontSize: 11.5, color: 'var(--text-low)', marginTop: 2 }}>{opt.hint}</span>
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+
+                  {confirmation === 'otp' && (
+                    <div style={{ marginTop: 14 }}>
+                      <PinInput
+                        value={otpPin}
+                        onChange={setOtpPin}
+                        label="OTP the receiver read out"
+                        description="Checked against this trip's code when you record the POD."
+                      />
+                      {can(user.role, 'trip.dispatch') && (
+                        <div style={{ marginTop: 12, fontSize: 12, color: 'var(--text-mid)' }}>
+                          {consigneeOtp ? (
+                            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10 }}>
+                              <span>
+                                Code for {consigneeOtp.customerName ?? 'the consignee'}:{' '}
+                                <strong className="mono" style={{ color: 'var(--text-high)', fontSize: 14 }}>{consigneeOtp.otp}</strong>
+                              </span>
+                              {consigneeOtp.whatsappUrl && (
+                                <a className="btn btn-secondary btn-sm" href={consigneeOtp.whatsappUrl} target="_blank" rel="noopener noreferrer">
+                                  Send on WhatsApp
+                                </a>
+                              )}
+                              <span style={{ flexBasis: '100%', color: 'var(--text-low)' }}>
+                                Send it to the consignee before the truck arrives, never to the driver.
+                              </span>
+                            </div>
+                          ) : (
+                            <button type="button" className="btn btn-ghost btn-sm" onClick={fetchConsigneeOtp} style={{ gap: 6 }}>
+                              <KeyRound size={13} /> Get the consignee&apos;s code to send
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Delivery Verification Checklist Toggles (Untitled UI Toggle) */}
@@ -434,7 +564,7 @@ export default function DeliveryPage() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                     <label className="form-label" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
                       <PenLine size={13} color="var(--brand)" />
-                      Digital Consignee Signature (Draw on Canvas below)
+                      Receiver&apos;s signature {confirmation === 'signature' ? '(required)' : '(optional)'}
                     </label>
                     <button
                       type="button"
@@ -476,7 +606,7 @@ export default function DeliveryPage() {
                       onTouchStart={startDrawing}
                       onTouchMove={draw}
                       onTouchEnd={stopDrawing}
-                      style={{ width: '100%', height: '120px', cursor: 'crosshair', display: 'block' }}
+                      style={{ width: '100%', height: '120px', cursor: 'crosshair', display: 'block', touchAction: 'none' }}
                     />
                     {!form.hasSigned && (
                       <div style={{
@@ -497,35 +627,39 @@ export default function DeliveryPage() {
                   </div>
                 </div>
 
-                {/* Proof of Delivery Photo Watermark (Stitch Screen 11) */}
+                {/* What the server adds to the record */}
                 <div style={{
                   padding: 12,
-                  background: 'rgba(45, 138, 78, 0.1)',
-                  border: '1px solid rgba(45, 138, 78, 0.3)',
+                  background: 'var(--surface-2)',
+                  border: '1px solid var(--border)',
                   borderRadius: 8,
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  marginBottom: 16
+                  alignItems: 'flex-start',
+                  gap: 8,
+                  marginBottom: 16,
+                  fontSize: 12,
+                  color: 'var(--text-mid)',
+                  lineHeight: 1.5,
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Camera size={16} color="#16a34a" />
-                    <span style={{ fontSize: 12, color: 'var(--text-high)', fontWeight: 600 }}>
-                      Delivery Docking Photo Captured (Timestamp Watermarked: {new Date().toLocaleTimeString()})
-                    </span>
-                  </div>
-                  <span className="badge badge-green" style={{ fontSize: 10 }}>GEO-VERIFIED</span>
+                  <ShieldCheck size={16} color="var(--brand)" style={{ flex: 'none', marginTop: 1 }} />
+                  <span>
+                    When you record the POD, the server adds its own time and the truck&apos;s last GPS position from the
+                    driver&apos;s trip link, then stores the record once with a SHA-256 fingerprint. It can&apos;t be edited afterwards.
+                    {activeTrip.status === 'In Transit' && ' Recording it also closes the trip and stops the driver\'s location sharing.'}
+                  </span>
                 </div>
+                {/* TODO(photo upload): add a geotagged photo of the signed LR here once POD photo upload exists; its
+                    object key and SHA-256 go into the record's photoRef (src/features/delivery/pod.ts). */}
 
                 {/* Submit Action */}
                 <button
                   className="btn btn-primary btn-lg w-full"
                   style={{
                     justifyContent: 'center',
-                    background: form.receiver ? 'linear-gradient(135deg, #0057FF, #0040CC)' : 'var(--surface-3)',
-                    color: form.receiver ? '#ffffff' : 'var(--text-low)',
-                    boxShadow: form.receiver ? '0 4px 14px rgba(0, 87, 255, 0.25)' : 'none',
-                    cursor: form.receiver ? 'pointer' : 'not-allowed',
+                    background: canSubmit ? 'linear-gradient(135deg, #0B6B4E, #07523C)' : 'var(--surface-3)',
+                    color: canSubmit ? '#ffffff' : 'var(--text-low)',
+                    boxShadow: canSubmit ? '0 4px 14px rgba(11, 107, 78, 0.25)' : 'none',
+                    cursor: canSubmit ? 'pointer' : 'not-allowed',
                     border: 'none',
                     borderRadius: 10,
                     padding: '12px 18px',
@@ -533,14 +667,139 @@ export default function DeliveryPage() {
                     fontSize: 13.5,
                   }}
                   onClick={handleComplete}
-                  disabled={!form.receiver}
+                  disabled={!canSubmit}
                 >
-                  <PackageCheck size={16} /> Counter-Sign & Auto-Generate GST Tax Invoice →
+                  <PackageCheck size={16} /> {saving ? 'Recording POD…' : order ? 'Record POD & generate invoice →' : 'Record POD →'}
                 </button>
+                {!canSubmit && !saving && (
+                  <div style={{ marginTop: 8, fontSize: 11.5, color: 'var(--text-low)', textAlign: 'center' }}>
+                    {!receiverOk ? 'Enter the receiver\'s name.'
+                      : confirmation === 'otp' ? 'Enter the 6-digit OTP the receiver read out.'
+                      : 'The receiver needs to sign, or choose another way they confirmed.'}
+                  </div>
+                )}
               </div>
             </div>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── A recorded POD: what was stored, its fingerprint, and the audit export ──
+function PodRecordCard({ pod, invoiceId, canExport, onViewInvoices, onNext }: {
+  pod: PodSummary;
+  invoiceId: string | null | undefined; // undefined: not raised from this screen just now
+  canExport: boolean;
+  onViewInvoices: () => void;
+  onNext?: () => void;
+}) {
+  const [detail, setDetail] = useState<{ record: PodRecord; hashMatches: boolean } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/trips/${encodeURIComponent(pod.tripId)}/pod`)
+      .then(res => (res.ok ? res.json() : null))
+      .then(data => {
+        if (cancelled || !data) return;
+        try {
+          setDetail({ record: JSON.parse(data.record) as PodRecord, hashMatches: !!data.hashMatches });
+        } catch { /* leave the summary only */ }
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [pod.tripId]);
+
+  const copyHash = async () => {
+    try {
+      await navigator.clipboard.writeText(pod.recordHash);
+      toast.success('Fingerprint copied');
+    } catch {
+      toast.error('Could not copy. Select the fingerprint and copy it by hand.');
+    }
+  };
+
+  const loc = detail?.record.location;
+  const rows: [string, React.ReactNode][] = [
+    ['Receiver', pod.receiverName],
+    ['Confirmation', CONFIRMATION_LABEL[pod.confirmation] ?? pod.confirmation],
+    ['Recorded at', istDateTime(pod.capturedAt)],
+    ['Location', loc
+      ? <>
+          <span className="mono">{loc.lat.toFixed(5)}, {loc.lng.toFixed(5)}</span>
+          <span style={{ color: 'var(--text-low)' }}> · driver&apos;s phone GPS at {istDateTime(loc.recordedAt)}{loc.accuracyM !== null ? ` (±${Math.round(loc.accuracyM)} m)` : ''}</span>
+        </>
+      : detail ? 'No GPS ping was received on this trip' : '…'],
+    ['Deduction', `₹${Number(pod.damageDeduction).toLocaleString('en-IN')}`],
+  ];
+
+  return (
+    <div className="card" style={{ padding: 24 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+        <CheckCircle size={28} color="var(--brand)" />
+        <div>
+          <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-high)' }}>Proof of delivery recorded</div>
+          <div className="mono" style={{ fontSize: 12, color: 'var(--text-low)' }}>{pod.tripId}{pod.orderId ? ` / ${pod.orderId}` : ''}</div>
+        </div>
+      </div>
+
+      <dl style={{ display: 'grid', gridTemplateColumns: 'max-content 1fr', gap: '8px 16px', fontSize: 13, margin: 0 }}>
+        {rows.map(([label, value]) => (
+          <div key={label} style={{ display: 'contents' }}>
+            <dt style={{ color: 'var(--text-low)' }}>{label}</dt>
+            <dd style={{ margin: 0, color: 'var(--text-high)', fontWeight: 500 }}>{value}</dd>
+          </div>
+        ))}
+      </dl>
+
+      <div style={{ marginTop: 18, padding: 12, background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 8 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+          <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-high)' }}>SHA-256 fingerprint</span>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={copyHash} style={{ gap: 6, fontSize: 11.5 }}>
+            <Copy size={12} /> Copy
+          </button>
+        </div>
+        <div className="mono" style={{ fontSize: 12, wordBreak: 'break-all', color: 'var(--text-high)' }}>{pod.recordHash}</div>
+        <div style={{ marginTop: 6, fontSize: 11.5, color: detail && !detail.hashMatches ? 'var(--status-error)' : 'var(--text-low)' }}>
+          {detail
+            ? detail.hashMatches
+              ? 'The stored record still matches this fingerprint.'
+              : 'The stored record no longer matches this fingerprint. It was changed after it was recorded.'
+            : 'Checking the stored record…'}
+          {' '}Share the fingerprint with the consignee if you want them to hold a copy.
+        </div>
+      </div>
+
+      {canExport && (
+        <div style={{ marginTop: 14, fontSize: 12, color: 'var(--text-mid)', lineHeight: 1.5 }}>
+          <a className="btn btn-secondary btn-sm" href={`/api/pod/export?tripId=${encodeURIComponent(pod.tripId)}`} download style={{ gap: 6 }}>
+            <Download size={13} /> Download audit export (JSON)
+          </a>
+          <div style={{ marginTop: 6, color: 'var(--text-low)' }}>
+            Lists the stored record, its fingerprint check and how records are made, to help you prepare a certificate
+            under section 63 of the Bharatiya Sakshya Adhiniyam. It is not a certificate itself.
+          </div>
+        </div>
+      )}
+
+      {invoiceId !== undefined && (
+        <div style={{ marginTop: 14, fontSize: 13, color: 'var(--text-mid)' }}>
+          {invoiceId
+            ? <>Invoice <strong className="mono" style={{ color: 'var(--brand)' }}>{invoiceId}</strong> has been generated.</>
+            : 'The invoice was not generated. You can raise it from Invoices.'}
+        </div>
+      )}
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 20 }}>
+        <button type="button" className="btn btn-primary" onClick={onViewInvoices}>
+          <FileText size={15} /> View invoices →
+        </button>
+        {onNext && (
+          <button type="button" className="btn btn-ghost" onClick={onNext} style={{ gap: 6 }}>
+            <MapPin size={14} /> Next arrived trip
+          </button>
+        )}
       </div>
     </div>
   );

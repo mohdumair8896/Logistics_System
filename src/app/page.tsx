@@ -1,41 +1,22 @@
-'use client';
+// ─── Home ─────────────────────────────────────────────────────────────────────
+// The scroll film (frame 0 is server-rendered, the rest stream in), then the product, the problems as
+// stacking cards, the modules rail, the rate calculator and answers. Design: docs/DESIGN_SYSTEM.md §8.
 
-import dynamic from 'next/dynamic';
+import '@/components/marketing/marketing.css';
+import { SiteHeader } from '@/components/marketing/SiteHeader';
+import { SiteFooter } from '@/components/marketing/SiteFooter';
+import { Hero } from '@/components/home/Hero';
 import LogisticsSections from '@/components/home/LogisticsSections';
-
-const ScrollJourneyCanvas = dynamic(
-  () => import('@/components/home/ScrollJourneyCanvas'),
-  { ssr: false }
-);
 
 export default function Home() {
   return (
-    // CRITICAL: NO overflow-x:hidden on this element — it breaks position:sticky
-    // The scroll happens on the <html>/<body> (the viewport), not a child container
-    <main style={{ background: '#020617', width: '100%' }}>
-
-      {/* 400vh tall scroll track — the sticky canvas locks here */}
-      <div
-        id="journey-track"
-        style={{ position: 'relative', height: '400vh', width: '100%' }}
-      >
-        {/* sticky: stays fixed in viewport as user scrolls through the 400vh */}
-        <div
-          style={{
-            position: 'sticky',
-            top: 0,
-            height: '100vh',
-            width: '100%',
-            overflow: 'hidden', // only the canvas container clips, NOT the parent
-          }}
-        >
-          <ScrollJourneyCanvas />
-        </div>
-      </div>
-
-      {/* All below-the-fold marketing sections */}
-      <LogisticsSections />
-
-    </main>
+    <div className="mk">
+      <SiteHeader />
+      <main id="main">
+        <Hero />
+        <LogisticsSections />
+      </main>
+      <SiteFooter />
+    </div>
   );
 }

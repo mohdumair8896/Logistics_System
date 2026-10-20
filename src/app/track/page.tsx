@@ -29,7 +29,7 @@ export default function PublicTrackingSearchPage() {
       <header style={{ borderBottom: '1px solid var(--border, #E6E4DF)', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-1, #FFFFFF)', backdropFilter: 'blur(12px)', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
           <LogisticsEdgeLogo size="sm" variant="full" />
-          <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: 'rgba(0, 87, 255, 0.08)', color: 'var(--brand, #0057FF)', border: '1px solid rgba(0, 87, 255, 0.2)', textTransform: 'uppercase' }}>
+          <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: 'rgba(11, 107, 78, 0.08)', color: 'var(--brand, #0B6B4E)', border: '1px solid rgba(11, 107, 78, 0.2)', textTransform: 'uppercase' }}>
             Public Portal
           </span>
         </Link>
@@ -40,9 +40,9 @@ export default function PublicTrackingSearchPage() {
 
       {/* Main Hero Search Container */}
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', maxWidth: 800, margin: '0 auto', width: '100%' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 14px', borderRadius: 20, background: 'rgba(0, 87, 255, 0.08)', border: '1px solid rgba(0, 87, 255, 0.2)', marginBottom: 20 }}>
-          <ShieldCheck size={16} color="var(--brand, #0057FF)" />
-          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--brand, #0057FF)' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 14px', borderRadius: 20, background: 'rgba(11, 107, 78, 0.08)', border: '1px solid rgba(11, 107, 78, 0.2)', marginBottom: 20 }}>
+          <ShieldCheck size={16} color="var(--brand, #0B6B4E)" />
+          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--brand, #0B6B4E)' }}>
             Official Live Consignee Tracking
           </span>
         </div>
@@ -78,7 +78,7 @@ export default function PublicTrackingSearchPage() {
                 padding: '10px 20px',
                 borderRadius: 10,
                 border: 'none',
-                background: searchQuery.trim() ? 'var(--brand, #0057FF)' : 'var(--surface-3, #E9E7E2)',
+                background: searchQuery.trim() ? 'var(--brand, #0B6B4E)' : 'var(--surface-3, #E9E7E2)',
                 color: searchQuery.trim() ? '#fff' : 'var(--text-low, #909090)',
                 fontSize: 14,
                 fontWeight: 700,
@@ -86,7 +86,7 @@ export default function PublicTrackingSearchPage() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 6,
-                boxShadow: searchQuery.trim() ? '0 2px 8px rgba(0,87,255,0.3)' : 'none',
+                boxShadow: searchQuery.trim() ? '0 2px 8px rgba(11, 107, 78,0.3)' : 'none',
                 transition: 'all 0.2s',
               }}
             >
@@ -120,15 +120,15 @@ export default function PublicTrackingSearchPage() {
                   transition: 'background 0.2s, border-color 0.2s',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--brand, #0057FF)';
-                  e.currentTarget.style.background = 'rgba(0, 87, 255, 0.04)';
+                  e.currentTarget.style.borderColor = 'var(--brand, #0B6B4E)';
+                  e.currentTarget.style.background = 'rgba(11, 107, 78, 0.04)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.borderColor = 'var(--border, #E6E4DF)';
                   e.currentTarget.style.background = 'var(--surface-1, #FFFFFF)';
                 }}
               >
-                <span style={{ fontFamily: 'var(--font-mono, monospace)', fontWeight: 700, color: 'var(--brand, #0057FF)' }}>{s.id}</span>
+                <span style={{ fontFamily: 'var(--font-mono, monospace)', fontWeight: 700, color: 'var(--brand, #0B6B4E)' }}>{s.id}</span>
                 <span style={{ color: 'var(--text-mid, #525252)' }}>{s.label}</span>
               </button>
             ))}
@@ -138,8 +138,8 @@ export default function PublicTrackingSearchPage() {
         {/* Value Proposition Cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, width: '100%', marginTop: 60 }}>
           <div style={{ background: 'var(--surface-1, #FFFFFF)', border: '1px solid var(--border, #E6E4DF)', borderRadius: 14, padding: 20, boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-            <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(0,87,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
-              <Truck size={18} color="var(--brand, #0057FF)" />
+            <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(11, 107, 78,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+              <Truck size={18} color="var(--brand, #0B6B4E)" />
             </div>
             <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4, color: 'var(--text-high, #141414)' }}>Corridor Telematics</div>
             <div style={{ fontSize: 12, color: 'var(--text-mid, #525252)', lineHeight: 1.5 }}>

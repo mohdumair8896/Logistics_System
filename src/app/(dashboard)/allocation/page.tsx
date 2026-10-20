@@ -23,11 +23,22 @@ export default function AllocationPage() {
 
 
 
-  const handleAllocate = (vehicleId: string, driverId: string, overrideReason?: string) => {
+  const handleAllocate = async (vehicleId: string, overrideReason?: string) => {
     if (!activeOrder) return;
     const veh = evaluatedVehicles.find(v => v.id === vehicleId);
+    // Always use the driver actually assigned to this vehicle
+    const driverId = veh?.driver?.id;
+    if (!driverId) {
+      toast.error(`${veh?.vehicleNo || vehicleId} has no driver assigned`, {
+        description: 'Assign a driver to this vehicle on the Drivers page, then allocate again.',
+      });
+      return;
+    }
+    if (!(await allocateVehicle(activeOrder.id, vehicleId, driverId, overrideReason))) {
+      setOverrideModal(null);
+      return; // server explained why in a toast (capacity, licence, availability…)
+    }
     setAllocatedVehNo(veh?.vehicleNo || vehicleId);
-    allocateVehicle(activeOrder.id, vehicleId, driverId);
     toast.success('Fleet Asset Dispatched & Assigned', {
       description: overrideReason
         ? `Order ${activeOrder.id} override assigned (${overrideReason}). Transferred to Bay Staging.`
@@ -203,7 +214,7 @@ export default function AllocationPage() {
                       }}>
                         <div>
                           <div style={{ fontSize: 10.5, color: 'var(--text-mid, #525252)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Utilization</div>
-                          <div style={{ fontWeight: 800, color: 'var(--brand, #0057FF)', fontSize: 16, marginTop: 2 }}>{recommendedVehicle.utilization}%</div>
+                          <div style={{ fontWeight: 800, color: 'var(--brand, #0B6B4E)', fontSize: 16, marginTop: 2 }}>{recommendedVehicle.utilization}%</div>
                         </div>
                         <div>
                           <div style={{ fontSize: 10.5, color: 'var(--text-mid, #525252)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Assigned Driver</div>
@@ -219,12 +230,12 @@ export default function AllocationPage() {
                       className="btn btn-primary w-full btn-lg"
                       style={{
                         justifyContent: 'center',
-                        background: 'linear-gradient(135deg, #0057FF, #0040CC)',
+                        background: 'linear-gradient(135deg, #0B6B4E, #07523C)',
                         color: '#ffffff',
                         fontWeight: 700,
                         fontSize: 13,
                         letterSpacing: '0.5px',
-                        boxShadow: '0 4px 14px rgba(0, 87, 255, 0.25)',
+                        boxShadow: '0 4px 14px rgba(11, 107, 78, 0.25)',
                         display: 'flex',
                         alignItems: 'center',
                         gap: 8,
@@ -233,7 +244,7 @@ export default function AllocationPage() {
                         padding: '12px 18px',
                         cursor: 'pointer',
                       }}
-                      onClick={() => handleAllocate(recommendedVehicle.id, recommendedVehicle.driver?.id || 'D001')}
+                      onClick={() => handleAllocate(recommendedVehicle.id)}
                     >
                       <Truck size={16} /> ALLOCATE THIS TRUCK
                     </button>
@@ -348,7 +359,7 @@ export default function AllocationPage() {
                 <button
                   className="btn btn-warning"
                   style={{ flex: 1.5 }}
-                  onClick={() => handleAllocate(overrideModal.vehicleId, 'D001', 'Manager Verified Override')}
+                  onClick={() => handleAllocate(overrideModal.vehicleId, `Manager override: ${overrideModal.reason}`)}
                 >
                   Confirm Override
                 </button>

@@ -65,8 +65,8 @@ export default function TelemetryPanel({
               <Gauge size={10} color="var(--brand)" />
             </div>
             <div className="telemetry-cell-value" style={{ color: 'var(--brand)' }}>
-              {trip.speedKmH || 64}
-              <span style={{ fontSize: 9.5, fontWeight: 500, color: 'var(--text-low)', marginLeft: 2 }}>km/h</span>
+              {trip.speedKmH ?? '—'}
+              {trip.speedKmH != null && <span style={{ fontSize: 9.5, fontWeight: 500, color: 'var(--text-low)', marginLeft: 2 }}>km/h</span>}
             </div>
           </div>
 
@@ -76,8 +76,8 @@ export default function TelemetryPanel({
               <Fuel size={10} color="var(--brand)" />
             </div>
             <div className="telemetry-cell-value" style={{ color: 'var(--brand)' }}>
-              {trip.fuelPercent ?? 85}
-              <span style={{ fontSize: 9.5, fontWeight: 500, color: 'var(--text-low)', marginLeft: 1 }}>%</span>
+              {trip.fuelPercent ?? '—'}
+              {trip.fuelPercent != null && <span style={{ fontSize: 9.5, fontWeight: 500, color: 'var(--text-low)', marginLeft: 1 }}>%</span>}
             </div>
           </div>
 
@@ -87,7 +87,7 @@ export default function TelemetryPanel({
               <Thermometer size={10} color="var(--brand)" />
             </div>
             <div className="telemetry-cell-value" style={{ color: 'var(--text-high)' }}>
-              {trip.cargoTemp || '22°C'}
+              {trip.cargoTemp || '—'}
             </div>
           </div>
 
@@ -97,7 +97,7 @@ export default function TelemetryPanel({
               <ShieldCheck size={10} color="var(--brand)" />
             </div>
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 800, color: trip.geofenceStatus === 'Deviated' ? 'var(--status-warn, #D97706)' : 'var(--brand)', marginTop: 2 }}>
-              {trip.geofenceStatus || 'In Corridor'}
+              {trip.geofenceStatus || '—'}
             </div>
           </div>
         </div>

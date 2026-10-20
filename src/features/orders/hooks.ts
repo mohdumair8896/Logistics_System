@@ -4,6 +4,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import type { Order } from './types';
+import { apiMutate } from '@/lib/apiClient';
 
 function mapOrder(r: Record<string, unknown>): Order {
   return {
@@ -44,45 +45,36 @@ export function useOrders() {
 
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
-  const addOrder = useCallback(async (o: Omit<Order, 'id' | 'createdAt'>): Promise<string> => {
-    const res = await fetch('/api/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(o),
-    });
-    const data = await res.json();
+  /** Creates an order. Returns the order ID, or null if the server refused. */
+  const addOrder = useCallback(async (o: Omit<Order, 'id' | 'createdAt'>): Promise<string | null> => {
+    const result = await apiMutate<{ id: string }>('/api/orders', 'POST', o);
     await fetchOrders();
-    return data.id ?? '';
+    return result.ok ? result.data.id : null;
   }, [fetchOrders]);
 
-  const updateOrder = useCallback(async (id: string, updates: Partial<Order>) => {
-    await fetch(`/api/orders/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updates),
-    });
-    setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o));
+  const updateOrder = useCallback(async (id: string, updates: Partial<Order>): Promise<boolean> => {
+    const result = await apiMutate(`/api/orders/${id}`, 'PATCH', updates);
+    if (result.ok) setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o));
+    return result.ok;
   }, []);
 
-  const scanOrderItem = useCallback(async (orderId: string, productId: string) => {
-    await fetch(`/api/orders/${orderId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ _action: 'scanItem', productId }),
-    });
+  const scanOrderItem = useCallback(async (orderId: string, productId: string): Promise<boolean> => {
+    const result = await apiMutate(`/api/orders/${orderId}`, 'PATCH', { _action: 'scanItem', productId });
+    if (!result.ok) return false;
     setOrders(prev => prev.map(o => {
       if (o.id !== orderId) return o;
       return { ...o, items: o.items.map(item => item.productId === productId ? { ...item, scanned: true } : item) };
     }));
+    return true;
   }, []);
 
-  const allocateVehicle = useCallback(async (orderId: string, vehicleId: string, driverId: string) => {
-    await fetch(`/api/orders/${orderId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ _action: 'allocate', vehicleId, driverId }),
+  /** Allocates a vehicle + driver. Pass overrideReason to assign a busy vehicle or unavailable driver. */
+  const allocateVehicle = useCallback(async (orderId: string, vehicleId: string, driverId: string, overrideReason?: string): Promise<boolean> => {
+    const result = await apiMutate(`/api/orders/${orderId}`, 'PATCH', {
+      _action: 'allocate', vehicleId, driverId, ...(overrideReason ? { overrideReason } : {}),
     });
     await fetchOrders();
+    return result.ok;
   }, [fetchOrders]);
 
   return { orders, loading, addOrder, updateOrder, scanOrderItem, allocateVehicle, refetch: fetchOrders };

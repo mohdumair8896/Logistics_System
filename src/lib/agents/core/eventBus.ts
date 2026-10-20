@@ -2,6 +2,7 @@
 // Completely isolates agents from each other. Communication is purely event-driven.
 
 import { db } from '@/lib/db';
+import { currentTenantId } from '@/lib/tenancy';
 import { agentAuditLogs, agentWorkflows } from '@/lib/schema';
 import type { LogisticsEvent, LogisticsEventType, AgentResult, AgentModule } from './types';
 
@@ -92,7 +93,7 @@ class LogisticsEventBus {
 
   private async persistEventLog(event: LogisticsEvent): Promise<void> {
     try {
-      await db.insert(agentAuditLogs).values({
+      await db.insert(agentAuditLogs).values({ tenantId: currentTenantId(),
         agentId: 'event-bus',
         eventType: event.type,
         entityId: event.entityId || null,
@@ -110,7 +111,7 @@ class LogisticsEventBus {
     durationMs: number
   ): Promise<void> {
     try {
-      await db.insert(agentWorkflows).values({
+      await db.insert(agentWorkflows).values({ tenantId: currentTenantId(),
         agentId: result.agentId,
         triggerEvent: event.type,
         status: result.success ? 'COMPLETED' : 'FAILED',

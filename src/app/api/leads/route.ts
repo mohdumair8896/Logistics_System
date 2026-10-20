@@ -3,21 +3,41 @@
 // PATCH /api/leads/[id]   — update lead status
 
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { z } from 'zod';
 import { shipperLeads } from '@/lib/schema';
-import { requireAuth, isAuthError } from '@/lib/auth';
-import { desc } from 'drizzle-orm';
+import { requireTenant, isAuthError } from '@/lib/auth';
+import { requirePermission } from '@/lib/permissions';
+import { withTenant } from '@/lib/tenancy';
+import { nextId } from '@/lib/ids';
+import { parseJsonBody, isoDate } from '@/lib/validation';
+import { desc, eq } from 'drizzle-orm';
+
+const createLeadSchema = z.object({
+  shipperName: z.string().trim().min(1).max(100),
+  companyName: z.string().trim().max(200).optional(),
+  phone: z.string().trim().max(20).optional(),
+  email: z.string().trim().email().max(255).optional().or(z.literal('')),
+  originHub: z.string().trim().max(200).optional(),
+  destinationHub: z.string().trim().max(200).optional(),
+  cargoType: z.string().trim().max(50).optional(),
+  estimatedWeightKg: z.number().int().min(0).max(100000).optional(),
+  freightQuote: z.number().min(0).max(100_000_000).optional(),
+  targetDeliveryDate: isoDate.optional().or(z.literal('')),
+  isUrgent: z.boolean().optional(),
+  transcriptSnippet: z.string().max(5000).optional(),
+});
 
 // ─── GET /api/leads ───────────────────────────────────────────────────────────
 export async function GET(request: NextRequest) {
-  const auth = await requireAuth(request);
+  const auth = await requireTenant(request);
   if (isAuthError(auth)) return auth;
 
   try {
-    const rows = await db
+    const rows = await withTenant(auth.tenantId, tx => tx
       .select()
       .from(shipperLeads)
-      .orderBy(desc(shipperLeads.createdAt));
+      .where(eq(shipperLeads.tenantId, auth.tenantId))
+      .orderBy(desc(shipperLeads.createdAt)));
 
     const leads = rows.map(r => ({
       id: r.id,
@@ -47,31 +67,28 @@ export async function GET(request: NextRequest) {
 
 // ─── POST /api/leads ──────────────────────────────────────────────────────────
 export async function POST(request: NextRequest) {
-  const auth = await requireAuth(request);
+  const auth = await requireTenant(request);
   if (isAuthError(auth)) return auth;
+  const denied = requirePermission(auth, 'lead.manage');
+  if (denied) return denied;
 
   try {
-    const body = await request.json();
-    const [latest] = await db.select({ id: shipperLeads.id }).from(shipperLeads).orderBy(desc(shipperLeads.id)).limit(1);
-    const lastNum = latest ? parseInt(latest.id.replace('LEAD-', ''), 10) : 0;
-    const nextNum = (!isNaN(lastNum) && lastNum > 0) ? lastNum + 1 : 1001;
-    const id = `LEAD-${nextNum}`;
+    const parsed = await parseJsonBody(request, createLeadSchema);
+    if (!parsed.ok) return parsed.response;
+    const { freightQuote, email, targetDeliveryDate, ...fields } = parsed.data;
 
-    await db.insert(shipperLeads).values({
-      id,
-      shipperName: body.shipperName,
-      companyName: body.companyName,
-      phone: body.phone,
-      email: body.email,
-      originHub: body.originHub,
-      destinationHub: body.destinationHub,
-      cargoType: body.cargoType,
-      estimatedWeightKg: body.estimatedWeightKg,
-      freightQuote: String(body.freightQuote ?? 0),
-      targetDeliveryDate: body.targetDeliveryDate,
-      isUrgent: body.isUrgent ?? false,
-      status: 'New',
-      transcriptSnippet: body.transcriptSnippet,
+    const id = await withTenant(auth.tenantId, async tx => {
+      const newId = await nextId(tx, 'LEAD');
+      await tx.insert(shipperLeads).values({
+        ...fields,
+        id: newId,
+        tenantId: auth.tenantId,
+        email: email || null,
+        targetDeliveryDate: targetDeliveryDate || null,
+        freightQuote: String(freightQuote ?? 0),
+        status: 'New',
+      });
+      return newId;
     });
 
     return NextResponse.json({ id }, { status: 201 });

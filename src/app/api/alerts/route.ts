@@ -1,21 +1,32 @@
 // GET /api/alerts — list active (non-dismissed) alerts
 // POST /api/alerts — create a real system alert
+// DELETE /api/alerts — dismiss all active alerts
 
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { z } from 'zod';
 import { systemAlerts } from '@/lib/schema';
-import { isNull, desc, sql } from 'drizzle-orm';
-import { requireAuth, isAuthError } from '@/lib/auth';
+import { and, eq, isNull, desc, sql } from 'drizzle-orm';
+import { requireTenant, isAuthError } from '@/lib/auth';
+import { requirePermission } from '@/lib/permissions';
+import { withTenant } from '@/lib/tenancy';
+import { parseJsonBody } from '@/lib/validation';
+
+const createAlertSchema = z.object({
+  title: z.string().trim().min(1).max(200),
+  description: z.string().trim().min(1).max(2000),
+  severity: z.enum(['info', 'warning', 'critical']),
+  category: z.enum(['Weather', 'Fleet', 'Driver', 'Route', 'Warehouse', 'Cold-Chain', 'Geofence']),
+}).strict();
 
 export async function GET(request: NextRequest) {
-  const auth = await requireAuth(request);
+  const auth = await requireTenant(request);
   if (isAuthError(auth)) return auth;
   try {
-    const rows = await db.select()
+    const rows = await withTenant(auth.tenantId, tx => tx.select()
       .from(systemAlerts)
-      .where(isNull(systemAlerts.dismissedAt))
+      .where(and(eq(systemAlerts.tenantId, auth.tenantId), isNull(systemAlerts.dismissedAt)))
       .orderBy(desc(systemAlerts.createdAt))
-      .limit(50);
+      .limit(50));
 
     // Map DB format to app format
     const mapped = rows.map(r => ({
@@ -24,7 +35,9 @@ export async function GET(request: NextRequest) {
       description: r.description,
       severity: r.severity,
       category: r.category,
-      timestamp: r.createdAt ? new Date(r.createdAt).toLocaleString('en-IN', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }) : 'Just now',
+      timestamp: r.createdAt
+        ? new Date(r.createdAt).toLocaleString('en-IN', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short', timeZone: 'Asia/Kolkata' })
+        : 'Just now',
     }));
 
     return NextResponse.json(mapped);
@@ -35,16 +48,16 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const auth = await requireAuth(req);
+  const auth = await requireTenant(req);
   if (isAuthError(auth)) return auth;
+  const denied = requirePermission(auth, 'alert.manage');
+  if (denied) return denied;
   try {
-    const body = await req.json();
-    const [created] = await db.insert(systemAlerts).values({
-      title: body.title,
-      description: body.description,
-      severity: body.severity,
-      category: body.category,
-    }).returning();
+    const parsed = await parseJsonBody(req, createAlertSchema);
+    if (!parsed.ok) return parsed.response;
+    const [created] = await withTenant(auth.tenantId, tx => tx.insert(systemAlerts)
+      .values({ ...parsed.data, tenantId: auth.tenantId })
+      .returning());
     return NextResponse.json(created, { status: 201 });
   } catch (err) {
     console.error('[POST /api/alerts]', err);
@@ -53,12 +66,14 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const auth = await requireAuth(request);
+  const auth = await requireTenant(request);
   if (isAuthError(auth)) return auth;
+  const denied = requirePermission(auth, 'alert.manage');
+  if (denied) return denied;
   try {
-    await db.update(systemAlerts)
+    await withTenant(auth.tenantId, tx => tx.update(systemAlerts)
       .set({ dismissedAt: sql`now()` })
-      .where(isNull(systemAlerts.dismissedAt));
+      .where(and(eq(systemAlerts.tenantId, auth.tenantId), isNull(systemAlerts.dismissedAt))));
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('[DELETE /api/alerts]', err);

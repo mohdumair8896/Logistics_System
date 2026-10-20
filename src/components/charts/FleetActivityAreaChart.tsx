@@ -207,7 +207,7 @@ export function FleetActivityAreaChart() {
               <span>Delivered Orders</span>
             </div>
             <div className="flex items-center gap-1.5 font-semibold text-[var(--text-mid)]">
-              <span className="w-2 h-2 rounded-full bg-[var(--chart-1,#0057FF)] inline-block" />
+              <span className="w-2 h-2 rounded-full bg-[var(--chart-1,#0B6B4E)] inline-block" />
               <span>In Transit</span>
             </div>
           </div>

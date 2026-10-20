@@ -57,19 +57,22 @@ export default function WarehousePage() {
 
   const allSafetyChecked = Object.values(safetyChecks).every(Boolean);
 
-  const handleScanAll = () => {
+  const handleScanAll = async () => {
     if (!activeOrder) return;
-    activeOrder.items.forEach(item => {
-      scanOrderItem(activeOrder.id, item.productId);
-    });
+    // One at a time: each scan rewrites the order's item list, so parallel scans would overwrite each other
+    for (const item of activeOrder.items) {
+      if (!(await scanOrderItem(activeOrder.id, item.productId))) return;
+    }
     toast.success('Cargo Manifest Verified', { description: `${activeOrder.items.length} pallet batches barcode scanned and cleared for loading.` });
   };
 
-  const handleConfirmLoading = () => {
+  const handleConfirmLoading = async () => {
     if (!activeOrder) return;
-    confirmLoading(activeOrder.id, loadingBay);
-    const tripId = addTrip(activeOrder.id);
-    toast.success('Transit Dispatched', { description: `Loading bay cleared. Corridor trip ${tripId} initiated on live GPS tracking.` });
+    // Order matters: mark the order loaded at the bay, then open the trip for it
+    if (!(await confirmLoading(activeOrder.id, loadingBay))) return;
+    const tripId = await addTrip(activeOrder.id);
+    if (!tripId) return; // error already shown
+    toast.success('Transit Dispatched', { description: `Loading bay cleared. Trip ${tripId} is live for GPS tracking.` });
     setLoaded(true);
     setTimeout(() => {
       router.push('/trips');
@@ -427,9 +430,9 @@ export default function WarehousePage() {
                 className="btn btn-primary btn-lg w-full"
                 style={{
                   justifyContent: 'center',
-                  background: allSafetyChecked ? 'linear-gradient(135deg, #0057FF, #0040CC)' : 'var(--surface-3)',
+                  background: allSafetyChecked ? 'linear-gradient(135deg, #0B6B4E, #07523C)' : 'var(--surface-3)',
                   color: allSafetyChecked ? '#ffffff' : 'var(--text-low)',
-                  boxShadow: allSafetyChecked ? '0 4px 14px rgba(0, 87, 255, 0.25)' : 'none',
+                  boxShadow: allSafetyChecked ? '0 4px 14px rgba(11, 107, 78, 0.25)' : 'none',
                   cursor: allSafetyChecked ? 'pointer' : 'not-allowed',
                   border: 'none',
                   borderRadius: 10,

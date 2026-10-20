@@ -2,8 +2,9 @@
 // Performs deep operational investigation rather than shallow database retrieval.
 
 import { db } from '@/lib/db';
+import { currentTenantId } from '@/lib/tenancy';
 import { orders, trips, vehicles, drivers, incidents } from '@/lib/schema';
-import { eq, desc } from 'drizzle-orm';
+import { and, eq, desc } from 'drizzle-orm';
 import type { AgentModule, LogisticsEvent, AgentResult, AgentReasoningStep } from '../../core/types';
 
 export interface CustomerInquiryPayload {
@@ -34,11 +35,11 @@ export class CustomerAgent implements AgentModule<CustomerInquiryPayload> {
     // 1. Locate Order & Linked Trip
     let targetOrder = null;
     if (orderId) {
-      const [ord] = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
+      const [ord] = await db.select().from(orders).where(and(eq(orders.tenantId, currentTenantId()), eq(orders.id, orderId))).limit(1);
       targetOrder = ord;
     } else {
       // Find latest active order
-      const [latest] = await db.select().from(orders).orderBy(desc(orders.createdAt)).limit(1);
+      const [latest] = await db.select().from(orders).where(eq(orders.tenantId, currentTenantId())).orderBy(desc(orders.createdAt)).limit(1);
       targetOrder = latest;
     }
 
@@ -52,18 +53,18 @@ export class CustomerAgent implements AgentModule<CustomerInquiryPayload> {
     }
 
     // 2. Fetch linked trip, vehicle, driver, and active incidents in parallel
-    const [activeTrip] = await db.select().from(trips).where(eq(trips.orderId, targetOrder.id)).limit(1);
+    const [activeTrip] = await db.select().from(trips).where(and(eq(trips.tenantId, currentTenantId()), eq(trips.orderId, targetOrder.id))).limit(1);
     const [assignedVehicle] = targetOrder.vehicleId
-      ? await db.select().from(vehicles).where(eq(vehicles.id, targetOrder.vehicleId)).limit(1)
+      ? await db.select().from(vehicles).where(and(eq(vehicles.tenantId, currentTenantId()), eq(vehicles.id, targetOrder.vehicleId))).limit(1)
       : [null];
     const [assignedDriver] = targetOrder.driverId
-      ? await db.select().from(drivers).where(eq(drivers.id, targetOrder.driverId)).limit(1)
+      ? await db.select().from(drivers).where(and(eq(drivers.tenantId, currentTenantId()), eq(drivers.id, targetOrder.driverId))).limit(1)
       : [null];
 
     const activeIncidents = await db
       .select()
       .from(incidents)
-      .where(eq(incidents.orderId, targetOrder.id))
+      .where(and(eq(incidents.tenantId, currentTenantId()), eq(incidents.orderId, targetOrder.id)))
       .orderBy(desc(incidents.createdAt));
 
     steps.push({

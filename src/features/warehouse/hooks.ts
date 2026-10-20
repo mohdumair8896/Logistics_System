@@ -9,6 +9,7 @@ import { useVehicles } from '@/features/vehicles/hooks';
 import { useDrivers } from '@/features/drivers/hooks';
 import { useTrips } from '@/features/trips/hooks';
 import { useProducts } from '@/features/products/hooks';
+import { apiMutate } from '@/lib/apiClient';
 
 export interface InventoryItem {
   id?: string;
@@ -20,15 +21,6 @@ export interface InventoryItem {
   unit?: string;
 }
 
-const fallbackInventory: InventoryItem[] = [
-  { productId: 'P001', warehouseId: 'W001', quantity: 35000, bay: 'Bay A-12' },
-  { productId: 'P002', warehouseId: 'W001', quantity: 22000, bay: 'Bay A-14' },
-  { productId: 'P003', warehouseId: 'W001', quantity: 45000, bay: 'Bay B-04' },
-  { productId: 'P004', warehouseId: 'W001', quantity: 18000, bay: 'Bay B-08' },
-  { productId: 'P005', warehouseId: 'W001', quantity: 12000, bay: 'Bay C-02' },
-  { productId: 'P006', warehouseId: 'W001', quantity: 9500, bay: 'Bay C-06' },
-];
-
 export function useWarehouse() {
   const { orders, scanOrderItem, refetch: refetchOrders } = useOrders();
   const { customers } = useCustomers();
@@ -36,19 +28,17 @@ export function useWarehouse() {
   const { drivers } = useDrivers();
   const { addTrip } = useTrips();
   const { products } = useProducts();
-  const [inventory, setInventory] = useState<InventoryItem[]>(fallbackInventory);
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
 
   const fetchInventory = useCallback(async () => {
     try {
       const res = await fetch('/api/inventory');
       if (res.ok) {
         const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-          setInventory(data);
-        }
+        if (Array.isArray(data)) setInventory(data);
       }
     } catch {
-      // Retain fallback on network failure
+      // Keep the last loaded stock on a network failure
     }
   }, []);
 
@@ -59,12 +49,9 @@ export function useWarehouse() {
   const allocatedOrders = orders.filter(o => o.status === 'Allocated');
 
   // confirmLoading: mark order as In Transit, deduct inventory via API
-  const confirmLoading = useCallback(async (orderId: string, bay = 'Bay 4') => {
-    await fetch(`/api/orders/${orderId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'In Transit', loadingBay: bay }),
-    });
+  const confirmLoading = useCallback(async (orderId: string, bay = 'Bay 4'): Promise<boolean> => {
+    const result = await apiMutate(`/api/orders/${orderId}`, 'PATCH', { status: 'In Transit', loadingBay: bay });
+    if (!result.ok) return false; // don't deduct stock for a load that didn't leave
 
     const targetOrder = orders.find(o => o.id === orderId);
     if (targetOrder?.items) {
@@ -82,6 +69,7 @@ export function useWarehouse() {
     }
 
     await refetchOrders();
+    return true;
   }, [orders, refetchOrders, fetchInventory]);
 
   return {

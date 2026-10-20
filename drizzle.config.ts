@@ -7,6 +7,7 @@ export default {
   out: './drizzle',
   dialect: 'postgresql',
   dbCredentials: {
-    url: process.env.DATABASE_URL!,
+    // Migrations may use a separate admin connection; defaults to the app's DATABASE_URL.
+    url: (process.env.DATABASE_URL_MIGRATIONS ?? process.env.DATABASE_URL)!,
   },
 } satisfies Config;

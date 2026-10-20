@@ -29,9 +29,10 @@ import {
   AlertDialogCancel,
 } from '@/components/ui/AlertDialog';
 import { Empty, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/Empty';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 export default function KnowledgeBasePage() {
-  const { items: knowledgeBase, addItem: addKnowledgeBaseItem, deleteItem: deleteKnowledgeBaseItem } = useKnowledgeBase();
+  const { items: knowledgeBase, loading: kbLoading, addItem: addKnowledgeBaseItem, deleteItem: deleteKnowledgeBaseItem } = useKnowledgeBase();
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [search, setSearch] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -197,7 +198,18 @@ export default function KnowledgeBasePage() {
         gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
         gap: 16
       }}>
-        {filteredItems.length === 0 ? (
+        {kbLoading ? (
+          // Placeholder cards until the first load, instead of a "no documents" message that isn't true yet
+          Array.from({ length: 3 }, (_, i) => (
+            <div key={`loading-${i}`} className="card" style={{ padding: 16 }} aria-hidden="true">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-5 w-3/4 mt-3" />
+              <Skeleton className="h-3 w-full mt-4" />
+              <Skeleton className="h-3 w-5/6 mt-2" />
+              <Skeleton className="h-3 w-2/3 mt-2" />
+            </div>
+          ))
+        ) : filteredItems.length === 0 ? (
           <div className="card" style={{ gridColumn: '1 / -1', padding: '40px 16px', textAlign: 'center' }}>
             <Empty>
               <EmptyMedia>

@@ -44,3 +44,6 @@ next-env.d.ts
 # scratch testing
 /scratch/
 .firecrawl/
+
+# local development database (npm run db:local)
+/.pglite/

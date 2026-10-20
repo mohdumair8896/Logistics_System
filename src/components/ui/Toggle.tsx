@@ -51,14 +51,14 @@ export function Toggle({
           width: trackWidth,
           height: trackHeight,
           borderRadius: 99,
-          background: checked ? 'var(--brand, #0057FF)' : 'var(--border-mid, #D2CFC8)',
+          background: checked ? 'var(--brand, #0B6B4E)' : 'var(--border-mid, #D2CFC8)',
           border: 'none',
           padding: 2,
           display: 'inline-flex',
           alignItems: 'center',
           cursor: disabled ? 'not-allowed' : 'pointer',
           transition: 'background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-          boxShadow: checked ? '0 2px 6px var(--brand-glow, rgba(0,87,255,0.25))' : 'none',
+          boxShadow: checked ? '0 2px 6px var(--brand-glow, rgba(11, 107, 78,0.25))' : 'none',
           flexShrink: 0,
         }}
       >

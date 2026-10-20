@@ -1,43 +1,54 @@
 'use client';
-import { useState } from 'react';
+// ─── Sign in ──────────────────────────────────────────────────────────────────
+// Two panes on desktop (form + highway panel), one column on phones. Every control on this page
+// does what it says: there is no "remember me" (sessions are fixed at 8 h) and no fake reset email.
+// Patterns: docs/DESIGN_SYSTEM.md §5.
+
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Truck, Eye, EyeOff, LogIn, ShieldCheck, KeyRound, X } from 'lucide-react';
-import { ModalPortal } from '@/components/ui/ModalPortal';
+import { ClipboardList, Eye, EyeOff, FileCheck2, Route } from 'lucide-react';
+import { BrandMark } from '@/components/ui/BrandMark';
 import { DotSpinner } from '@/components/ui/DotSpinner';
-import { Toggle } from '@/components/ui/Toggle';
+
+/** Only same-site paths are allowed as a post-login destination. */
+function safeReturnPath(raw: string | null): string {
+  if (!raw || !raw.startsWith('/') || raw.startsWith('//') || raw.startsWith('/login')) return '/dashboard';
+  return raw;
+}
 
 export default function LoginPage() {
   const router = useRouter();
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(true);
   const [showPass, setShowPass] = useState(false);
+  const [capsLock, setCapsLock] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [forgotModal, setForgotModal] = useState(false);
-  const [resetSent, setResetSent] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [returning, setReturning] = useState(false);
+  const passwordRef = useRef<HTMLInputElement>(null);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  // Arrived here from a protected page (signed out or session ended)
+  useEffect(() => {
+    setReturning(new URLSearchParams(window.location.search).has('from'));
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
-
     const trimmedEmail = email.trim();
-
-    if (!trimmedEmail || !trimmedEmail.includes('@')) {
-      setError('Please enter a valid business email address.');
-      setLoading(false);
+    if (!trimmedEmail.includes('@')) {
+      setError('Enter the email address you use for work.');
+      return;
+    }
+    if (!password) {
+      setError('Enter your password.');
+      passwordRef.current?.focus();
       return;
     }
 
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters.');
-      setLoading(false);
-      return;
-    }
-
+    setLoading(true);
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
@@ -45,211 +56,125 @@ export default function LoginPage() {
         body: JSON.stringify({ email: trimmedEmail, password }),
         credentials: 'same-origin',
       });
-
-      const data = await res.json();
-
+      const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.success) {
-        setError(data.message || 'Invalid credentials. Please try again.');
+        setError(res.status === 401
+          ? 'That email and password don’t match. Check both and try again.'
+          : data.message || 'Sign-in failed. Please try again.');
         setLoading(false);
         return;
       }
-
-
-      router.push('/dashboard');
-    } catch (err) {
-      console.error('[Login] Authentication request error:', err);
-      setError('Network error. Please check your connection and try again.');
-    } finally {
+      router.replace(safeReturnPath(new URLSearchParams(window.location.search).get('from')));
+    } catch {
+      setError('No connection. Check your internet and try again.');
       setLoading(false);
     }
   };
 
   return (
-    <div style={{
-      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'var(--surface)', position: 'relative', overflow: 'hidden',
-    }}>
-      {/* Subtle background decoration */}
-      <div style={{
-        position: 'absolute', top: '8%', right: '10%', width: 500, height: 500,
-        background: 'radial-gradient(circle, rgba(0,87,255,0.06) 0%, transparent 70%)',
-        borderRadius: '50%', pointerEvents: 'none',
-      }} />
-      <div style={{
-        position: 'absolute', bottom: '8%', left: '10%', width: 380, height: 380,
-        background: 'radial-gradient(circle, rgba(0,87,255,0.04) 0%, transparent 70%)',
-        borderRadius: '50%', pointerEvents: 'none',
-      }} />
+    <div className="auth-shell">
+      {/* ── Form pane ── */}
+      <main className="auth-form-pane">
+        <Link href="/" className="auth-wordmark" aria-label="LogisticsEdge home">
+          <BrandMark size={28} />
+          <span>LogisticsEdge</span>
+        </Link>
 
-      <div style={{ width: '100%', maxWidth: 460, padding: 20, zIndex: 1 }}>
-        {/* Brand header */}
-        <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-            width: 56, height: 56, background: 'var(--brand)',
-            borderRadius: 14, marginBottom: 14,
-            boxShadow: '0 4px 20px var(--brand-glow)',
-          }}>
-            <Truck size={26} color="#fff" />
-          </div>
-          <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-high)', letterSpacing: '-0.3px', marginBottom: 4, fontFamily: 'var(--font-heading)' }}>
-            LogisticsEdge Platform
-          </h1>
-          <p style={{ fontSize: 11.5, color: 'var(--text-low)', fontWeight: 600, letterSpacing: '0.7px', textTransform: 'uppercase' }}>
-            Fleet Intelligence System
+        <div className="auth-form-wrap">
+          <h1 className="auth-title">Sign in</h1>
+          <p className="auth-lede">
+            {returning ? 'Sign in to continue where you left off.' : 'Welcome back. Sign in to your company workspace.'}
           </p>
-        </div>
 
-        {/* Login card */}
-        <div style={{
-          background: 'var(--surface-1)', border: '1px solid var(--border)',
-          borderRadius: 14, padding: '24px 26px',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
-        }}>
-          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 13 }}>
+          <form onSubmit={handleSubmit} noValidate className="auth-form">
             <div className="form-group">
-              <label className="form-label">Email Address</label>
+              <label className="form-label" htmlFor="login-email">Work email</label>
               <input
-                className="form-input"
+                id="login-email"
+                className="form-input auth-input"
                 type="email"
+                inputMode="email"
+                autoComplete="username"
+                autoFocus
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder="name@company.com"
-                required
+                placeholder="you@company.com"
+                aria-invalid={!!error && !email.includes('@')}
               />
             </div>
 
             <div className="form-group">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <label className="form-label">Password</label>
-                <button
-                  type="button"
-                  onClick={() => { setForgotModal(true); setResetSent(false); }}
-                  style={{ background: 'none', border: 'none', color: 'var(--brand)', fontSize: 11, cursor: 'pointer' }}
-                >
-                  Forgot Password?
+              <div className="auth-label-row">
+                <label className="form-label" htmlFor="login-password">Password</label>
+                <button type="button" className="auth-link-btn" onClick={() => setHelpOpen(v => !v)} aria-expanded={helpOpen} aria-controls="login-help">
+                  Forgot password?
                 </button>
               </div>
-              <div className="input-group" style={{ height: 42 }}>
+              <div className="input-group auth-input">
                 <input
+                  id="login-password"
+                  ref={passwordRef}
                   type={showPass ? 'text' : 'password'}
+                  autoComplete="current-password"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
+                  onKeyUp={e => setCapsLock(e.getModifierState('CapsLock'))}
+                  onBlur={() => setCapsLock(false)}
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPass(!showPass)}
-                  style={{ background: 'none', border: 'none', color: 'var(--text-low)', cursor: 'pointer', display: 'flex', padding: 4 }}
+                  className="auth-eye"
+                  onClick={() => setShowPass(v => !v)}
                   aria-label={showPass ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPass}
                 >
-                  {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
+                  {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
+              {capsLock && <div className="auth-hint">Caps Lock is on</div>}
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '2px 0' }}>
-              <Toggle
-                size="sm"
-                checked={rememberMe}
-                onChange={setRememberMe}
-                label="Keep me signed in"
-                hint="Save workstation session credentials"
-              />
-              <span style={{ color: 'var(--text-low)', fontSize: 10.5, marginTop: 2 }}>SSL Encrypted</span>
-            </div>
-
-            {error && (
-              <div style={{
-                background: 'var(--status-error-bg)', border: '1px solid rgba(192,57,43,0.2)',
-                borderRadius: 8, padding: '8px 12px', color: 'var(--status-error)', fontSize: 12,
-                display: 'flex', alignItems: 'center', gap: 8,
-              }}>
-                <span style={{ fontSize: 14 }}>⚠️</span>
-                {error}
+            {helpOpen && (
+              <div id="login-help" className="auth-help">
+                Ask your Operations Director for a reset link. They create it under Team &amp; Roles; it works once, for 24 hours,
+                and lets you choose a new password. If you are your workspace’s only Director, write to{' '}
+                <a href="mailto:support@logisticsedge.io">support@logisticsedge.io</a> from your work email.
               </div>
             )}
 
-            <button
-              type="submit"
-              className="btn btn-primary btn-lg"
-              disabled={loading}
-              style={{ justifyContent: 'center', marginTop: 4, width: '100%', gap: 10 }}
-            >
-              {loading ? (
-                <>
-                  <DotSpinner size={16} color="#ffffff" />
-                  Authenticating…
-                </>
-              ) : (
-                <>
-                  <LogIn size={14} />
-                  Sign In →
-                </>
-              )}
+            {error && <div role="alert" className="auth-error">{error}</div>}
+
+            <button type="submit" className="btn btn-primary auth-submit" disabled={loading}>
+              {loading ? <><DotSpinner size={16} color="#ffffff" /> Signing in…</> : 'Sign in'}
             </button>
-
-            <div style={{ textAlign: 'center', marginTop: 10, fontSize: 12, color: 'var(--text-mid)' }}>
-              New company?{' '}
-              <Link href="/pricing" style={{ color: 'var(--brand)', fontWeight: 600, textDecoration: 'none' }}>
-                Choose a Plan &amp; Activate Workspace →
-              </Link>
-            </div>
           </form>
+
+          <p className="auth-alt">
+            New to LogisticsEdge? <Link href="/pricing">See plans and start a workspace</Link>
+          </p>
         </div>
 
-        {/* Security notice */}
-        <div style={{
-          marginTop: 14, padding: '9px 13px',
-          background: 'var(--brand-10)', border: '1px solid var(--brand-20)',
-          borderRadius: 10, display: 'flex', alignItems: 'center', gap: 10,
-        }}>
-          <ShieldCheck size={15} color="var(--brand)" style={{ flexShrink: 0 }} />
-          <div style={{ fontSize: 10.5, color: 'var(--text-mid)', lineHeight: 1.4 }}>
-            <strong style={{ color: 'var(--text-high)' }}>Enterprise Security</strong>: SOC-2 Type II Certified • 256-bit TLS. All sessions monitored.
-          </div>
-        </div>
+        <footer className="auth-footer">
+          <span>© 2026 LogisticsEdge</span>
+          <Link href="/terms">Terms</Link>
+          <Link href="/privacy">Privacy</Link>
+        </footer>
+      </main>
 
-        <div style={{ textAlign: 'center', marginTop: 18, fontSize: 10.5, color: 'var(--text-low)' }}>
-          © 2026 LogisticsEdge Platform. All rights reserved.
-        </div>
-      </div>
+      {/* ── Highway pane: a golden-hour still from the home page's closing film ── */}
+      <aside className="auth-road-pane" aria-hidden="true">
+        {/* eslint-disable-next-line @next/next/no-img-element -- one sized WebP still, desktop only */}
+        <img className="auth-road-photo" src="/media/login-highway.webp" alt="" width={960} height={720} decoding="async" />
 
-      {/* Forgot Password Modal */}
-      {forgotModal && (
-        <ModalPortal>
-          <div className="modal-overlay" onClick={() => setForgotModal(false)}>
-            <div className="modal" style={{ maxWidth: 380 }} onClick={e => e.stopPropagation()}>
-              <div className="modal-title">
-                <span>Reset Password</span>
-                <button type="button" onClick={() => setForgotModal(false)} className="modal-close-btn" aria-label="Close modal">
-                  <X size={17} />
-                </button>
-              </div>
-              {resetSent ? (
-                <div style={{ textAlign: 'center', padding: 12 }}>
-                  <KeyRound size={32} color="var(--brand)" style={{ margin: '0 auto 10px' }} />
-                  <div style={{ fontWeight: 700, color: 'var(--text-high)' }}>Email Sent</div>
-                  <p style={{ fontSize: 12, color: 'var(--text-low)', marginTop: 4 }}>Check your inbox for the password reset link.</p>
-                  <button className="btn btn-primary" style={{ marginTop: 14, width: '100%', justifyContent: 'center' }} onClick={() => setForgotModal(false)}>
-                    Back to Sign In
-                  </button>
-                </div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <p style={{ fontSize: 12.5, color: 'var(--text-mid)' }}>Enter your registered email to receive a reset link.</p>
-                  <input className="form-input" defaultValue={email} />
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button className="btn btn-ghost" style={{ flex: 1, justifyContent: 'center' }} onClick={() => setForgotModal(false)}>Cancel</button>
-                    <button className="btn btn-primary" style={{ flex: 1.5, justifyContent: 'center' }} onClick={() => setResetSent(true)}>Send Link</button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </ModalPortal>
-      )}
+        <div className="auth-road-copy">
+          <div className="auth-road-title">Every load, from booking to bill.</div>
+          <ul className="auth-road-list">
+            <li><ClipboardList size={16} /> Book orders and price lanes in rupees</li>
+            <li><Route size={16} /> Dispatch trucks and follow every trip live</li>
+            <li><FileCheck2 size={16} /> Capture proof of delivery and send GST invoices</li>
+          </ul>
+        </div>
+      </aside>
     </div>
   );
 }

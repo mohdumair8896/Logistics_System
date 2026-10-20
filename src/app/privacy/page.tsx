@@ -49,12 +49,12 @@ export default function PrivacyPolicyPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
             <div style={{
               width: 36, height: 36, borderRadius: 10,
-              background: 'rgba(0, 87, 255, 0.08)', border: '1px solid rgba(0, 87, 255, 0.2)',
+              background: 'rgba(11, 107, 78, 0.08)', border: '1px solid rgba(11, 107, 78, 0.2)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <ShieldCheck style={{ width: 20, height: 20, color: 'var(--brand, #0057FF)' }} />
+              <ShieldCheck style={{ width: 20, height: 20, color: 'var(--brand, #0B6B4E)' }} />
             </div>
-            <span style={{ fontSize: 12, fontFamily: 'var(--font-mono, monospace)', textTransform: 'uppercase', letterSpacing: 2, color: 'var(--brand, #0057FF)', fontWeight: 700 }}>
+            <span style={{ fontSize: 12, fontFamily: 'var(--font-mono, monospace)', textTransform: 'uppercase', letterSpacing: 2, color: 'var(--brand, #0B6B4E)', fontWeight: 700 }}>
               Legal &amp; Compliance
             </span>
           </div>
@@ -72,47 +72,67 @@ export default function PrivacyPolicyPage() {
 
           <section style={sectionStyle}>
             <h2 style={h2style}>
-              <Lock style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
+              <Lock style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
               1. Data Controller &amp; Contact Details
             </h2>
             <div style={{
               background: 'var(--surface-2, #F3F2EF)', border: '1px solid var(--border, #E6E4DF)',
               borderRadius: 14, padding: '20px 24px', fontFamily: 'var(--font-mono, monospace)', fontSize: 13,
             }}>
-              <strong style={{ color: 'var(--brand, #0057FF)' }}>LogisticsEdge Technologies Pvt. Ltd.</strong><br />
-              CIN / Registration: U72900UP2024PTC000000 &bull; GSTIN: 09AAACP0000A1Z5<br />
+              <strong style={{ color: 'var(--brand, #0B6B4E)' }}>LogisticsEdge Technologies Pvt. Ltd.</strong><br />
               Registered Address: Plot No. 12, Vibhuti Khand, Gomti Nagar, Lucknow — 226010, Uttar Pradesh, India<br />
-              Email: <a href="mailto:privacy@logisticsedge.io" style={{ color: 'var(--brand, #0057FF)' }}>privacy@logisticsedge.io</a> &bull;{' '}
-              <a href="mailto:security@logisticsedge.io" style={{ color: 'var(--brand, #0057FF)' }}>security@logisticsedge.io</a><br />
-              Grievance Officer (CPA 2019): Grievance Redressal Desk &bull; <a href="mailto:grievance@logisticsedge.io" style={{ color: 'var(--brand, #0057FF)' }}>grievance@logisticsedge.io</a><br />
-              DPO (GDPR): Data Protection Operations Desk &bull; <a href="mailto:dpo@logisticsedge.io" style={{ color: 'var(--brand, #0057FF)' }}>dpo@logisticsedge.io</a>
+              Email: <a href="mailto:privacy@logisticsedge.io" style={{ color: 'var(--brand, #0B6B4E)' }}>privacy@logisticsedge.io</a> &bull;{' '}
+              <a href="mailto:security@logisticsedge.io" style={{ color: 'var(--brand, #0B6B4E)' }}>security@logisticsedge.io</a><br />
+              Grievance Officer (CPA 2019): Grievance Redressal Desk &bull; <a href="mailto:grievance@logisticsedge.io" style={{ color: 'var(--brand, #0B6B4E)' }}>grievance@logisticsedge.io</a><br />
+              DPO (GDPR): Data Protection Operations Desk &bull; <a href="mailto:dpo@logisticsedge.io" style={{ color: 'var(--brand, #0B6B4E)' }}>dpo@logisticsedge.io</a>
             </div>
           </section>
 
           <section style={sectionStyle}>
             <h2 style={h2style}>
-              <Database style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
+              <Scale style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
+              Our role: processor or fiduciary
+            </h2>
+            <p>
+              <strong>Data in your workspace.</strong> When you put drivers, vehicles, trips, locations, consignees or your
+              customers into LogisticsEdge, your company decides why that data is collected. Under India&rsquo;s Digital
+              Personal Data Protection Act 2023 your company is the Data Fiduciary and we are its Data Processor: we process
+              that data only to run the service for you. A data processing agreement is available on request.
+            </p>
+            <p>
+              <strong>Our own records.</strong> For people who use the rate calculator on this website, and for our
+              customers&rsquo; account and billing contacts, we are the Data Fiduciary, as described in this policy. See
+              also <Link href="/trust" style={{ color: 'var(--brand, #0B6B4E)' }}>Trust and security</Link>.
+            </p>
+          </section>
+
+          <section style={sectionStyle}>
+            <h2 style={h2style}>
+              <Database style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
               2. Data We Collect
             </h2>
             <ul style={{ paddingLeft: 24, display: 'flex', flexDirection: 'column', gap: 10 }}>
               <li>
-                <strong>Operational Telematics:</strong> Real-time vehicle GPS coordinates, velocity, fuel levels, ambient trailer temperature, and acceleration data for dispatch optimisation.
+                <strong>Trip location:</strong> latitude, longitude and time, plus speed and accuracy when the phone reports them, sent from the driver&rsquo;s phone while the trip link is open.
               </li>
               <li>
-                <strong>Freight &amp; Manifest Information:</strong> Waybill identifiers, bill of lading (BOL), cargo classifications, origin/destination addresses, and proof-of-delivery (POD) timestamps.
+                <strong>Drivers and vehicles:</strong> driver names, phone numbers, licence numbers and expiry dates, and whether documents are verified; vehicle numbers, types and capacities.
               </li>
               <li>
-                <strong>Account &amp; Contact Data:</strong> Business name, authorised contact names, business email addresses, and GSTIN for invoicing purposes.
+                <strong>Orders, trips and deliveries:</strong> customer and consignee details, pickup and drop locations, cargo and weights, and at delivery the receiver&rsquo;s name and any damage deduction.
               </li>
               <li>
-                <strong>Technical Diagnostics:</strong> IP addresses, browser type, session tokens, and page performance metrics. IP addresses are pseudonymised within 24 hours.
+                <strong>Account and billing:</strong> business name, contact names, email addresses, phone numbers and GSTIN.
               </li>
               <li>
-                <strong>Newsletter Subscriptions:</strong> Work email address — only with your explicit consent (opt-in).
+                <strong>Rate requests on this website:</strong> your name, mobile number and optional company, the route and load you priced, how you prefer to be contacted, whether you asked for updates, and the campaign tags of the link you arrived by.
+              </li>
+              <li>
+                <strong>Technical data:</strong> IP addresses (used for rate limiting and security), browser type and session cookies. Analytics tools load only if you accept them in the cookie notice.
               </li>
             </ul>
             <div style={{
-              background: 'rgba(0, 87, 255, 0.05)', border: '1px solid rgba(0, 87, 255, 0.15)',
+              background: 'rgba(11, 107, 78, 0.05)', border: '1px solid rgba(11, 107, 78, 0.15)',
               borderRadius: 12, padding: '14px 18px', marginTop: 8, fontSize: 13, color: 'var(--text-high, #141414)'
             }}>
               We apply <strong>data minimisation</strong>: we collect only what is necessary for the stated purpose and retain it only as long as required.
@@ -121,7 +141,7 @@ export default function PrivacyPolicyPage() {
 
           <section style={sectionStyle}>
             <h2 style={h2style}>
-              <Server style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
+              <Server style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
               3. Legal Basis for Processing
             </h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 12, marginTop: 4 }}>
@@ -135,7 +155,7 @@ export default function PrivacyPolicyPage() {
                   background: 'var(--surface-2, #F3F2EF)', border: '1px solid var(--border, #E6E4DF)',
                   borderRadius: 12, padding: '14px 18px',
                 }}>
-                  <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--brand, #0057FF)', margin: '0 0 6px' }}>{b.label}</p>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--brand, #0B6B4E)', margin: '0 0 6px' }}>{b.label}</p>
                   <p style={{ fontSize: 13, color: 'var(--text-mid, #525252)', margin: 0 }}>{b.desc}</p>
                 </div>
               ))}
@@ -144,7 +164,7 @@ export default function PrivacyPolicyPage() {
 
           <section style={sectionStyle}>
             <h2 style={h2style}>
-              <Eye style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
+              <Eye style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
               4. Cookies &amp; Tracking Technologies
             </h2>
             <p>
@@ -154,13 +174,13 @@ export default function PrivacyPolicyPage() {
               We do <strong>not</strong> use advertising cookies, retargeting pixels, or social media tracking. We do not sell your data to third-party advertisers.
             </p>
             <p>
-              See our full <Link href="/cookies" style={{ color: 'var(--brand, #0057FF)', textDecoration: 'underline' }}>Cookie Policy</Link> for a complete list of cookies set, their purpose, and how to manage them.
+              See our full <Link href="/cookies" style={{ color: 'var(--brand, #0B6B4E)', textDecoration: 'underline' }}>Cookie Policy</Link> for a complete list of cookies set, their purpose, and how to manage them.
             </p>
           </section>
 
           <section style={sectionStyle} id="india">
             <h2 style={h2style}>
-              <Scale style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
+              <Scale style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
               5. India — DPDP Act 2023
             </h2>
             <p>
@@ -181,7 +201,7 @@ export default function PrivacyPolicyPage() {
 
           <section style={sectionStyle} id="gdpr">
             <h2 style={h2style}>
-              <Globe style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
+              <Globe style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
               6. EU/UK Residents — GDPR &amp; UK DPA 2018
             </h2>
             <p>EU and UK residents have additional rights under the General Data Protection Regulation:</p>
@@ -201,7 +221,7 @@ export default function PrivacyPolicyPage() {
 
           <section style={sectionStyle} id="ccpa">
             <h2 style={h2style}>
-              <Globe style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
+              <Globe style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
               7. California Residents — CCPA / CPRA
             </h2>
             <p>California residents have rights under the California Consumer Privacy Act (CCPA) as amended by CPRA:</p>
@@ -213,13 +233,13 @@ export default function PrivacyPolicyPage() {
               <li><strong>Right to Correct:</strong> Request correction of inaccurate personal information.</li>
             </ul>
             <p style={{ marginTop: 8, fontSize: 13, color: 'var(--text-mid, #525252)' }}>
-              Submit requests to <a href="mailto:privacy@logisticsedge.io" style={{ color: 'var(--brand, #0057FF)' }}>privacy@logisticsedge.io</a>. We respond within 45 days. We may request verification of identity before processing requests.
+              Submit requests to <a href="mailto:privacy@logisticsedge.io" style={{ color: 'var(--brand, #0B6B4E)' }}>privacy@logisticsedge.io</a>. We respond within 45 days. We may request verification of identity before processing requests.
             </p>
           </section>
 
           <section style={sectionStyle}>
             <h2 style={h2style}>
-              <FileText style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
+              <FileText style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
               8. Data Retention
             </h2>
             <ul style={{ paddingLeft: 24, display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -227,13 +247,13 @@ export default function PrivacyPolicyPage() {
               <li>GST invoices and freight manifests: 8 years (Income Tax Act 1961 / GST Act 2017).</li>
               <li>Security logs (IP addresses, session tokens): 90 days.</li>
               <li>Analytics data: Aggregated only; no individual retention beyond session.</li>
-              <li>Newsletter emails: Until you unsubscribe or withdraw consent.</li>
+              <li>Marketing updates (only if you ticked the box on the rate form): until you withdraw consent.</li>
             </ul>
           </section>
 
           <section style={sectionStyle}>
             <h2 style={h2style}>
-              <ShieldCheck style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
+              <ShieldCheck style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
               9. Security Measures
             </h2>
             <p>

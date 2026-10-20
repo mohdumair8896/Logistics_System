@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import {
   Truck, Globe, Zap, Sparkles, Check, ArrowRight, ArrowLeft,
   Layers, Compass, Cpu, CheckCircle2, Activity
@@ -54,37 +55,35 @@ export default function ConfigurePage() {
       .catch(() => {});
   }, []);
 
-  const startProvisioning = () => {
+  const startProvisioning = async () => {
     setScreen('PROVISIONING');
-    // Save tenant profile into localStorage so the dashboard and header can immediately read it
-    const activeTenant = {
-      name: state.companyName || 'My Logistics Workspace',
-      archetype: state.archetype,
-      plan: result.recommendedPlan,
-      score: result.totalScore,
-      enabledModules: result.recommendedModules,
-      autonomyLevel: state.autonomyLevel,
-      fleetSize: state.fleetSize,
-      monthlyShipments: state.monthlyShipments,
-      geography: state.geography,
-    };
-    try {
-      localStorage.setItem('logisticsedge_active_tenant', JSON.stringify(activeTenant));
-    } catch {}
 
-    // Persist to server API and update session cookie
-    fetch('/api/tenants/configure', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        archetype: state.archetype,
-        complexityScore: result.totalScore,
-        enabledModules: result.recommendedModules,
-        autonomyLevel: state.autonomyLevel,
-        companyName: state.companyName,
-        activeIntegrations: state.integrations,
-      }),
-    }).catch(e => console.warn('[Provisioning API error]:', e));
+    // Save the configuration (modules, autonomy, integrations) to the workspace on the server.
+    // The sidebar reads entitlements from /api/tenant/entitlements, so nothing is kept in localStorage.
+    try {
+      const res = await fetch('/api/tenants/configure', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          archetype: state.archetype,
+          complexityScore: result.totalScore,
+          enabledModules: result.recommendedModules,
+          autonomyLevel: state.autonomyLevel,
+          companyName: state.companyName,
+          activeIntegrations: state.integrations,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.message || data.error || 'Could not save your workspace setup. Please try again.');
+        setScreen('RECOMMENDATION');
+        return;
+      }
+    } catch {
+      toast.error('Network error. Please check your connection and try again.');
+      setScreen('RECOMMENDATION');
+      return;
+    }
 
     // Step through workspace provisioning checklist
     let step = 0;

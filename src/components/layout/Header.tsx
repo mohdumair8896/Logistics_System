@@ -49,7 +49,7 @@ export default function Header({
         <div>
           <div className="header-title">{title}</div>
           {subtitle && (
-            <div style={{ fontSize: 11, color: 'var(--text-low)', marginTop: 1 }}>{subtitle}</div>
+            <div className="header-subtitle">{subtitle}</div>
           )}
         </div>
       </div>
@@ -73,7 +73,7 @@ export default function Header({
           <span>LIVE</span>
         </Link>
 
-        <div style={{ fontSize: 11.5, color: 'var(--text-low)' }} className="hidden-mobile">{now}</div>
+        <div style={{ fontSize: 11.5, color: 'var(--text-low)', whiteSpace: 'nowrap' }} className="header-date">{now}</div>
 
         {/* Alerts dropdown */}
         <div style={{ position: 'relative' }}>
@@ -195,9 +195,9 @@ export default function Header({
           </AnimatePresence>
         </div>
 
-        {/* Quick Bug Report */}
+        {/* Quick Bug Report (hidden on phones, where the header has no room for it) */}
         <button
-          className="header-btn"
+          className="header-btn hidden-mobile"
           title="Report Bug (React Hook Form + Zod)"
           onClick={() => setShowBugModal(true)}
           aria-label="Report Bug"
@@ -205,9 +205,9 @@ export default function Header({
           <Bug size={15} />
         </button>
 
-        {/* Quick Notification Preferences */}
+        {/* Quick Notification Preferences (hidden on phones too) */}
         <button
-          className="header-btn"
+          className="header-btn hidden-mobile"
           title="Notification Preferences (RHF Checkbox)"
           onClick={() => setShowPrefsModal(true)}
           aria-label="Notification Preferences"

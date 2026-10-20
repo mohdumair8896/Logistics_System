@@ -1,0 +1,5 @@
+Contact: mailto:security@logisticsedge.io
+Expires: 2027-10-19T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://logisticsedge.io/.well-known/security.txt
+Policy: https://logisticsedge.io/trust

@@ -56,11 +56,28 @@ npm install
 ```
 
 ### 2. Run Development Server
+
+Develop against a local database so nothing you do touches production. `npm run db:local` creates `.pglite/` (in-process Postgres with every migration) and fills it with the fictional demo workspace; the demo sign-in details are written to `.pglite/DEMO_LOGIN.txt`.
+
 ```bash
-npm run dev
+npm run db:local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser.
+Then start the dev server with the local database (PowerShell: `$env:DATABASE_URL='pglite:./.pglite'; $env:DB_RLS_ROLE='app_rls'; npm run dev`):
+
+```bash
+DATABASE_URL=pglite:./.pglite DB_RLS_ROLE=app_rls npm run dev
+```
+
+Only one process at a time may have `.pglite/` open: the dev server, `npm run db:local` or `npm run db:seed`. PGlite runs Postgres inside that process and has no lock of its own, so two processes writing the folder lose rows and in the end break it. Each of these claims the folder in `.pglite/lms-open.lock` (holding its process ID), and a second one stops with "… is already open in process N". Stop the dev server before running `npm run db:local`, and don't point any other tool at the folder (a script, a copy or backup) while it is open. The dev server opens the folder on its first query rather than at startup, because `next dev` also loads route modules in short-lived worker processes that must never open it.
+
+Stopping the dev server in any way (Ctrl+C, closing the terminal, ending the process) keeps every saved change. A `lms-open.lock` and `postmaster.pid` left behind after that are normal; the next process takes them over.
+
+If the local database is damaged anyway (every query fails with `RuntimeError: Aborted()`), stop everything that uses it, move `.pglite/` aside and run `npm run db:local` again. To keep the same demo password, set `SEED_STAFF_PASSWORD` to the one in the old `DEMO_LOGIN.txt` first.
+
+Open [http://localhost:3000](http://localhost:3000) with your browser. Without `DATABASE_URL` set on the command line, the dev server uses the one in `.env.local`.
+
+Design rules (colours, type, motion, sign-in and dashboard patterns) live in [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md).
 
 ### 3. Production Build
 ```bash

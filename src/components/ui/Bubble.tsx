@@ -19,10 +19,10 @@ export function Bubble({
 
   const variantStyles = {
     default: isEnd
-      ? 'bg-[var(--brand,#0057FF)] text-white'
+      ? 'bg-[var(--brand,#0B6B4E)] text-white'
       : 'bg-[var(--surface-1,#FFFFFF)] text-[var(--text-high,#141414)] border border-[var(--border,#E6E4DF)]',
     muted: 'bg-[var(--surface-2,#F3F2EF)] text-[var(--text-high,#141414)] border border-[var(--border,#E6E4DF)]',
-    brand: 'bg-[var(--brand,#0057FF)] text-white',
+    brand: 'bg-[var(--brand,#0B6B4E)] text-white',
   }[variant];
 
   return (

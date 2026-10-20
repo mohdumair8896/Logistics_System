@@ -78,7 +78,7 @@ export const FileUpload: FC<FileUploadProps> = ({
           className={cn(
             'flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed transition-all cursor-pointer text-center',
             isDragging
-              ? 'border-[var(--brand)] bg-[rgba(0,87,255,0.06)] scale-[0.99]'
+              ? 'border-[var(--brand)] bg-[rgba(11, 107, 78,0.06)] scale-[0.99]'
               : 'border-[var(--border)] bg-[var(--surface-1)] hover:bg-[var(--surface-2)] hover:border-[var(--brand)]'
           )}
         >
@@ -91,7 +91,7 @@ export const FileUpload: FC<FileUploadProps> = ({
             }}
             className="hidden"
           />
-          <div className="w-10 h-10 rounded-full bg-[rgba(0,87,255,0.08)] text-[var(--brand)] flex items-center justify-center mb-2.5">
+          <div className="w-10 h-10 rounded-full bg-[rgba(11, 107, 78,0.08)] text-[var(--brand)] flex items-center justify-center mb-2.5">
             <UploadCloud size={20} />
           </div>
           <span className="text-xs font-bold text-[var(--text-high)]">Click to upload or drag & drop</span>
@@ -101,7 +101,7 @@ export const FileUpload: FC<FileUploadProps> = ({
         <div className="flex flex-col gap-2 p-3.5 rounded-xl border border-[var(--border)] bg-[var(--surface-1)] shadow-xs">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-lg bg-[rgba(0,87,255,0.1)] text-[var(--brand)] flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-[rgba(11, 107, 78,0.1)] text-[var(--brand)] flex items-center justify-center shrink-0">
                 <FileText size={16} />
               </div>
               <div className="flex flex-col min-w-0">

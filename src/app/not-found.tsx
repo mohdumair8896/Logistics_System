@@ -30,7 +30,7 @@ export default function NotFound() {
         transform: 'translate(-50%, -50%)',
         width: 600,
         height: 600,
-        background: 'radial-gradient(circle, rgba(0, 87, 255, 0.05) 0%, rgba(0, 87, 255, 0.02) 50%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(11, 107, 78, 0.05) 0%, rgba(11, 107, 78, 0.02) 50%, transparent 70%)',
         pointerEvents: 'none',
       }} />
 
@@ -53,7 +53,7 @@ export default function NotFound() {
             position: 'absolute',
             inset: -6,
             borderRadius: '50%',
-            background: 'rgba(0, 87, 255, 0.12)',
+            background: 'rgba(11, 107, 78, 0.12)',
             filter: 'blur(10px)',
           }} />
           <div style={{
@@ -61,13 +61,13 @@ export default function NotFound() {
             width: 72,
             height: 72,
             borderRadius: 20,
-            background: 'rgba(0, 87, 255, 0.08)',
-            border: '1px solid rgba(0, 87, 255, 0.25)',
+            background: 'rgba(11, 107, 78, 0.08)',
+            border: '1px solid rgba(11, 107, 78, 0.25)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-            <Radio style={{ width: 32, height: 32, color: 'var(--brand, #0057FF)', animation: 'pulse 2s infinite' }} />
+            <Radio style={{ width: 32, height: 32, color: 'var(--brand, #0B6B4E)', animation: 'pulse 2s infinite' }} />
           </div>
         </div>
 
@@ -77,12 +77,12 @@ export default function NotFound() {
           fontSize: 12,
           fontFamily: 'var(--font-mono, monospace)',
           fontWeight: 700,
-          color: 'var(--brand, #0057FF)',
+          color: 'var(--brand, #0B6B4E)',
           letterSpacing: 2,
           textTransform: 'uppercase',
           marginBottom: 12,
-          background: 'rgba(0, 87, 255, 0.08)',
-          border: '1px solid rgba(0, 87, 255, 0.2)',
+          background: 'rgba(11, 107, 78, 0.08)',
+          border: '1px solid rgba(11, 107, 78, 0.2)',
           padding: '4px 14px',
           borderRadius: 99,
         }}>
@@ -119,12 +119,12 @@ export default function NotFound() {
               gap: 10,
               padding: '13px 24px',
               borderRadius: 12,
-              background: 'var(--brand, #0057FF)',
+              background: 'var(--brand, #0B6B4E)',
               color: '#ffffff',
               fontSize: 14,
               fontWeight: 700,
               textDecoration: 'none',
-              boxShadow: '0 4px 14px rgba(0, 87, 255, 0.25)',
+              boxShadow: '0 4px 14px rgba(11, 107, 78, 0.25)',
               transition: 'opacity 0.15s',
             }}
           >
@@ -150,7 +150,7 @@ export default function NotFound() {
                 textDecoration: 'none',
               }}
             >
-              <Search style={{ width: 15, height: 15, color: 'var(--brand, #0057FF)' }} />
+              <Search style={{ width: 15, height: 15, color: 'var(--brand, #0B6B4E)' }} />
               Live Tracker
             </Link>
 
@@ -171,7 +171,7 @@ export default function NotFound() {
                 textDecoration: 'none',
               }}
             >
-              <Truck style={{ width: 15, height: 15, color: 'var(--brand, #0057FF)' }} />
+              <Truck style={{ width: 15, height: 15, color: 'var(--brand, #0B6B4E)' }} />
               Operations Center
             </Link>
           </div>

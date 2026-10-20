@@ -81,7 +81,7 @@ export function Avatar({
             width: '100%',
             height: '100%',
             borderRadius: '50%',
-            background: 'linear-gradient(135deg, #0057FF, #0040CC)',
+            background: 'linear-gradient(135deg, #0B6B4E, #07523C)',
             color: '#ffffff',
             display: 'flex',
             alignItems: 'center',
@@ -90,7 +90,7 @@ export function Avatar({
             fontWeight: 700,
             fontFamily: 'var(--font-heading, sans-serif)',
             letterSpacing: '0.2px',
-            boxShadow: '0 2px 8px var(--brand-glow, rgba(0,87,255,0.15))',
+            boxShadow: '0 2px 8px var(--brand-glow, rgba(11, 107, 78,0.15))',
           }}
           aria-label={displayName}
         >

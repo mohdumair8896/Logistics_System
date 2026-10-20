@@ -1,523 +1,246 @@
-'use client';
+// ─── Home page sections below the scroll film ────────────────────────────────
+// A marquee of what a workspace handles and a statement that comes into focus, then the product (zooming in as it
+// scrolls up) with four facts, the problems in the fleet owner's words (as ambry.io does) as stacking cards, who it
+// is for as a hover list, the modules (a rail on phones, widening cards on laptops), the paperwork a delivered trip
+// leaves as a fan of cards, three getting-started steps, the rate calculator, plain answers and one closing call to
+// action. Section patterns follow scrolltide.co's library (kickers, focus reveal, zoom reveal, hover list, expanded
+// cards, fan deck, numbered steps, route booking, wordmark footer), redrawn in this palette.
+// Every statement here describes something the app does today; no figures we can't back up.
+// Design: docs/DESIGN_SYSTEM.md §8.4.
 
-import React, { useState } from 'react';
 import Link from 'next/link';
-import {
-  Globe2,
-  MapPinned,
-  Truck,
-  ShieldCheck,
-  Headphones,
-  ChevronDown,
-  ChevronUp,
-  ArrowRight,
-  TrendingUp,
-  Award,
-  Send,
-} from 'lucide-react';
-import { toast } from 'sonner';
+import { ArrowLeft, ArrowRight, ArrowUp, ChevronDown } from 'lucide-react';
 import QuoteRequest from './QuoteRequest';
-import LogisticsEdgeLogo from '@/components/ui/LogisticsEdgeLogo';
+import { ProductPreview } from './ProductPreview';
+import { ProblemStack } from './ProblemStack';
+import { ModuleRail, type Module } from './ModuleRail';
+import { ClosingVideo } from './ClosingVideo';
+import { Marquee } from './Marquee';
+import { FocusStatement } from './FocusStatement';
+import { StatsRow } from './StatsRow';
+import { Workflow } from './Workflow';
+import { AudienceList } from './AudienceList';
+import { PaperworkDeck } from './PaperworkDeck';
 
-const solidCard = {
-  background: '#0B0F17',
-  border: '1px solid #1E293B',
-  boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-} as const;
+const PROBLEMS = [
+  {
+    q: '“Where is the truck?”',
+    pain: 'You call the driver. The driver is on the highway and doesn’t pick up. Meanwhile your customer is calling you.',
+    fix: 'Each trip shows the last position sent from the driver’s phone, and you can send your customer a tracking link that needs no login.',
+  },
+  {
+    q: 'Loads waiting, trucks standing',
+    pain: 'Bookings arrive on calls and WhatsApp. By the time someone checks the register, a free truck has already left empty.',
+    fix: 'One list of loads waiting for a truck, next to the trucks and drivers that are free right now. Allocate from the same screen.',
+  },
+  {
+    q: 'Drivers you can’t put on the road',
+    pain: 'A licence lapses or documents were never checked, and nobody notices until the truck is stopped.',
+    fix: 'Drivers with unverified documents, and licences that expire in the next 30 days, are listed on Today under Needs attention.',
+  },
+  {
+    q: 'Invoices typed up days later',
+    pain: 'Someone copies trip details into Excel or Tally, works out the GST by hand and hopes the numbers match the trip.',
+    fix: 'Close the trip at handover with the receiver’s name, and the invoice is raised from it, with the reverse-charge GST your customer owes worked out, ready as a PDF.',
+  },
+];
+
+const media = (name: string) => `/media/modules/${name}.webp`;
+
+// Screens in the app, each with an image generated with Gemini in the film's palette (public/media/modules).
+const MODULES: Module[] = [
+  { name: 'Orders', image: media('orders'), text: 'Every booking in one list, whether it came by phone or WhatsApp: customer, pickup, drop, weight and deadline.' },
+  { name: 'Allocation', image: media('allocation'), text: 'Loads waiting for a truck, next to the trucks and drivers that are free right now.' },
+  { name: 'Drivers', image: media('drivers'), text: 'Unverified documents, and licences that expire in the next 30 days, are listed on Today before they stop a truck.' },
+  { name: 'Corridor Tracking', image: media('corridor-tracking'), text: 'Each live trip shows the last position sent from the driver’s phone. No GPS box to fit.' },
+  { name: 'Customer Tracking', image: media('customer-tracking'), text: 'A page your customer opens with the order or trip number. No login and no app to install.' },
+  { name: 'Delivery & POD', image: media('delivery-pod'), text: 'Close the trip at handover with the receiver’s name and any damage deduction.' },
+  { name: 'Invoices & Billing', image: media('invoices-billing'), text: 'The invoice is built from the delivered trip and shows the GST your customer pays under reverse charge, as a PDF you can mark paid.' },
+  { name: 'Leads CRM', image: media('leads-crm'), text: 'Rate requests from this site arrive as leads with the route and the estimate, ready for a call back.' },
+];
+
+const FAQS = [
+  {
+    q: 'Who is LogisticsEdge for?',
+    a: 'Fleet owners, transporters and 3PLs who move full truck loads by road in India and run their day on phone calls, WhatsApp and a register or spreadsheet.',
+  },
+  {
+    q: 'Do my drivers need a GPS device or an app?',
+    a: 'No. For each trip the driver gets a link, opens it on their phone and allows location. Their position is sent while that page stays open.',
+  },
+  {
+    q: 'Can my customers track their load?',
+    a: 'Yes. Every order and trip has a tracking page you can share. Your customer opens it with the order or trip number, without signing in.',
+  },
+  {
+    q: 'How is GST shown on invoices?',
+    a: 'The invoice is built from the delivered trip: freight, loading and unloading charges, less any damage deduction. Freight is billed as a goods transport service under reverse charge, so the invoice adds no GST. Instead it states the 5% your customer pays to the government, split as CGST and SGST or IGST by the place of supply in their GSTIN.',
+  },
+  {
+    q: 'Is the rate from the calculator final?',
+    a: 'No. It is an indicative range from road distance and truck type, before GST, tolls and loading. Our team confirms the final rate when they call you.',
+  },
+  {
+    q: 'What does it cost to try?',
+    a: 'Creating a workspace doesn’t need a card. Plans and their limits are on the pricing page.',
+  },
+];
 
 export default function LogisticsSections() {
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
-
-  // Newsletter state
-  const [newsletterEmail, setNewsletterEmail] = useState('');
-  const [newsletterHoneypot, setNewsletterHoneypot] = useState('');
-  const [isSubscribing, setIsSubscribing] = useState(false);
-  const [newsletterConsent, setNewsletterConsent] = useState(false);
-
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // 1. Spam honeypot detection
-    if (newsletterHoneypot) {
-      setNewsletterEmail('');
-      return;
-    }
-
-    // 2. GDPR consent required before collecting email
-    if (!newsletterConsent) {
-      toast.error('Please confirm you agree to our Privacy Policy before subscribing.');
-      return;
-    }
-
-    // 3. Email format validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!newsletterEmail || !emailRegex.test(newsletterEmail.trim())) {
-      toast.error('Please enter a valid work email address');
-      return;
-    }
-
-    setIsSubscribing(true);
-    setTimeout(() => {
-      setIsSubscribing(false);
-      setNewsletterEmail('');
-      toast.success('Subscribed!', {
-        description: 'You will now receive weekly freight intelligence reports.',
-      });
-    }, 600);
-  };
-
-  const services = [
-    {
-      title: 'Global Freight Reach',
-      sub: 'Intermodal Air & Ocean',
-      desc: 'Seamless international customs clearance with priority port berth reservation and multimodal container routing.',
-      icon: <Globe2 style={{ width: 24, height: 24, color: '#fbbf24' }} />,
-    },
-    {
-      title: 'Smart Telematics Tracking',
-      sub: 'Sub-Meter IoT Telemetry',
-      desc: 'Continuous real-time asset monitoring with temperature, humidity, shock sensors, and tamper detection.',
-      icon: <MapPinned style={{ width: 24, height: 24, color: '#22d3ee' }} />,
-    },
-    {
-      title: 'Express & Dedicated Delivery',
-      sub: 'Time-Definite Freight',
-      desc: 'Guaranteed scheduled delivery windows with dedicated non-stop expedited linehauls and driver relays.',
-      icon: <Truck style={{ width: 24, height: 24, color: '#34d399' }} />,
-    },
-    {
-      title: 'Secure Automated Storage',
-      sub: 'Robotic Cross-Docking',
-      desc: 'Climate-controlled fulfillment hubs with autonomous mobile robots for rapid sortation and cross-docking.',
-      icon: <ShieldCheck style={{ width: 24, height: 24, color: '#a78bfa' }} />,
-    },
-    {
-      title: '24/7 Mission Control Support',
-      sub: 'Enterprise SLA Assistance',
-      desc: 'Dedicated dispatch coordinators and automated exception handling for 100% on-time delivery assurance.',
-      icon: <Headphones style={{ width: 24, height: 24, color: '#fb7185' }} />,
-    },
-  ];
-
-  const skills = [
-    { label: 'Advanced Logistics Route Optimization', pct: 98, color: '#f59e0b' },
-    { label: 'Real-Time Sensor Telematics & Visibility', pct: 96, color: '#22d3ee' },
-    { label: 'Automated Cross-Docking & Warehousing', pct: 92, color: '#a78bfa' },
-    { label: 'Customer SLA Satisfaction & Retention', pct: 99, color: '#34d399' },
-  ];
-  // Note: skill percentages are indicative performance targets, not verified averages.
-
-  const steps = [
-    { step: '01', title: 'Consultation & Rate Quote', desc: 'Input weight, route, and cargo specs for instant guaranteed rate calculation.' },
-    { step: '02', title: 'Inventory Ingestion', desc: 'Automated RFID scanning & dimensioning at origin cross-dock facility.' },
-    { step: '03', title: 'Linehaul Dispatch', desc: 'GPS-guided electric or hybrid transport over telematics-optimized corridors.' },
-    { step: '04', title: 'Final Handover & POD', desc: 'Contactless signature capture with timestamped receipt stored in cloud.' },
-  ];
-
-  const faqs = [
-    {
-      q: 'What shipping corridors and regions does LogisticsEdge operate in?',
-      a: 'We operate across India’s national highway network including the Golden Quadrilateral (NH-44, NH-48, NH-19, NH-16), key industrial corridors (Delhi-Mumbai, Eastern Dedicated Freight Corridor), and regional feeder routes connecting Tier-2 and Tier-3 cities across Uttar Pradesh, Maharashtra, Gujarat, and Rajasthan.',
-    },
-    {
-      q: 'How does the predictive dispatch route optimization work?',
-      a: 'Our algorithmic engine analyzes real-time weather, port congestion, highway traffic, and fuel tariffs to dynamically re-route shipments before bottlenecks occur.',
-    },
-    {
-      q: 'Can I monitor cold-chain sensitive pharmaceuticals or perishable goods?',
-      a: 'Yes. Every refrigerated asset is linked to cellular IoT temperature probes that send automated alerts if the cargo drifts outside pre-set threshold limits.',
-    },
-    {
-      q: 'What is the standard proof-of-delivery (POD) turnaround time?',
-      a: 'PODs with contactless digital signatures and timestamped geotagged photos are generated instantaneously upon handover and synced to your dashboard within 3 seconds.',
-    },
-  ];
-
   return (
-    <div style={{ background: '#020617', color: '#fff', fontFamily: 'var(--font-inter, system-ui, sans-serif)' }} role="main">
+    <>
+      <Marquee />
 
-      {/* ── SECTION 1: SERVICES GRID ─────────────────────────────────── */}
-      <section style={{ padding: '96px 24px' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-          {/* Header */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: 24, marginBottom: 64 }}>
+      {/* ── One idea, brought into focus word by word ── */}
+      <section className="mk-section mk-focus-sec" aria-label="What LogisticsEdge does">
+        <div className="mk-wrap">
+          <p className="mk-kicker">The idea</p>
+          <FocusStatement text="Every load gets one record. It follows the booking onto a truck, down the highway, through the handover and into the invoice, so nobody types it twice." />
+        </div>
+      </section>
+
+      {/* ── The product: the screen every chapter of the film lands on ── */}
+      <section id="product" className="mk-section mk-showcase" aria-labelledby="product-title">
+        <div className="mk-wrap">
+          <div className="mk-split-head">
             <div>
-              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: '#fbbf24', fontFamily: 'monospace' }}>
-                Our Core Capabilities
-              </span>
-              <h2 style={{ fontSize: 'clamp(28px, 4vw, 48px)', fontWeight: 900, letterSpacing: -1, color: '#fff', marginTop: 8, lineHeight: 1.1 }}>
-                Trusted Enterprise Logistics Services
-              </h2>
+              <p className="mk-kicker">The product</p>
+              <h2 id="product-title" className="mk-h2">Every stop lands on <mark className="mk-mark">one screen</mark>.</h2>
             </div>
-            <p style={{ fontSize: 14, color: '#94a3b8', maxWidth: 400, lineHeight: 1.7 }}>
-              End-to-end supply chain reliability engineered with modern automation, dynamic routing, and round-the-clock visibility.
+            <p className="mk-section-lede">
+              Today is the first screen your dispatcher opens: what is waiting for a truck, what is moving, and what needs a
+              look before it turns into a phone call.
             </p>
           </div>
-
-          {/* Cards grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24 }}>
-            {services.map((s, idx) => (
-              <div
-                key={idx}
-                style={{ ...solidCard, padding: '32px', borderRadius: 16, display: 'flex', flexDirection: 'column', gap: 16, transition: 'border-color 0.2s', cursor: 'default' }}
-                onMouseEnter={e => (e.currentTarget.style.borderColor = '#F59E0B')}
-                onMouseLeave={e => (e.currentTarget.style.borderColor = '#1E293B')}
-              >
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: '#131B2A', border: '1px solid #1E293B', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {s.icon}
-                </div>
-                <div>
-                  <span style={{ fontSize: 11, fontFamily: 'monospace', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 1 }}>{s.sub}</span>
-                  <h3 style={{ fontSize: 18, fontWeight: 700, color: '#F8FAFC', marginTop: 4 }}>{s.title}</h3>
-                </div>
-                <p style={{ fontSize: 13, color: '#94A3B8', lineHeight: 1.7 }}>{s.desc}</p>
-              </div>
-            ))}
-
-            {/* CTA card */}
-            <div style={{ padding: 32, borderRadius: 16, background: '#0F172A', border: '1px solid #334155', color: '#F8FAFC', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}>
-              <div>
-                <Award style={{ width: 36, height: 36, marginBottom: 16, color: '#F59E0B' }} />
-                <h3 style={{ fontSize: 22, fontWeight: 800, lineHeight: 1.2 }}>Ready to Connect Your Logistics Systems?</h3>
-                <p style={{ fontSize: 13, fontWeight: 500, marginTop: 8, color: '#94A3B8' }}>
-                  Connect your TMS, GPS, and ERP with our Event Bus in less than 48 hours.
-                </p>
-              </div>
-              <a
-                href="#quote-section"
-                style={{ marginTop: 24, display: 'inline-flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: 13, background: '#0284C7', color: '#FFFFFF', padding: '12px 20px', borderRadius: 8, textDecoration: 'none', width: 'fit-content' }}
-              >
-                Get Immediate Quote <ArrowRight style={{ width: 16, height: 16 }} />
-              </a>
+          <figure className="mk-figure">
+            <div className="mk-zoom">
+              <ProductPreview />
             </div>
-          </div>
+            <figcaption className="mk-caption">Today, shown with the demo workspace’s example data.</figcaption>
+          </figure>
+          <StatsRow />
         </div>
       </section>
 
-      {/* ── SECTION 2: PERFORMANCE METRICS ──────────────────────────── */}
-      <section style={{ padding: '96px 24px', borderTop: '1px solid #1E293B', borderBottom: '1px solid #1E293B', background: '#090D14' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 64, alignItems: 'center' }}>
-
-          {/* Left: text + bars */}
-          <div>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--brand, #0057FF)', fontFamily: 'monospace' }}>
-              Operational Performance Targets
-            </span>
-            <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 800, letterSpacing: -1, color: '#F8FAFC', marginTop: 8, lineHeight: 1.15 }}>
-              Strict Service Level Agreements Built for Industrial Fleets
-            </h2>
-            <p style={{ fontSize: 14, color: '#94A3B8', lineHeight: 1.7, marginTop: 16, marginBottom: 32 }}>
-              We leverage real-time corridor telematics and automated dispatch to eliminate deadhead runs, protect perishable freight, and enforce carrier contract rates.
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-              {skills.map((s, i) => (
-                <div key={i}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontFamily: 'monospace', marginBottom: 6 }}>
-                    <span style={{ color: '#E2E8F0', fontWeight: 700 }}>{s.label}</span>
-                    <span style={{ color: s.color, fontWeight: 700 }}>{s.pct}%</span>
-                  </div>
-                  <div style={{ height: 6, background: '#1E293B', borderRadius: 99, overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${s.pct}%`, background: s.color, borderRadius: 99 }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-            <p style={{ fontSize: 11, color: '#64748B', marginTop: 12, fontFamily: 'monospace' }}>
-              * Indicative performance targets based on corridor benchmarks.
-            </p>
+      {/* ── Problems → what changes, as stacking cards ── */}
+      <section className="mk-section mk-problems-sec" aria-labelledby="problems-title">
+        <div className="mk-wrap mk-problems-grid">
+          <div className="mk-problems-intro">
+            <p className="mk-kicker">The problem</p>
+            <h2 id="problems-title" className="mk-h2">Sound <mark className="mk-mark">familiar</mark>?</h2>
+            <p className="mk-section-lede">If your day runs on phone calls, WhatsApp groups and a register, these will.</p>
           </div>
-
-          {/* Right: stats box */}
-          <div style={{ ...solidCard, padding: 40, borderRadius: 16 }}>
-            {/* Stats group — uniform connectedness: same card style = same data type */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, marginBottom: 8 }}>
-              {[
-                { val: '99.8%*', label: 'On-Time Delivery Rate', color: '#fbbf24' },
-                { val: '2.4M*', label: 'Miles Tracked Annually', color: '#22d3ee' },
-                { val: '0.02%*', label: 'Cargo Damage Rate', color: '#34d399' },
-                { val: '<15s*', label: 'Dispatch Response Time', color: '#a78bfa' },
-              ].map((stat, i) => (
-                <div key={i}>
-                  <span style={{ fontSize: 36, fontWeight: 900, color: stat.color, fontFamily: 'monospace', lineHeight: 1 }}>{stat.val}</span>
-                  <p style={{ fontSize: 11, color: '#a8b8c8', textTransform: 'uppercase', letterSpacing: 1, marginTop: 4, fontFamily: 'monospace' }}>{stat.label}</p>
-                </div>
-              ))}
-            </div>
-            <p style={{ fontSize: 11, color: '#64748b', fontFamily: 'monospace', marginBottom: 20 }}>* Real-time audited operational fleet metrics.</p>
-
-            {/* Fuel savings — visually separated from stats (Law of Proximity: different meaning = different group) */}
-            <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', marginBottom: 20 }} />
-            <div style={{ padding: 16, borderRadius: 16, background: 'rgba(52,211,153,0.07)', border: '1px solid rgba(52,211,153,0.15)', display: 'flex', alignItems: 'center', gap: 16 }}>
-              <TrendingUp style={{ width: 32, height: 32, color: '#34d399', flexShrink: 0 }} aria-hidden="true" />
-              <p style={{ fontSize: 13, color: '#cbd5e1', lineHeight: 1.6, margin: 0 }}>
-                Algorithmic load-balancing reduced client fuel costs by <strong style={{ color: '#34d399' }}>18.4%</strong> on average across Q2 interstate routes.*
-              </p>
-            </div>
-          </div>
+          <ProblemStack problems={PROBLEMS} />
         </div>
       </section>
 
-      {/* ── SECTION 3: PROCESS TIMELINE ──────────────────────────────── */}
-      <section style={{ padding: '96px 24px' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', maxWidth: 600, margin: '0 auto 80px' }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: '#fbbf24', fontFamily: 'monospace' }}>
-              Structured Execution
-            </span>
-            <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 900, color: '#fff', marginTop: 8, letterSpacing: -1 }}>
-              Our Seamless Moving Process
-            </h2>
-            <p style={{ fontSize: 14, color: '#94a3b8', marginTop: 12, lineHeight: 1.7 }}>
-              From initial cargo booking to optical confirmation at destination, our transparent lifecycle keeps you completely informed.
+      {/* ── Who it is for: a hover list into the three /for pages ── */}
+      <section id="who" className="mk-section mk-aud-sec" aria-labelledby="who-title">
+        <div className="mk-wrap">
+          <div className="mk-split-head">
+            <div>
+              <p className="mk-kicker">Built for</p>
+              <h2 id="who-title" className="mk-h2">Which one <mark className="mk-mark">are you</mark>?</h2>
+            </div>
+            <p className="mk-section-lede">
+              One workspace for all three. Each page walks through the screens that matter most to the way you work.
             </p>
           </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 40 }}>
-            {steps.map((item, index) => (
-              <div key={index} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontWeight: 900, fontSize: 20, color: '#fbbf24' }}>
-                  {item.step}
-                </div>
-                <h3 style={{ fontSize: 16, fontWeight: 700, color: '#fff', lineHeight: 1.3 }}>{item.title}</h3>
-                <p style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.7 }}>{item.desc}</p>
-              </div>
-            ))}
-          </div>
+          <AudienceList />
         </div>
       </section>
 
-      {/* ── SECTION 4: QUOTE REQUEST ──────────────────────────────────── */}
+      {/* ── Modules, as a horizontal rail ── */}
+      <section id="modules" className="mk-section mk-modules-sec" aria-labelledby="modules-title">
+        <div className="mk-wrap">
+          <div className="mk-split-head">
+            <div>
+              <p className="mk-kicker">In a workspace</p>
+              <h2 id="modules-title" className="mk-h2">What’s in a <mark className="mk-mark">workspace</mark></h2>
+            </div>
+            <p className="mk-section-lede">One record carries a load from booking to payment, so nothing is typed twice.</p>
+          </div>
+        </div>
+        {/* Outside .mk-wrap: the rail runs to the screen edges, with its first card on the content column */}
+        <ModuleRail modules={MODULES} />
+      </section>
+
+      {/* ── What a delivered trip leaves behind: four documents fanned like a hand ── */}
+      <section id="paperwork" className="mk-section mk-deck-sec" aria-labelledby="paperwork-title">
+        <div className="mk-wrap">
+          <div className="mk-split-head">
+            <div>
+              <p className="mk-kicker">After the handover</p>
+              <h2 id="paperwork-title" className="mk-h2">The paperwork, <mark className="mk-mark">already done</mark>.</h2>
+            </div>
+            <p className="mk-section-lede">
+              Close the trip at the customer’s gate and the rest comes from the same record: the invoice, the proof of
+              delivery, the tracking page your customer already has, and the vouchers for Tally.
+            </p>
+          </div>
+        </div>
+        {/* Outside .mk-wrap: on phones the cards swipe edge to edge, with the first one on the content column */}
+        <PaperworkDeck />
+      </section>
+
+      {/* ── Getting started: three numbered steps that light up in turn ── */}
+      <Workflow />
+
+      {/* ── Rate calculator ── */}
       <QuoteRequest />
 
-      {/* ── SECTION 4B: WORKSPACE ONBOARDING & SUBSCRIPTION CALLOUT ────────── */}
-      <section style={{ padding: '60px 24px', background: 'radial-gradient(ellipse at center, rgba(245,158,11,0.07) 0%, rgba(2,6,23,0) 70%)' }}>
-        <div style={{ maxWidth: 1060, margin: '0 auto', borderRadius: 24, border: '1px solid rgba(245,158,11,0.3)', background: 'linear-gradient(135deg, rgba(15,23,42,0.92), rgba(11,15,23,0.98))', padding: '48px 32px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', position: 'relative', overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 14px', borderRadius: 999, background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.35)', color: '#fbbf24', fontSize: 11.5, fontWeight: 800, letterSpacing: 1, fontFamily: 'monospace', textTransform: 'uppercase', marginBottom: 16 }}>
-            <span>⚡ Enterprise Ready</span>
+      {/* ── Questions ── */}
+      <section className="mk-section" aria-labelledby="faq-title">
+        <div className="mk-wrap mk-faq">
+          <div>
+            <p className="mk-kicker">Questions</p>
+            <h2 id="faq-title" className="mk-h2">Questions fleet owners ask</h2>
           </div>
-          <h2 style={{ fontSize: 'clamp(26px, 3.5vw, 38px)', fontWeight: 900, color: '#fff', margin: '0 0 14px', letterSpacing: -1 }}>
-            Ready to Supercharge Your Freight Operations?
-          </h2>
-          <p style={{ fontSize: 14.5, color: '#94a3b8', maxWidth: 620, lineHeight: 1.7, margin: '0 0 28px' }}>
-            Choose the plan tailored to your fleet scale. Complete the guided setup to configure your dedicated workspace, dispatch rules, and autonomous AI agents.
-          </p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'center' }}>
-            <Link
-              href="/pricing"
-              style={{
-                padding: '13px 26px',
-                borderRadius: 12,
-                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                color: '#0f172a',
-                fontSize: 14,
-                fontWeight: 900,
-                textDecoration: 'none',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 8,
-                boxShadow: '0 0 30px rgba(245,158,11,0.4)',
-              }}
-            >
-              <span>Choose Plan &amp; Start Free Trial</span>
-              <ArrowRight style={{ width: 16, height: 16 }} />
-            </Link>
-            <Link
-              href="/login"
-              style={{
-                padding: '13px 22px',
-                borderRadius: 12,
-                border: '1px solid rgba(255,255,255,0.2)',
-                background: 'rgba(15,23,42,0.8)',
-                color: '#f8fafc',
-                fontSize: 14,
-                fontWeight: 700,
-                textDecoration: 'none',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 8,
-              }}
-            >
-              <span>Sign In to Workspace</span>
-            </Link>
+          <div className="mk-faq-list">
+            {FAQS.map(f => (
+              <details key={f.q}>
+                <summary>
+                  {f.q}
+                  <ChevronDown size={18} aria-hidden="true" />
+                </summary>
+                <p>{f.a}</p>
+              </details>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ── SECTION 5: FAQ ───────────────────────────────────────────── */}
-      <section id="faq" style={{ padding: '96px 24px' }}>
-        <div style={{ maxWidth: 800, margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: 64 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: '#22d3ee', fontFamily: 'monospace' }}>
-              Got Questions?
-            </span>
-            <h2 style={{ fontSize: 'clamp(28px, 4vw, 40px)', fontWeight: 900, color: '#fff', marginTop: 8, letterSpacing: -1 }}>
-              Frequently Asked Questions
-            </h2>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {faqs.map((f, i) => {
-              const panelId = `faq-panel-${i}`;
-              const isOpen = openFaq === i;
-              return (
-                <div key={i} style={{ ...solidCard, borderRadius: 16, overflow: 'hidden' }}>
-                  <button
-                    onClick={() => setOpenFaq(isOpen ? null : i)}
-                    aria-expanded={isOpen}
-                    aria-controls={panelId}
-                    style={{ width: '100%', padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'none', border: 'none', color: isOpen ? '#fbbf24' : '#e4e4e7', fontSize: 15, fontWeight: 700, textAlign: 'left', cursor: 'pointer', gap: 16 }}
-                  >
-                    <span>{f.q}</span>
-                    {isOpen
-                      ? <ChevronUp style={{ width: 18, height: 18, color: '#fbbf24', flexShrink: 0 }} aria-hidden="true" />
-                      : <ChevronDown style={{ width: 18, height: 18, color: '#a8b8c8', flexShrink: 0 }} aria-hidden="true" />
-                    }
-                  </button>
-                  <div
-                    id={panelId}
-                    role="region"
-                    aria-label={f.q}
-                    hidden={!isOpen}
-                    style={{ padding: isOpen ? '0 24px 20px' : undefined, fontSize: 14, color: '#cbd5e1', lineHeight: 1.75, borderTop: isOpen ? '1px solid rgba(255,255,255,0.05)' : undefined, paddingTop: isOpen ? 16 : undefined }}
-                  >
-                    {f.a}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Peak-End Rule: end on an inspiring action, not just legal text */}
-      <div style={{ background: 'linear-gradient(180deg, transparent 0%, rgba(245,158,11,0.04) 100%)', borderTop: '1px solid rgba(255,255,255,0.05)', padding: '48px 24px 24px' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', textAlign: 'center' }}>
-          <p style={{ fontSize: 13, fontFamily: 'monospace', color: '#fbbf24', textTransform: 'uppercase', letterSpacing: 3, marginBottom: 12 }}>Ready to Ship?</p>
-          <h2 style={{ fontSize: 'clamp(24px, 3vw, 36px)', fontWeight: 900, color: '#fff', letterSpacing: -1, marginBottom: 20 }}>
-            Move your first load today
-          </h2>
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 14 }}>
-            <Link
-              href="/configure"
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 10,
-                background: 'linear-gradient(135deg, #2563eb, #4f46e5)',
-                color: '#fff', padding: '14px 28px', borderRadius: 14,
-                fontSize: 14, fontWeight: 700, textDecoration: 'none',
-                boxShadow: '0 0 30px rgba(37,99,235,0.3)',
-              }}
-            >
-              <ArrowRight style={{ width: 18, height: 18 }} aria-hidden="true" />
-              Configure Your Logistics Workspace
-            </Link>
-            <a
-              href="#quote-section"
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 10,
-                background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)',
-                color: '#fff', padding: '14px 28px', borderRadius: 14,
-                fontSize: 14, fontWeight: 700, textDecoration: 'none',
-              }}
-            >
-              Get Instant Rate
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <footer style={{ borderTop: '1px solid rgba(255,255,255,0.07)', padding: '48px 24px 32px', background: '#020617' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 48, marginBottom: 48 }}>
-
-            {/* Brand */}
-            <div>
-              <div style={{ marginBottom: 16 }}>
-                <LogisticsEdgeLogo size="md" variant="wordmark" />
-              </div>
-              <p style={{ fontSize: 13, color: '#a8b8c8', lineHeight: 1.7 }}>
-                Autonomous logistics infrastructure. Connecting industrial shippers, cross-docks, and final-mile electric delivery fleets.
-              </p>
-            </div>
-
-            {/* Hick's Law: removed Quick Links column: fewer choices = faster decisions */}
-            {/* Solutions */}
-            <div>
-              <h4 style={{ fontSize: 11, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: 2, color: '#cbd5e1', fontWeight: 700, marginBottom: 16 }}>What We Move</h4>
-              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {[
-                  'Cold-Chain & Pharmaceutical',
-                  'Intermodal Container Freight',
-                  'Final-Mile Green Delivery',
-                  'Flatbed & Oversized Loads',
-                ].map(s => (
-                  <li key={s} style={{ fontSize: 13, color: '#a8b8c8' }}>{s}</li>
-                ))}
+      {/* ── Closing: a direction board over a golden-hour expressway (generated with Veo) ── */}
+      <section className="mk-wrap mk-closing" aria-labelledby="next-title">
+        <div className="mk-closing-band">
+          <ClosingVideo src="/media/highway-loop.mp4" />
+          <div className="mk-sign">
+            <div className="mk-sign-inner">
+              <h2 id="next-title" className="mk-sign-title">Where to next?</h2>
+              <ul className="mk-sign-list">
+                <li>
+                  <Link href="/pricing" className="mk-sign-link">
+                    <ArrowUp size={30} strokeWidth={2.5} aria-hidden="true" />
+                    <span><span className="mk-sign-text">Start a workspace</span><small>Pick a plan. No card needed.</small></span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#quote" className="mk-sign-link">
+                    <ArrowRight size={30} strokeWidth={2.5} aria-hidden="true" />
+                    <span><span className="mk-sign-text">Get a rate for a load</span><small>Indicative price in seconds.</small></span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/login" className="mk-sign-link">
+                    <ArrowLeft size={30} strokeWidth={2.5} aria-hidden="true" />
+                    <span><span className="mk-sign-text">Sign in</span><small>Back to your workspace.</small></span>
+                  </Link>
+                </li>
               </ul>
             </div>
-
-            {/* Newsletter with GDPR consent */}
-            <div>
-              <h4 style={{ fontSize: 11, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: 2, color: '#cbd5e1', fontWeight: 700, marginBottom: 16 }}>Stay Updated</h4>
-              <p style={{ fontSize: 12, color: '#a8b8c8', marginBottom: 12 }}>Weekly freight index and telematics reports. Unsubscribe anytime.</p>
-
-              <form onSubmit={handleNewsletterSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <input type="text" name="user_work_code" tabIndex={-1} autoComplete="off" value={newsletterHoneypot} onChange={e => setNewsletterHoneypot(e.target.value)} style={{ display: 'none', opacity: 0, position: 'absolute', left: '-9999px' }} aria-hidden="true" />
-
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <label htmlFor="newsletter-email" style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, overflow: 'hidden' }}>Work email address</label>
-                  <input
-                    id="newsletter-email" type="email" required
-                    placeholder="Work email"
-                    value={newsletterEmail} onChange={e => setNewsletterEmail(e.target.value)}
-                    style={{ flex: 1, background: '#0f172a', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, padding: '10px 14px', fontSize: 13, color: '#fff', outline: 'none', minWidth: 0 }}
-                  />
-                  <button
-                    type="submit" disabled={isSubscribing}
-                    aria-busy={isSubscribing}
-                    aria-label={isSubscribing ? 'Subscribing, please wait' : 'Subscribe to newsletter'}
-                    style={{ background: '#f59e0b', color: '#1c1917', border: 'none', borderRadius: 10, padding: '10px 16px', fontSize: 13, fontWeight: 700, cursor: isSubscribing ? 'wait' : 'pointer', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 6, opacity: isSubscribing ? 0.7 : 1 }}
-                  >
-                    {isSubscribing ? 'Sending…' : 'Subscribe'}
-                    <Send style={{ width: 14, height: 14 }} aria-hidden="true" />
-                  </button>
-                </div>
-
-                {/* GDPR consent — Law of Proximity: consent right below the subscribe button */}
-                <label htmlFor="newsletter-consent" style={{ display: 'flex', alignItems: 'flex-start', gap: 8, cursor: 'pointer', fontSize: 11, color: '#a8b8c8', lineHeight: 1.5 }}>
-                  <input id="newsletter-consent" type="checkbox" checked={newsletterConsent} onChange={e => setNewsletterConsent(e.target.checked)} required style={{ width: 14, height: 14, accentColor: '#f59e0b', marginTop: 2, flexShrink: 0 }} />
-                  I agree to receive emails and accept the{' '}
-                  <a href="/privacy" style={{ color: '#fbbf24', textDecoration: 'underline' }}>Privacy Policy</a>.
-                </label>
-              </form>
-            </div>
-          </div>
-
-          {/* Bottom bar */}
-          <div style={{ paddingTop: 32, borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 16, fontSize: 12, color: '#a8b8c8' }}>
-            <div>
-              <p style={{ margin: '0 0 2px', color: '#a8b8c8' }}>&copy; 2026 LogisticsEdge Technologies Pvt. Ltd. All rights reserved.</p>
-              <p style={{ margin: 0, fontSize: 11, color: '#64748b' }}>CIN: U63090DL2024PTC428190 &bull; GSTIN: 07AAACP1234F1Z5 &bull; New Delhi &amp; Lucknow, India</p>
-            </div>
-            <nav aria-label="Legal links">
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20 }}>
-                {[
-                  ['Privacy Policy', '/privacy'],
-                  ['Terms of Service', '/terms'],
-                  ['Cookie Policy', '/cookies'],
-                  ['Refund Policy', '/refund'],
-                ].map(([label, href]) => (
-                  <Link key={label} href={href} style={{ color: '#a8b8c8', textDecoration: 'none', transition: 'color 0.15s' }}
-                    onMouseEnter={e => (e.currentTarget.style.color = '#fbbf24')}
-                    onMouseLeave={e => (e.currentTarget.style.color = '#a8b8c8')}>
-                    {label}
-                  </Link>
-                ))}
-              </div>
-            </nav>
           </div>
         </div>
-      </footer>
-    </div>
+      </section>
+    </>
   );
 }

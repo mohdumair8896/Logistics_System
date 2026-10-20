@@ -5,9 +5,16 @@
 
 import {
   pgTable, varchar, text, integer, decimal, boolean,
-  timestamp, date, uuid, json, index
+  timestamp, date, uuid, json, index, unique, bigint, primaryKey
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TENANCY: every business row belongs to exactly one tenant (company workspace).
+// Queries must filter by tenant_id; Postgres RLS enforces it as a backstop
+// (drizzle/0004_tenancy_rls.sql, activated by DB_RLS_ROLE — see docs/MIGRATIONS.md).
+// ─────────────────────────────────────────────────────────────────────────────
+const tenantRef = () => varchar('tenant_id', { length: 50 }).references(() => tenants.id).notNull();
 
 // ─────────────────────────────────────────────────────────────────────────────
 // USERS (Enterprise user authentication and roles)
@@ -20,7 +27,7 @@ export const users = pgTable('users', {
   role: varchar('role', { length: 50 }).notNull(),  // 'Operations Director' | 'Fleet Dispatcher' | 'Compliance Officer'
   facility: varchar('facility', { length: 100 }),
   avatar: varchar('avatar', { length: 10 }),
-  tenantId: varchar('tenant_id', { length: 50 }),
+  tenantId: varchar('tenant_id', { length: 50 }).references(() => tenants.id), // default workspace (see memberships)
   isActive: boolean('is_active').default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`),
 });
@@ -30,46 +37,56 @@ export const users = pgTable('users', {
 // ─────────────────────────────────────────────────────────────────────────────
 export const customers = pgTable('customers', {
   id: varchar('id', { length: 20 }).primaryKey(),
+  tenantId: tenantRef(),
   name: varchar('name', { length: 100 }).notNull(),
   contact: varchar('contact', { length: 100 }),
   phone: varchar('phone', { length: 20 }),
   address: text('address'),
   gstin: varchar('gstin', { length: 20 }),
   createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`),
-});
+}, (table) => [
+  index('idx_customers_tenant').on(table.tenantId, table.name),
+]);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PRODUCTS (replaces initialProducts)
 // ─────────────────────────────────────────────────────────────────────────────
 export const products = pgTable('products', {
   id: varchar('id', { length: 20 }).primaryKey(),
+  tenantId: tenantRef(),
   name: varchar('name', { length: 200 }).notNull(),
   unit: varchar('unit', { length: 20 }).notNull(),
   category: varchar('category', { length: 100 }),
   pricePerKg: decimal('price_per_kg', { precision: 10, scale: 2 }),
   createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`),
-});
+}, (table) => [
+  index('idx_products_tenant').on(table.tenantId, table.name),
+]);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // INVENTORY (replaces initialInventory)
 // ─────────────────────────────────────────────────────────────────────────────
 export const inventory = pgTable('inventory', {
   id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: tenantRef(),
   productId: varchar('product_id', { length: 20 }).references(() => products.id),
   warehouseId: varchar('warehouse_id', { length: 20 }).notNull(),
   quantity: integer('quantity').default(0),
   bay: varchar('bay', { length: 20 }),
   updatedAt: timestamp('updated_at', { withTimezone: true }).default(sql`now()`),
-});
+}, (table) => [
+  index('idx_inventory_tenant_product').on(table.tenantId, table.productId),
+]);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DRIVERS (replaces initialDrivers from features/drivers/data.ts)
 // ─────────────────────────────────────────────────────────────────────────────
 export const drivers = pgTable('drivers', {
   id: varchar('id', { length: 20 }).primaryKey(),
+  tenantId: tenantRef(),
   name: varchar('name', { length: 100 }).notNull(),
   phone: varchar('phone', { length: 20 }).notNull(),
-  licenseNo: varchar('license_no', { length: 30 }).unique().notNull(),
+  licenseNo: varchar('license_no', { length: 30 }).notNull(),
   licenseExpiry: date('license_expiry').notNull(),
   vehicleId: varchar('vehicle_id', { length: 20 }),
   status: varchar('status', { length: 20 }).default('Available'), // 'Available' | 'On Trip' | 'Off Duty'
@@ -77,14 +94,18 @@ export const drivers = pgTable('drivers', {
   rating: decimal('rating', { precision: 3, scale: 1 }).default('5.0'),
   documentVerified: boolean('document_verified').default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`),
-});
+}, (table) => [
+  index('idx_drivers_tenant_status').on(table.tenantId, table.status),
+  unique('uq_drivers_tenant_license_no').on(table.tenantId, table.licenseNo),
+]);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // VEHICLES (replaces initialVehicles from features/vehicles/data.ts)
 // ─────────────────────────────────────────────────────────────────────────────
 export const vehicles = pgTable('vehicles', {
   id: varchar('id', { length: 20 }).primaryKey(),
-  vehicleNo: varchar('vehicle_no', { length: 20 }).unique().notNull(),
+  tenantId: tenantRef(),
+  vehicleNo: varchar('vehicle_no', { length: 20 }).notNull(),
   type: varchar('type', { length: 50 }).notNull(),
   capacity: integer('capacity_kg').notNull(),
   currentLoad: integer('current_load_kg').default(0),
@@ -99,13 +120,17 @@ export const vehicles = pgTable('vehicles', {
   lng: decimal('lng', { precision: 10, scale: 7 }),  // live GPS longitude
   activityLog: json('activity_log').$type<{ id: string; title: string; timestamp: string; type: 'maintenance' | 'delivery' | 'inspection' }[]>().default([]),
   createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`),
-});
+}, (table) => [
+  index('idx_vehicles_tenant_status').on(table.tenantId, table.status),
+  unique('uq_vehicles_tenant_vehicle_no').on(table.tenantId, table.vehicleNo),
+]);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ORDERS (replaces initialOrders from features/orders/data.ts)
 // ─────────────────────────────────────────────────────────────────────────────
 export const orders = pgTable('orders', {
   id: varchar('id', { length: 20 }).primaryKey(),
+  tenantId: tenantRef(),
   customerId: varchar('customer_id', { length: 20 }).references(() => customers.id),
   origin: text('origin').notNull(),
   destination: text('destination').notNull(),
@@ -119,13 +144,17 @@ export const orders = pgTable('orders', {
   loadingBay: varchar('loading_bay', { length: 20 }),
   deadline: text('deadline'),
   createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`),
-});
+}, (table) => [
+  index('idx_orders_tenant_status_created').on(table.tenantId, table.status, table.createdAt),
+  index('idx_orders_tenant_customer').on(table.tenantId, table.customerId),
+]);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TRIPS (replaces initialTrips from features/trips/data.ts)
 // ─────────────────────────────────────────────────────────────────────────────
 export const trips = pgTable('trips', {
   id: varchar('id', { length: 20 }).primaryKey(),
+  tenantId: tenantRef(),
   orderId: varchar('order_id', { length: 20 }).references(() => orders.id),
   vehicleId: varchar('vehicle_id', { length: 20 }).references(() => vehicles.id),
   driverId: varchar('driver_id', { length: 20 }).references(() => drivers.id),
@@ -146,13 +175,17 @@ export const trips = pgTable('trips', {
   lat: decimal('lat', { precision: 10, scale: 7 }),  // live GPS from driver phone
   lng: decimal('lng', { precision: 10, scale: 7 }),  // live GPS from driver phone
   createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`),
-});
+}, (table) => [
+  index('idx_trips_tenant_status').on(table.tenantId, table.status),
+  index('idx_trips_tenant_order').on(table.tenantId, table.orderId),
+]);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // INVOICES (replaces initialInvoices from features/invoices/data.ts)
 // ─────────────────────────────────────────────────────────────────────────────
 export const invoices = pgTable('invoices', {
   id: varchar('id', { length: 20 }).primaryKey(),
+  tenantId: tenantRef(),
   orderId: varchar('order_id', { length: 20 }).references(() => orders.id),
   customerId: varchar('customer_id', { length: 20 }).references(() => customers.id),
   tripId: varchar('trip_id', { length: 20 }),
@@ -161,7 +194,15 @@ export const invoices = pgTable('invoices', {
   unloading: decimal('unloading_charge', { precision: 10, scale: 2 }),
   damageDeduction: decimal('damage_deduction', { precision: 10, scale: 2 }).default('0'),
   subtotal: decimal('subtotal', { precision: 12, scale: 2 }),
-  gst: decimal('gst', { precision: 10, scale: 2 }),
+  gst: decimal('gst', { precision: 10, scale: 2 }),     // GST added to the total (0 under reverse charge)
+  // How GST was worked out when the invoice was raised (src/features/invoices/gst.ts). All null on
+  // invoices raised before migration 0009. cgst + sgst (same state) or igst (other state) is the tax on
+  // the supply: charged under forward charge, payable by the customer under reverse charge.
+  gstScheme: varchar('gst_scheme', { length: 10 }),       // 'RCM_5' | 'FCM_5' | 'FCM_18'
+  placeOfSupply: varchar('place_of_supply', { length: 2 }), // GST state code
+  cgst: decimal('cgst', { precision: 10, scale: 2 }),
+  sgst: decimal('sgst', { precision: 10, scale: 2 }),
+  igst: decimal('igst', { precision: 10, scale: 2 }),
   total: decimal('total', { precision: 12, scale: 2 }),
   status: varchar('status', { length: 20 }).default('Pending'),  // 'Pending' | 'Paid'
   podSigned: boolean('pod_signed').default(false),
@@ -169,38 +210,61 @@ export const invoices = pgTable('invoices', {
   pdfUrl: text('pdf_url'),              // generated GST invoice PDF URL
   receiverName: varchar('receiver_name', { length: 100 }),
   createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`),
-});
+}, (table) => [
+  index('idx_invoices_tenant_status').on(table.tenantId, table.status),
+  index('idx_invoices_tenant_order').on(table.tenantId, table.orderId),
+]);
+
+// The GTA's GST option for a financial year (Annexure V): reverse charge at 5% unless they declared
+// forward charge. New invoices take the option of the year they are raised in.
+export const gstOptions = pgTable('gst_options', {
+  tenantId: tenantRef(),
+  financialYear: varchar('financial_year', { length: 7 }).notNull(), // '2026-27' (April to March)
+  scheme: varchar('scheme', { length: 10 }).notNull(),               // 'RCM_5' | 'FCM_5' | 'FCM_18'
+  supplierGstin: varchar('supplier_gstin', { length: 15 }),          // the GSTIN the declaration was filed for
+  updatedBy: varchar('updated_by', { length: 50 }).references(() => users.id),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).default(sql`now()`),
+}, (table) => [
+  primaryKey({ columns: [table.tenantId, table.financialYear] }),
+]);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DRIVER MESSAGES (replaces mockDriverMessages — real two-way chat)
 // ─────────────────────────────────────────────────────────────────────────────
 export const driverMessages = pgTable('driver_messages', {
   id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: tenantRef(),
   driverId: varchar('driver_id', { length: 20 }).references(() => drivers.id),
   sender: varchar('sender', { length: 20 }).notNull(), // 'driver' | 'dispatcher'
   text: text('text').notNull(),
   readAt: timestamp('read_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`),
-});
+}, (table) => [
+  index('idx_driver_messages_tenant_driver').on(table.tenantId, table.driverId, table.createdAt),
+]);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SYSTEM ALERTS (replaces initialAlerts — real DB-persisted alerts)
 // ─────────────────────────────────────────────────────────────────────────────
 export const systemAlerts = pgTable('system_alerts', {
   id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: tenantRef(),
   title: text('title').notNull(),
   description: text('description').notNull(),
   severity: varchar('severity', { length: 20 }).notNull(),  // 'warning' | 'info' | 'critical'
   category: varchar('category', { length: 30 }).notNull(),  // 'Weather' | 'Fleet' | 'Driver' | 'Route' | 'Warehouse' | 'Cold-Chain' | 'Geofence'
   dismissedAt: timestamp('dismissed_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`),
-});
+}, (table) => [
+  index('idx_system_alerts_tenant_created').on(table.tenantId, table.createdAt),
+]);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHIPPER LEADS (from the dispatch assistant / CRM pipeline)
 // ─────────────────────────────────────────────────────────────────────────────
 export const shipperLeads = pgTable('shipper_leads', {
   id: varchar('id', { length: 20 }).primaryKey(),
+  tenantId: tenantRef(),
   shipperName: varchar('shipper_name', { length: 100 }).notNull(),
   companyName: varchar('company_name', { length: 200 }),
   phone: varchar('phone', { length: 20 }),
@@ -216,40 +280,79 @@ export const shipperLeads = pgTable('shipper_leads', {
   transcriptSnippet: text('transcript_snippet'),
   associatedOrderId: varchar('associated_order_id', { length: 20 }),
   createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`),
-});
+}, (table) => [
+  index('idx_shipper_leads_tenant_status').on(table.tenantId, table.status),
+]);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // KNOWLEDGE BASE
 // ─────────────────────────────────────────────────────────────────────────────
 export const knowledgeBase = pgTable('knowledge_base', {
   id: varchar('id', { length: 20 }).primaryKey(),
+  tenantId: tenantRef(),
   category: varchar('category', { length: 50 }).notNull(),
   title: text('title').notNull(),
   content: text('content').notNull(),
   keywords: json('keywords').$type<string[]>().default([]),
   lastUpdated: date('last_updated').default(sql`CURRENT_DATE`),
   createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`),
-});
+}, (table) => [
+  index('idx_knowledge_base_tenant').on(table.tenantId, table.category),
+]);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GPS PINGS (driver smartphone GPS — stored for trip replay)
 // ─────────────────────────────────────────────────────────────────────────────
 export const gpsPings = pgTable('gps_pings', {
   id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: tenantRef(),
   vehicleId: varchar('vehicle_id', { length: 20 }).references(() => vehicles.id),
   tripId: varchar('trip_id', { length: 20 }),
   lat: decimal('lat', { precision: 10, scale: 7 }).notNull(),
   lng: decimal('lng', { precision: 10, scale: 7 }).notNull(),
   speedKmH: decimal('speed_kmh', { precision: 6, scale: 2 }),
   accuracy: decimal('accuracy', { precision: 8, scale: 2 }),
+  // Phone clock when the point was taken. Points queued offline arrive later than this; null before 0011.
+  recordedAt: timestamp('recorded_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`), // server receive time
+}, (table) => [
+  index('idx_gps_pings_tenant_vehicle_created').on(table.tenantId, table.vehicleId, table.createdAt),
+]);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POD RECORDS (tamper-evident proof of delivery, one per trip)
+// `record` is the exact canonical JSON that was hashed (src/features/delivery/pod.ts); `record_hash` is
+// its SHA-256. The other columns copy fields out of it for listing. Append-only: a trigger in 0012
+// rejects UPDATE and DELETE.
+// ─────────────────────────────────────────────────────────────────────────────
+export const podRecords = pgTable('pod_records', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: tenantRef(),
+  tripId: varchar('trip_id', { length: 20 }).references(() => trips.id).notNull(),
+  orderId: varchar('order_id', { length: 20 }),
+  receiverName: varchar('receiver_name', { length: 100 }).notNull(),
+  confirmation: varchar('confirmation', { length: 20 }).notNull(), // 'otp' | 'signature' | 'name_only'
+  capturedAt: timestamp('captured_at', { withTimezone: true }).notNull(), // server clock at handover
+  lat: decimal('lat', { precision: 10, scale: 7 }),   // driver phone's last GPS ping on the trip
+  lng: decimal('lng', { precision: 10, scale: 7 }),
+  damageDeduction: decimal('damage_deduction', { precision: 10, scale: 2 }).default('0'),
+  photoRef: text('photo_ref'),          // TODO: set once POD photo upload exists
+  signaturePng: text('signature_png'),  // data:image/png;base64,… — its SHA-256 is inside `record`
+  record: text('record').notNull(),
+  recordHash: varchar('record_hash', { length: 64 }).notNull(),
+  createdBy: varchar('created_by', { length: 50 }).references(() => users.id),
   createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`),
-});
+}, (table) => [
+  unique('uq_pod_records_tenant_trip').on(table.tenantId, table.tripId),
+  index('idx_pod_records_tenant_captured').on(table.tenantId, table.capturedAt),
+]);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // INCIDENTS (Exceptions, breakdowns, delays, detention detected by Exception Agent)
 // ─────────────────────────────────────────────────────────────────────────────
 export const incidents = pgTable('incidents', {
   id: varchar('id', { length: 30 }).primaryKey(),
+  tenantId: tenantRef(),
   tripId: varchar('trip_id', { length: 20 }),
   orderId: varchar('order_id', { length: 20 }),
   vehicleId: varchar('vehicle_id', { length: 20 }),
@@ -265,13 +368,16 @@ export const incidents = pgTable('incidents', {
   resolvedAt: timestamp('resolved_at', { withTimezone: true }),
   metadata: json('metadata').$type<Record<string, unknown>>().default({}),
   createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`),
-});
+}, (table) => [
+  index('idx_incidents_tenant_status').on(table.tenantId, table.status),
+]);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AGENT WORKFLOWS (Multi-step autonomous execution runs)
 // ─────────────────────────────────────────────────────────────────────────────
 export const agentWorkflows = pgTable('agent_workflows', {
   id: varchar('id', { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: tenantRef(),
   agentId: varchar('agent_id', { length: 50 }).notNull(), // e.g. 'exception-agent', 'driver-agent'
   triggerEvent: varchar('trigger_event', { length: 50 }).notNull(),
   status: varchar('status', { length: 30 }).notNull(), // 'RUNNING' | 'COMPLETED' | 'FAILED'
@@ -279,26 +385,32 @@ export const agentWorkflows = pgTable('agent_workflows', {
   outcomeSummary: text('outcome_summary'),
   durationMs: integer('duration_ms').default(0),
   createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`),
-});
+}, (table) => [
+  index('idx_agent_workflows_tenant_created').on(table.tenantId, table.createdAt),
+]);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AGENT AUDIT LOGS (Decoupled event trail)
 // ─────────────────────────────────────────────────────────────────────────────
 export const agentAuditLogs = pgTable('agent_audit_logs', {
   id: varchar('id', { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: tenantRef(),
   agentId: varchar('agent_id', { length: 50 }).notNull(),
   eventType: varchar('event_type', { length: 50 }).notNull(),
   entityId: varchar('entity_id', { length: 50 }),
   message: text('message').notNull(),
   payload: json('payload').$type<Record<string, unknown>>().default({}),
   createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`),
-});
+}, (table) => [
+  index('idx_agent_audit_logs_tenant_created').on(table.tenantId, table.createdAt),
+]);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // OPERATIONAL EVENTS (Canonical Logistics Event Graph Timeline)
 // ─────────────────────────────────────────────────────────────────────────────
 export const operationalEvents = pgTable('operational_events', {
   id: varchar('id', { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: tenantRef(),
   shipmentId: varchar('shipment_id', { length: 20 }),
   tripId: varchar('trip_id', { length: 20 }),
   vehicleId: varchar('vehicle_id', { length: 20 }),
@@ -328,6 +440,8 @@ export const operationalEvents = pgTable('operational_events', {
   index('idx_op_events_shipment_created').on(table.shipmentId, table.createdAt),
   index('idx_op_events_approval_status').on(table.approvalStatus, table.createdAt),
   index('idx_op_events_event_type').on(table.eventType),
+  index('idx_op_events_tenant_created').on(table.tenantId, table.createdAt),
+  index('idx_op_events_tenant_approval').on(table.tenantId, table.approvalStatus),
 ]);
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -395,3 +509,68 @@ export const usageCounters = pgTable('usage_counters', {
   index('idx_usage_tenant_period').on(table.tenantId, table.metricPeriod),
 ]);
 
+// User ⇄ tenant membership with a per-workspace role. users.tenant_id stays the default workspace.
+export const memberships = pgTable('memberships', {
+  userId: varchar('user_id', { length: 50 }).references(() => users.id).notNull(),
+  tenantId: varchar('tenant_id', { length: 50 }).references(() => tenants.id).notNull(),
+  role: varchar('role', { length: 50 }).notNull(), // 'Operations Director' | 'Fleet Dispatcher' | 'Compliance Officer'
+  createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`),
+}, (table) => [
+  primaryKey({ columns: [table.userId, table.tenantId] }),
+  index('idx_memberships_tenant').on(table.tenantId),
+]);
+
+// Atomic, race-free counters for human-readable IDs (ORD-1001, TRP-1001, V001…).
+// IDs stay globally unique because they are primary keys; see src/lib/ids.ts.
+export const idCounters = pgTable('id_counters', {
+  kind: varchar('kind', { length: 20 }).primaryKey(),
+  lastValue: bigint('last_value', { mode: 'number' }).notNull(),
+});
+
+// Server-side sessions: signing out, a role change or removal from a workspace ends access
+// immediately, instead of when the 8-hour token expires. System table (no RLS role access).
+export const sessions = pgTable('sessions', {
+  id: varchar('id', { length: 40 }).primaryKey(),
+  userId: varchar('user_id', { length: 50 }).references(() => users.id).notNull(),
+  tenantId: varchar('tenant_id', { length: 50 }).references(() => tenants.id),
+  userAgent: varchar('user_agent', { length: 300 }),
+  createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
+}, (table) => [
+  index('idx_sessions_user_tenant').on(table.userId, table.tenantId),
+]);
+
+// Team invitations: a Director shares a one-time link; only a SHA-256 hash of the token is stored.
+export const invitations = pgTable('invitations', {
+  id: varchar('id', { length: 40 }).primaryKey(),
+  tenantId: tenantRef(),
+  email: varchar('email', { length: 255 }).notNull(),
+  role: varchar('role', { length: 50 }).notNull(),
+  tokenHash: varchar('token_hash', { length: 64 }).notNull().unique(),
+  invitedBy: varchar('invited_by', { length: 50 }).references(() => users.id),
+  createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  acceptedAt: timestamp('accepted_at', { withTimezone: true }),
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
+}, (table) => [
+  index('idx_invitations_tenant_created').on(table.tenantId, table.createdAt),
+]);
+
+// Password reset links: there is no email provider, so a Director shares a one-time link (24 h).
+// Only a SHA-256 hash of the token is stored. tenant_id is the issuing workspace, where the member
+// is signed in after the reset. System table like sessions (no RLS role access): the public reset
+// endpoint looks a link up by its hash before any workspace is known.
+export const passwordResets = pgTable('password_resets', {
+  id: varchar('id', { length: 40 }).primaryKey(),
+  userId: varchar('user_id', { length: 50 }).references(() => users.id).notNull(),
+  tenantId: varchar('tenant_id', { length: 50 }).references(() => tenants.id).notNull(),
+  tokenHash: varchar('token_hash', { length: 64 }).notNull().unique(),
+  createdBy: varchar('created_by', { length: 50 }).references(() => users.id),
+  createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  usedAt: timestamp('used_at', { withTimezone: true }),
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
+}, (table) => [
+  index('idx_password_resets_user').on(table.userId),
+]);

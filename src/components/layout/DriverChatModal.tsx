@@ -106,7 +106,7 @@ export default function DriverChatModal({ driverId, onClose }: Props) {
         {/* Header */}
         <div style={{ background: 'var(--surface-2)', padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ width: 40, height: 40, background: 'linear-gradient(135deg, #0057FF, #0040CC)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 800, boxShadow: '0 2px 8px rgba(0,87,255,0.2)' }}>
+            <div style={{ width: 40, height: 40, background: 'linear-gradient(135deg, #0B6B4E, #07523C)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 800, boxShadow: '0 2px 8px rgba(11, 107, 78,0.2)' }}>
               {driver?.name.split(' ').map(n => n[0]).join('') || 'D'}
             </div>
             <div>
@@ -161,10 +161,10 @@ export default function DriverChatModal({ driverId, onClose }: Props) {
                     borderRadius: 12,
                     borderBottomRightRadius: isDispatcher ? 2 : 12,
                     borderBottomLeftRadius: isDispatcher ? 12 : 2,
-                    background: isDispatcher ? 'linear-gradient(135deg, #0057FF, #0040CC)' : 'var(--surface-1)',
+                    background: isDispatcher ? 'linear-gradient(135deg, #0B6B4E, #07523C)' : 'var(--surface-1)',
                     color: isDispatcher ? 'white' : 'var(--text-high)',
                     border: isDispatcher ? 'none' : '1px solid var(--border)',
-                    boxShadow: isDispatcher ? '0 2px 8px rgba(0,87,255,0.2)' : '0 1px 3px rgba(0,0,0,0.04)',
+                    boxShadow: isDispatcher ? '0 2px 8px rgba(11, 107, 78,0.2)' : '0 1px 3px rgba(0,0,0,0.04)',
                     fontSize: 13,
                     lineHeight: 1.4
                   }}>

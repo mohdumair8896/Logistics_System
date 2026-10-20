@@ -9,6 +9,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { BadgeWithDot } from '@/components/ui/BadgeWithDot';
 import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/HoverCard';
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from '@/components/ui/Empty';
+import { maskLicence } from '@/lib/masking';
 import type { Vehicle } from '../types';
 import type { Driver } from '@/features/drivers/types';
 
@@ -48,8 +49,8 @@ export default function VehiclesTable({ vehicles, drivers, selectedId, onSelect 
               onClick={() => setFilterStatus(st)}
               style={{
                 fontSize: 11, padding: '4px 8px', borderRadius: 6,
-                background: filterStatus === st ? 'var(--brand-10, rgba(0,87,255,0.08))' : 'var(--surface-2)',
-                border: filterStatus === st ? '1px solid var(--brand-20, rgba(0,87,255,0.2))' : '1px solid var(--border)',
+                background: filterStatus === st ? 'var(--brand-10, rgba(11, 107, 78,0.08))' : 'var(--surface-2)',
+                border: filterStatus === st ? '1px solid var(--brand-20, rgba(11, 107, 78,0.2))' : '1px solid var(--border)',
                 color: filterStatus === st ? 'var(--brand)' : 'var(--text-mid)',
                 fontWeight: 600, cursor: 'pointer'
               }}
@@ -101,7 +102,7 @@ export default function VehiclesTable({ vehicles, drivers, selectedId, onSelect 
                   <tr
                     key={v.id}
                     onClick={() => onSelect(v.id)}
-                    style={{ background: selectedId === v.id ? 'var(--brand-10, rgba(0,87,255,0.08))' : '', cursor: 'pointer' }}
+                    style={{ background: selectedId === v.id ? 'var(--brand-10, rgba(11, 107, 78,0.08))' : '', cursor: 'pointer' }}
                   >
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -148,7 +149,7 @@ export default function VehiclesTable({ vehicles, drivers, selectedId, onSelect 
                               <Avatar name={drv.name} size="sm" status={drv.status === 'Available' ? 'online' : 'busy'} />
                               <div>
                                 <div className="font-bold text-xs text-[var(--text-high)]">{drv.name}</div>
-                                <div className="text-[10px] text-[var(--text-low)]">{drv.licenseNo || 'Commercial HMV'}</div>
+                                <div className="text-[10px] text-[var(--text-low)]">{drv.licenseNo ? `Licence ${maskLicence(drv.licenseNo)}` : 'Commercial HMV'}</div>
                               </div>
                             </div>
                             <div className="text-[11px] text-[var(--text-mid)] space-y-1">

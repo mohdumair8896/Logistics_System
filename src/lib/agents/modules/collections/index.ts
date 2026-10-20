@@ -2,8 +2,9 @@
 // "Extremely Monetizable": Accelerates cash flow by autonomously pursuing overdue freight receivables.
 
 import { db } from '@/lib/db';
+import { currentTenantId } from '@/lib/tenancy';
 import { invoices, customers, systemAlerts } from '@/lib/schema';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import type { AgentModule, LogisticsEvent, AgentResult, AgentReasoningStep } from '../../core/types';
 import { LogisticsEventGraph } from '../../core/eventGraph';
 
@@ -39,7 +40,7 @@ export class CollectionsAgent implements AgentModule<CollectionsAuditPayload> {
       timestamp: new Date().toISOString(),
     });
 
-    const pendingInvoices = await db.select().from(invoices).where(eq(invoices.status, 'Pending'));
+    const pendingInvoices = await db.select().from(invoices).where(and(eq(invoices.tenantId, currentTenantId()), eq(invoices.status, 'Pending')));
     const overdueAccounts: OverdueAccount[] = [];
     let totalOutstanding = 0;
 
@@ -53,7 +54,7 @@ export class CollectionsAgent implements AgentModule<CollectionsAuditPayload> {
 
       let customerName = 'Commercial Shipper';
       if (inv.customerId) {
-        const [c] = await db.select().from(customers).where(eq(customers.id, inv.customerId)).limit(1);
+        const [c] = await db.select().from(customers).where(and(eq(customers.tenantId, currentTenantId()), eq(customers.id, inv.customerId))).limit(1);
         if (c) customerName = c.name;
       }
 
@@ -63,7 +64,7 @@ export class CollectionsAgent implements AgentModule<CollectionsAuditPayload> {
       if (daysOverdue >= 30) {
         cadenceStage = 'CREDIT_HOLD_ESCALATION';
         actionDrafted = `Dispatched Executive Credit Hold Warning for Invoice #${inv.id} (Overdue by ${daysOverdue} days). Recommending freeze on new dispatches.`;
-        await db.insert(systemAlerts).values({
+        await db.insert(systemAlerts).values({ tenantId: currentTenantId(),
           title: `Collections Escalation: ${customerName} (₹${amount.toLocaleString()})`,
           description: `Invoice #${inv.id} is overdue by ${daysOverdue} days. Automated credit hold drafted.`,
           severity: 'critical',

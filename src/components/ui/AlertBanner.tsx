@@ -1,7 +1,7 @@
 'use client';
 /**
  * Alert Banner — Operational status and warning notifications
- * Fully themed to Signal Blue (#0057FF) / Porcelain (#F8F7F4)
+ * Uses the status colours from docs/DESIGN_SYSTEM.md (info blue, on-track green, caution amber, exception red)
  */
 
 import { useState, type ReactNode } from 'react';
@@ -32,31 +32,31 @@ const VARIANT_TOKENS: Record<AlertVariant, {
   Icon: typeof Info;
 }> = {
   info: {
-    bg: 'rgba(0, 87, 255, 0.08)',
-    border: 'rgba(0, 87, 255, 0.22)',
-    text: '#0057FF',
-    subtxt: 'rgba(0, 87, 255, 0.75)',
+    bg: 'var(--status-active-bg)',
+    border: 'rgba(29, 95, 184, 0.22)',
+    text: 'var(--status-active)',
+    subtxt: 'var(--text-mid)',
     Icon: Info,
   },
   success: {
-    bg: 'rgba(16, 185, 129, 0.08)',
-    border: 'rgba(16, 185, 129, 0.25)',
-    text: '#059669',
-    subtxt: 'rgba(5, 150, 105, 0.75)',
+    bg: 'var(--status-done-bg)',
+    border: 'rgba(11, 107, 78, 0.22)',
+    text: 'var(--status-done)',
+    subtxt: 'var(--text-mid)',
     Icon: CheckCircle2,
   },
   warning: {
-    bg: 'rgba(217, 119, 6, 0.08)',
-    border: 'rgba(217, 119, 6, 0.25)',
-    text: '#D97706',
-    subtxt: 'rgba(180, 83, 9, 0.75)',
+    bg: 'var(--status-warn-bg)',
+    border: 'rgba(138, 90, 0, 0.25)',
+    text: 'var(--status-warn)',
+    subtxt: 'var(--text-mid)',
     Icon: AlertTriangle,
   },
   error: {
-    bg: 'rgba(220, 38, 38, 0.08)',
-    border: 'rgba(220, 38, 38, 0.25)',
-    text: '#DC2626',
-    subtxt: 'rgba(185, 28, 28, 0.75)',
+    bg: 'var(--status-error-bg)',
+    border: 'rgba(180, 35, 24, 0.22)',
+    text: 'var(--status-error)',
+    subtxt: 'var(--text-mid)',
     Icon: AlertCircle,
   },
 };

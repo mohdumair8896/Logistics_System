@@ -26,7 +26,7 @@ export default function AddVehicleModal({ onClose }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await addVehicle({ ...form, currentLoad: 0, status: 'Available', driverId: null });
+    if (!(await addVehicle({ ...form, currentLoad: 0, status: 'Available', driverId: null }))) return; // error already shown
     toast.success('Vehicle Registered', { description: `${form.vehicleNo} has been added to the fleet.` });
     onClose();
   };

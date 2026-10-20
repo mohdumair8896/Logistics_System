@@ -2,33 +2,13 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronDown, Check, LogOut, Radio, BookOpen } from 'lucide-react';
+import { ChevronDown, LogOut, Radio, BookOpen, UserCog, KeyRound } from 'lucide-react';
+import { can } from '@/lib/permissions';
 import { useCurrentUser, invalidateUserCache } from '@/lib/useCurrentUser';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Avatar } from '@/components/ui/Avatar';
 import Link from 'next/link';
-
-const roleProfiles = [
-  {
-    role: 'Operations Director',
-    email: 'admin@logisticsedge.io',
-    name: 'Alex Morgan',
-    facility: 'Central Distribution Hub',
-  },
-  {
-    role: 'Fleet Dispatcher',
-    email: 'dispatch@logisticsedge.io',
-    name: 'Sam Rivera',
-    facility: 'North Corridor Terminal',
-  },
-  {
-    role: 'Compliance Officer',
-    email: 'compliance@logisticsedge.io',
-    name: 'Jordan Patel',
-    facility: 'West Regional Terminal',
-  },
-];
 
 export function AccountDropdown() {
   const { user } = useCurrentUser();
@@ -44,23 +24,6 @@ export function AccountDropdown() {
       duration: 3000,
     });
     router.push('/login');
-  };
-
-  const handleSwitchAccount = async (email: string) => {
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password: 'Logistics2026!' }),
-      });
-      if (res.ok) {
-        invalidateUserCache();
-        toast.success('Switched profile successfully');
-        window.location.reload();
-      }
-    } catch {
-      toast.error('Failed to switch profile');
-    }
   };
 
   useEffect(() => {
@@ -178,71 +141,6 @@ export function AccountDropdown() {
               </div>
             </div>
 
-            {/* Switch role section */}
-            <div style={{ padding: '8px 4px 4px' }}>
-              <div style={{
-                padding: '4px 8px 6px',
-                fontSize: 10,
-                fontWeight: 700,
-                color: 'var(--text-low)',
-                textTransform: 'uppercase',
-                letterSpacing: 0.6,
-              }}>
-                Switch Account / Role
-              </div>
-
-              {roleProfiles.map((profile) => {
-                const isSelected = profile.role === currentRole;
-                return (
-                  <button
-                    key={profile.role}
-                    type="button"
-                    onClick={async () => {
-                      await handleSwitchAccount(profile.email);
-                      setIsOpen(false);
-                    }}
-                    style={{
-                      width: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '7px 8px',
-                      borderRadius: 7,
-                      border: 'none',
-                      background: isSelected ? 'var(--brand-10)' : 'transparent',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      transition: 'background 0.12s',
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isSelected) e.currentTarget.style.background = 'var(--surface-2)';
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isSelected) e.currentTarget.style.background = 'transparent';
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <Avatar size="xs" name={profile.name} />
-                      <div>
-                        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-high)' }}>
-                          {profile.name}
-                        </div>
-                        <div style={{ fontSize: 10, color: 'var(--text-low)' }}>
-                          {profile.role}
-                        </div>
-                      </div>
-                    </div>
-
-                    {isSelected && (
-                      <Check size={14} color="var(--brand)" />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
-            <div style={{ height: 1, background: 'var(--border)', margin: '6px 0' }} />
-
             {/* Quick Links */}
             <Link
               href="/tracking"
@@ -281,6 +179,46 @@ export function AccountDropdown() {
               <BookOpen size={14} color="var(--icon)" />
               <span>SOP & Tariff Directory</span>
             </Link>
+
+            <Link
+              href="/settings/account"
+              onClick={() => setIsOpen(false)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '7px 10px',
+                borderRadius: 7,
+                color: 'var(--text-mid)',
+                textDecoration: 'none',
+                fontSize: 12,
+                fontWeight: 500,
+              }}
+            >
+              <KeyRound size={14} color="var(--icon)" />
+              <span>Change password</span>
+            </Link>
+
+            {can(user?.role, 'team.manage') && (
+              <Link
+                href="/settings/team"
+                onClick={() => setIsOpen(false)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '7px 10px',
+                  borderRadius: 7,
+                  color: 'var(--text-mid)',
+                  textDecoration: 'none',
+                  fontSize: 12,
+                  fontWeight: 500,
+                }}
+              >
+                <UserCog size={14} color="var(--icon)" />
+                <span>Team &amp; Roles</span>
+              </Link>
+            )}
 
             <div style={{ height: 1, background: 'var(--border)', margin: '6px 0' }} />
 

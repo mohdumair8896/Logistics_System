@@ -3,8 +3,9 @@
 // Vehicles (GPS), Drivers (WhatsApp), Routes, PODs, Invoices, and Actions.
 
 import { db } from '@/lib/db';
+import { currentTenantId } from '@/lib/tenancy';
 import { operationalEvents } from '@/lib/schema';
-import { eq, desc } from 'drizzle-orm';
+import { and, eq, desc, gte, sql } from 'drizzle-orm';
 import { OperationalTimelineEvent, OperationalEvidence, AutonomyLevel } from './types';
 
 export class LogisticsEventGraph {
@@ -34,7 +35,7 @@ export class LogisticsEventGraph {
     const id = `EVT-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
 
     try {
-      await db.insert(operationalEvents).values({
+      await db.insert(operationalEvents).values({ tenantId: currentTenantId(),
         id,
         shipmentId: data.shipmentId || null,
         tripId: data.tripId || null,
@@ -71,7 +72,7 @@ export class LogisticsEventGraph {
       const records = await db
         .select()
         .from(operationalEvents)
-        .where(eq(operationalEvents.shipmentId, shipmentId))
+        .where(and(eq(operationalEvents.tenantId, currentTenantId()), eq(operationalEvents.shipmentId, shipmentId)))
         .orderBy(desc(operationalEvents.createdAt));
 
       return records.map(r => ({
@@ -108,8 +109,8 @@ export class LogisticsEventGraph {
   public static async getOperationsQueue(status?: 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED') {
     try {
       const query = status
-        ? db.select().from(operationalEvents).where(eq(operationalEvents.approvalStatus, status)).orderBy(desc(operationalEvents.createdAt)).limit(50)
-        : db.select().from(operationalEvents).orderBy(desc(operationalEvents.createdAt)).limit(50);
+        ? db.select().from(operationalEvents).where(and(eq(operationalEvents.tenantId, currentTenantId()), eq(operationalEvents.approvalStatus, status))).orderBy(desc(operationalEvents.createdAt)).limit(50)
+        : db.select().from(operationalEvents).where(eq(operationalEvents.tenantId, currentTenantId())).orderBy(desc(operationalEvents.createdAt)).limit(50);
 
       const records = await query;
       return records.map(r => ({
@@ -146,15 +147,16 @@ export class LogisticsEventGraph {
     notes?: string
   ): Promise<boolean> {
     try {
-      await db
+      const updated = await db
         .update(operationalEvents)
         .set({
           approvalStatus: decision,
           actionDraft: notes ? `[${decision}] ${notes}` : undefined,
         })
-        .where(eq(operationalEvents.id, eventId));
+        .where(and(eq(operationalEvents.tenantId, currentTenantId()), eq(operationalEvents.id, eventId)))
+        .returning({ id: operationalEvents.id });
 
-      return true;
+      return updated.length > 0;
     } catch (err) {
       console.error('[EventGraph] Error resolving approval:', err);
       return false;
@@ -162,44 +164,43 @@ export class LogisticsEventGraph {
   }
 
   /**
-   * Calculate aggregated ROI and productivity metrics from the Event Graph.
+   * Aggregated ROI and productivity metrics from the Event Graph for the last 7 days.
+   * Only executed actions (auto-approved or approved) count; nothing is padded.
    */
   public static async getOperationsMetrics() {
+    const empty = {
+      totalAutomatedTasks: 0,
+      hoursSaved: 0,
+      pendingApprovals: 0,
+      freightLeakagePreventedInr: 0,
+      disputedInvoicesResolved: 0,
+      activeWorkforceCount: 0,
+    };
     try {
-      const allEvents = await db.select().from(operationalEvents).limit(200);
+      const executed = sql`${operationalEvents.approvalStatus} in ('AUTO_APPROVED', 'APPROVED')`;
+      const impact = sql`${operationalEvents.evidence}->>'financialImpactInr'`;
+      const [row] = await db.select({
+        automated: sql<number>`count(*) filter (where ${executed})::int`,
+        pending: sql<number>`count(*) filter (where ${operationalEvents.approvalStatus} = 'PENDING_APPROVAL')::int`,
+        leakage: sql<number>`coalesce(sum(case when ${impact} ~ '^[0-9]+([.][0-9]+)?$' then (${impact})::numeric end) filter (where ${executed}), 0)::float`,
+        disputesResolved: sql<number>`count(*) filter (where ${executed} and ${operationalEvents.eventType} = 'FREIGHT_DISCREPANCY_FLAGGED')::int`,
+        actors: sql<number>`count(distinct ${operationalEvents.actor})::int`,
+      }).from(operationalEvents)
+        .where(and(eq(operationalEvents.tenantId, currentTenantId()), gte(operationalEvents.createdAt, sql`now() - interval '7 days'`)));
 
-      const totalAutomated = allEvents.filter(e => e.approvalStatus === 'AUTO_APPROVED' || e.approvalStatus === 'APPROVED').length;
-      const pendingApprovals = allEvents.filter(e => e.approvalStatus === 'PENDING_APPROVAL').length;
-      
-      // Calculate estimated hours saved (~20 mins per automated event)
-      const hoursSaved = Math.round((totalAutomated * 20) / 60);
-
-      // Disputed freight resolved / leakage prevented estimate
-      let leakagePreventedInr = 0;
-      for (const e of allEvents) {
-        const ev = e.evidence as OperationalEvidence;
-        if (ev?.financialImpactInr) {
-          leakagePreventedInr += ev.financialImpactInr;
-        }
-      }
-
+      if (!row) return empty;
       return {
-        totalAutomatedTasks: Math.max(totalAutomated, 142),
-        hoursSaved: Math.max(hoursSaved, 48),
-        pendingApprovals,
-        freightLeakagePreventedInr: Math.max(leakagePreventedInr, 184000),
-        disputedInvoicesResolved: 18,
-        activeWorkforceCount: 4,
+        totalAutomatedTasks: row.automated,
+        // Estimate: ~20 minutes of manual coordination per automated action
+        hoursSaved: Math.round((row.automated * 20) / 60),
+        pendingApprovals: row.pending,
+        freightLeakagePreventedInr: Math.round(row.leakage),
+        disputedInvoicesResolved: row.disputesResolved,
+        activeWorkforceCount: row.actors,
       };
-    } catch {
-      return {
-        totalAutomatedTasks: 142,
-        hoursSaved: 48,
-        pendingApprovals: 3,
-        freightLeakagePreventedInr: 184000,
-        disputedInvoicesResolved: 18,
-        activeWorkforceCount: 4,
-      };
+    } catch (err) {
+      console.error('[EventGraph] Error computing operations metrics:', err);
+      return empty;
     }
   }
 }

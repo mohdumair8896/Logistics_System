@@ -31,7 +31,7 @@ function CookieTable({ cookies }: { cookies: CookieRow[] }) {
         <tbody>
           {cookies.map((c, i) => (
             <tr key={i} style={{ borderBottom: '1px solid var(--border, #E6E4DF)', background: i % 2 === 0 ? 'var(--surface, #F8F7F4)' : 'var(--surface-1, #FFFFFF)' }}>
-              <td style={{ padding: '12px 14px', fontFamily: 'var(--font-mono, monospace)', color: 'var(--brand, #0057FF)', fontWeight: 600 }}>{c.name}</td>
+              <td style={{ padding: '12px 14px', fontFamily: 'var(--font-mono, monospace)', color: 'var(--brand, #0B6B4E)', fontWeight: 600 }}>{c.name}</td>
               <td style={{ padding: '12px 14px', color: 'var(--text-mid, #525252)' }}>{c.type}</td>
               <td style={{ padding: '12px 14px', color: 'var(--text-high, #141414)' }}>{c.purpose}</td>
               <td style={{ padding: '12px 14px', color: 'var(--text-low, #909090)', whiteSpace: 'nowrap' }}>{c.duration}</td>
@@ -59,7 +59,9 @@ export default function CookiePolicyPage() {
   ];
 
   const analyticsCookies: CookieRow[] = [
-    { name: '_plausible (if enabled)', type: 'Analytics', purpose: 'Privacy-first, cookieless page view analytics. No personal data is stored. Requires your explicit consent.', duration: 'Session only' },
+    { name: '_ga, _ga_<ID> (Google Analytics 4, if enabled)', type: 'Analytics', purpose: 'Counts visits and which pages and steps people use, with IP addresses anonymised. Set only after you accept analytics.', duration: 'Up to 2 years' },
+    { name: '_clck, _clsk, CLID (Microsoft Clarity, if enabled)', type: 'Analytics', purpose: 'Shows where people click and get stuck, through heatmaps and session replays with form inputs masked. Set only after you accept analytics.', duration: '1 day to 1 year' },
+    { name: 'ph_<project>_posthog (PostHog, if enabled)', type: 'Analytics', purpose: 'Measures our sign-up funnel: rate calculator, quote, call-back request. Set only after you accept analytics.', duration: '1 year' },
   ];
 
   return (
@@ -86,12 +88,12 @@ export default function CookiePolicyPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
             <div style={{
               width: 36, height: 36, borderRadius: 10,
-              background: 'rgba(0, 87, 255, 0.08)', border: '1px solid rgba(0, 87, 255, 0.2)',
+              background: 'rgba(11, 107, 78, 0.08)', border: '1px solid rgba(11, 107, 78, 0.2)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <Cookie style={{ width: 20, height: 20, color: 'var(--brand, #0057FF)' }} />
+              <Cookie style={{ width: 20, height: 20, color: 'var(--brand, #0B6B4E)' }} />
             </div>
-            <span style={{ fontSize: 12, fontFamily: 'var(--font-mono, monospace)', textTransform: 'uppercase', letterSpacing: 2, color: 'var(--brand, #0057FF)', fontWeight: 700 }}>
+            <span style={{ fontSize: 12, fontFamily: 'var(--font-mono, monospace)', textTransform: 'uppercase', letterSpacing: 2, color: 'var(--brand, #0B6B4E)', fontWeight: 700 }}>
               Legal &amp; Compliance
             </span>
           </div>
@@ -108,7 +110,7 @@ export default function CookiePolicyPage() {
 
           <section style={sectionStyle}>
             <h2 style={h2style}>
-              <Cookie style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
+              <Cookie style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
               1. What Are Cookies?
             </h2>
             <p>
@@ -118,7 +120,7 @@ export default function CookiePolicyPage() {
 
           <section style={sectionStyle}>
             <h2 style={h2style}>
-              <ShieldCheck style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
+              <ShieldCheck style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
               2. Strictly Necessary Cookies
             </h2>
             <p>
@@ -129,15 +131,15 @@ export default function CookiePolicyPage() {
 
           <section style={sectionStyle}>
             <h2 style={h2style}>
-              <BarChart2 style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
+              <BarChart2 style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
               3. Analytics Cookies (Consent Required)
             </h2>
             <p>
-              We use <strong style={{ color: 'var(--text-high, #141414)' }}>privacy-first, cookieless analytics</strong> (Plausible Analytics, if enabled). No personal data or cross-site tracking occurs. These are only activated after you give explicit consent via our cookie banner. You can withdraw consent at any time.
+              We may use <strong style={{ color: 'var(--text-high, #141414)' }}>Google Analytics 4, Microsoft Clarity and PostHog</strong> to understand which pages help and where people get stuck. Only the tools we have switched on are loaded, and none of them loads until you accept analytics in the cookie notice. You can withdraw consent at any time.
             </p>
             <CookieTable cookies={analyticsCookies} />
             <div style={{
-              background: 'rgba(0, 87, 255, 0.06)', border: '1px solid rgba(0, 87, 255, 0.2)',
+              background: 'rgba(11, 107, 78, 0.06)', border: '1px solid rgba(11, 107, 78, 0.2)',
               borderRadius: 12, padding: '14px 18px', marginTop: 8, fontSize: 13, color: 'var(--text-high, #141414)'
             }}>
               We do <strong>not</strong> use advertising cookies, retargeting pixels, social media tracking pixels, or sell your data to third parties.
@@ -146,15 +148,15 @@ export default function CookiePolicyPage() {
 
           <section style={sectionStyle}>
             <h2 style={h2style}>
-              <Settings style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
+              <Settings style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
               4. How to Manage &amp; Withdraw Consent
             </h2>
             <p>You have full control over non-essential cookies:</p>
             <ul style={{ paddingLeft: 24, display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <li><strong style={{ color: 'var(--text-high, #141414)' }}>Cookie Banner:</strong> Use the &ldquo;Customize&rdquo; option in our cookie banner at the bottom of the page to accept or reject analytics cookies.</li>
+              <li><strong style={{ color: 'var(--text-high, #141414)' }}>Cookie notice:</strong> Choose &ldquo;Essential only&rdquo; or &ldquo;Accept all&rdquo;, or use &ldquo;Choose&rdquo; to switch analytics on or off.</li>
               <li><strong style={{ color: 'var(--text-high, #141414)' }}>Browser Settings:</strong> Most browsers allow you to block or delete cookies. See your browser&apos;s help documentation for instructions.</li>
-              <li><strong style={{ color: 'var(--text-high, #141414)' }}>Clear localStorage:</strong> Open browser DevTools → Application → Local Storage → delete <code style={{ fontFamily: 'var(--font-mono, monospace)', color: 'var(--brand, #0057FF)', background: 'var(--surface-2, #F3F2EF)', padding: '2px 6px', borderRadius: 4 }}>logisticsedge_cookie_consent_v1</code> to reset your preferences.</li>
-              <li><strong style={{ color: 'var(--text-high, #141414)' }}>Opt-Out Links:</strong> Plausible Analytics operates cookieless and does not require a separate opt-out link.</li>
+              <li><strong style={{ color: 'var(--text-high, #141414)' }}>Clear localStorage:</strong> Open browser DevTools → Application → Local Storage → delete <code style={{ fontFamily: 'var(--font-mono, monospace)', color: 'var(--brand, #0B6B4E)', background: 'var(--surface-2, #F3F2EF)', padding: '2px 6px', borderRadius: 4 }}>logisticsedge_cookie_consent_v1</code> to reset your preferences.</li>
+              <li><strong style={{ color: 'var(--text-high, #141414)' }}>Opt-out tools:</strong> Google offers a browser add-on to opt out of Google Analytics on all sites.</li>
             </ul>
             <p style={{ marginTop: 8, fontSize: 13, color: 'var(--text-low, #909090)' }}>
               Withdrawing consent for analytics cookies will not affect your ability to use the platform. Withdrawing consent for strictly necessary cookies is not possible as they are essential for security and authentication.
@@ -163,26 +165,26 @@ export default function CookiePolicyPage() {
 
           <section style={sectionStyle}>
             <h2 style={h2style}>
-              <Globe style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
+              <Globe style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
               5. Jurisdiction &amp; Legal Basis
             </h2>
             <ul style={{ paddingLeft: 24, display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <li><strong style={{ color: 'var(--text-high, #141414)' }}>India (DPDP Act 2023):</strong> Consent is our lawful basis for analytics processing. Strictly necessary cookies are processed under &ldquo;legitimate interest&rdquo; for platform security.</li>
+              <li><strong style={{ color: 'var(--text-high, #141414)' }}>India (DPDP Act 2023):</strong> Analytics run only with your consent. Strictly necessary cookies are needed to give you the service you asked for, such as keeping you signed in, and are not used for anything else.</li>
               <li><strong style={{ color: 'var(--text-high, #141414)' }}>European Union (GDPR Article 6):</strong> Strictly necessary cookies → legitimate interest. Analytics → explicit consent (opt-in). Analytics are not activated until you click &ldquo;Accept All.&rdquo;</li>
-              <li><strong style={{ color: 'var(--text-high, #141414)' }}>United States (California CCPA):</strong> We do not sell or share personal information. Cookies we set do not constitute &ldquo;selling&rdquo; under CCPA. California residents may submit a data access/deletion request to <a href="mailto:privacy@logisticsedge.io" style={{ color: 'var(--brand, #0057FF)' }}>privacy@logisticsedge.io</a>.</li>
+              <li><strong style={{ color: 'var(--text-high, #141414)' }}>United States (California CCPA):</strong> We do not sell or share personal information. Cookies we set do not constitute &ldquo;selling&rdquo; under CCPA. California residents may submit a data access/deletion request to <a href="mailto:privacy@logisticsedge.io" style={{ color: 'var(--brand, #0B6B4E)' }}>privacy@logisticsedge.io</a>.</li>
             </ul>
           </section>
 
           <section style={sectionStyle}>
             <h2 style={h2style}>
-              <Cookie style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
+              <Cookie style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
               6. Changes to This Policy
             </h2>
             <p>
               We will notify you of material changes by updating the &ldquo;Effective Date&rdquo; above and, where required by law, displaying a notice on the platform. Continued use of the platform after changes constitutes acceptance of the revised policy.
             </p>
             <p>
-              For cookie-related questions or to exercise your data rights, contact: <a href="mailto:privacy@logisticsedge.io" style={{ color: 'var(--brand, #0057FF)' }}>privacy@logisticsedge.io</a>
+              For cookie-related questions or to exercise your data rights, contact: <a href="mailto:privacy@logisticsedge.io" style={{ color: 'var(--brand, #0B6B4E)' }}>privacy@logisticsedge.io</a>
             </p>
           </section>
 
@@ -193,9 +195,9 @@ export default function CookiePolicyPage() {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between' }}>
             <p style={{ margin: 0 }}>&copy; 2026 LogisticsEdge Technologies Pvt. Ltd. All rights reserved.</p>
             <div style={{ display: 'flex', gap: 16 }}>
-              <Link href="/privacy" style={{ color: 'var(--brand, #0057FF)', textDecoration: 'none' }}>Privacy Policy</Link>
-              <Link href="/terms" style={{ color: 'var(--brand, #0057FF)', textDecoration: 'none' }}>Terms of Service</Link>
-              <Link href="/refund" style={{ color: 'var(--brand, #0057FF)', textDecoration: 'none' }}>Refund Policy</Link>
+              <Link href="/privacy" style={{ color: 'var(--brand, #0B6B4E)', textDecoration: 'none' }}>Privacy Policy</Link>
+              <Link href="/terms" style={{ color: 'var(--brand, #0B6B4E)', textDecoration: 'none' }}>Terms of Service</Link>
+              <Link href="/refund" style={{ color: 'var(--brand, #0B6B4E)', textDecoration: 'none' }}>Refund Policy</Link>
             </div>
           </div>
         </div>

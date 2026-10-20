@@ -11,6 +11,14 @@ export function formatINR(val: number): string {
   return `₹${Math.round(val).toLocaleString('en-IN')}`;
 }
 
+/**
+ * Formats a time as IST (e.g. "02:45 pm"). Server code runs in UTC on Vercel, so the
+ * time zone must be explicit or users see times 5½ hours off.
+ */
+export function formatIstTime(date: Date): string {
+  return date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' });
+}
+
 /** Common status badge class mapping across all logistics entities (internal) */
 const STATUS_BADGE_CLASSES: Record<string, string> = {
   // Order & Trip statuses

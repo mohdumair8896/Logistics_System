@@ -31,9 +31,10 @@ import {
 } from '@/components/ui/ContextMenu';
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from '@/components/ui/Empty';
 import { AlertBanner } from '@/components/ui/AlertBanner';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 export default function OrdersPage() {
-  const { orders, addOrder, updateOrder } = useOrders();
+  const { orders, loading: ordersLoading, addOrder, updateOrder } = useOrders();
   const { customers } = useCustomers();
   const { products } = useProducts();
   const router = useRouter();
@@ -104,17 +105,18 @@ export default function OrdersPage() {
       return sortAsc ? comparison : -comparison;
     });
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!form.destination.trim()) return;
-    const id = addOrder({
+    const id = await addOrder({
       ...form,
       origin: form.origin.trim(),
       destination: form.destination.trim(),
-      totalWeight,
+      totalWeight: Math.round(totalWeight),
       status: 'Pending',
       vehicleId: null,
       driverId: null
     });
+    if (!id) return; // validation error already shown
     toast.success('Order Dispatched to Queue', { description: `Shipment ${id} generated. Ready for fleet allocation.` });
     setShowCreate(false);
     setPage(1);
@@ -229,7 +231,7 @@ export default function OrdersPage() {
                 style={{
                   padding: '6px 12px',
                   borderRadius: 6,
-                  border: active ? '1px solid rgba(0,87,255,0.18)' : '1px solid transparent',
+                  border: active ? '1px solid rgba(11, 107, 78,0.18)' : '1px solid transparent',
                   background: active ? '#ffffff' : 'transparent',
                   boxShadow: active ? '0 1px 3px rgba(0,0,0,0.06)' : 'none',
                   color: active ? 'var(--brand)' : 'var(--text-mid)',
@@ -280,7 +282,7 @@ export default function OrdersPage() {
       {/* Orders Table */}
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <div className="table-container">
-          <table className="data-table">
+          <table className="data-table" aria-busy={ordersLoading}>
             <thead>
               <tr>
                 <th onClick={() => handleSort('id')} style={{ cursor: 'pointer', userSelect: 'none' }} aria-sort={sortField === 'id' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
@@ -313,7 +315,20 @@ export default function OrdersPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredOrders.length === 0 ? (
+              {ordersLoading ? (
+                // Placeholder rows until the first load, instead of a "no orders" message that isn't true yet
+                Array.from({ length: 5 }, (_, i) => (
+                  <tr key={`loading-${i}`} aria-hidden="true">
+                    <td><Skeleton className="h-4 w-20" /></td>
+                    <td><Skeleton className="h-4 w-36" /><Skeleton className="h-3 w-20 mt-2" /></td>
+                    <td><Skeleton className="h-4 w-44" /></td>
+                    <td><Skeleton className="h-4 w-16" /></td>
+                    <td><Skeleton className="h-4 w-24" /></td>
+                    <td><Skeleton className="h-5 w-20" /></td>
+                    <td><Skeleton className="h-7 w-20 ml-auto" /></td>
+                  </tr>
+                ))
+              ) : filteredOrders.length === 0 ? (
                 <tr>
                   <td colSpan={7} style={{ padding: '36px 16px' }}>
                     <Empty className="border-none bg-transparent">
@@ -551,10 +566,10 @@ export default function OrdersPage() {
         description={`Are you sure you want to cancel shipment ${orderToCancel}? This will stop dispatch allocation and mark the consignment as cancelled.`}
         confirmText="Cancel Order"
         variant="danger"
-        onConfirm={() => {
+        onConfirm={async () => {
           if (orderToCancel) {
-            updateOrder(orderToCancel, { status: 'Cancelled' });
-            toast.warning('Order Cancelled', { description: `Shipment ${orderToCancel} was cancelled.` });
+            const cancelled = await updateOrder(orderToCancel, { status: 'Cancelled' });
+            if (cancelled) toast.warning('Order Cancelled', { description: `Shipment ${orderToCancel} was cancelled.` });
             setOrderToCancel(null);
           }
         }}

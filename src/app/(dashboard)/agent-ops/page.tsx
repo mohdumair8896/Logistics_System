@@ -152,19 +152,17 @@ export default function AgentOpsPage() {
   // Handle 1-Click "Execute Routine Operations"
   const handleExecuteRoutine = async () => {
     setExecutingRoutine(true);
-    toast.info('Autonomous Workforce Running Routine Playbooks...', {
-      description: 'Resolving scheduled pings, ETA syncs, dock buffering, and low-risk dunning.',
-    });
-
     try {
       const res = await fetch('/api/agent/brief', { method: 'POST' });
-      const data = await res.json();
-      if (data.success) {
-        toast.success('Routine Operations Executed!', {
-          description: data.message,
-        });
-        await Promise.all([fetchBrief(), fetchQueue()]);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        toast.error(data.error || data.message || 'Failed to approve routine items');
+        return;
       }
+      toast.success(data.resolvedCount > 0 ? 'Routine items approved' : 'Nothing to approve', {
+        description: data.message,
+      });
+      await Promise.all([fetchBrief(), fetchQueue()]);
     } catch {
       toast.error('Failed to execute routine operations');
     } finally {
@@ -174,17 +172,25 @@ export default function AgentOpsPage() {
 
   // Handle Autonomy Level Change
   const handleAutonomyChange = async (newLevel: number) => {
+    const previousLevel = autonomyLevel;
     setAutonomyLevel(newLevel);
     try {
-      await fetch('/api/agent/queue', {
+      const res = await fetch('/api/agent/queue', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ newAutonomyLevel: newLevel }),
       });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        setAutonomyLevel(previousLevel);
+        toast.error(data.error || 'Could not update autonomy level');
+        return;
+      }
       toast.success(`Autonomy Policy Updated`, {
         description: `Operations Layer set to Level ${newLevel} (${getAutonomyLevelTitle(newLevel)})`,
       });
     } catch {
+      setAutonomyLevel(previousLevel);
       toast.error('Could not update autonomy level');
     }
   };
@@ -197,14 +203,16 @@ export default function AgentOpsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ eventId, decision }),
       });
-      const data = await res.json();
-      if (data.success) {
-        toast.success(`Action [${decision}] Recorded`, {
-          description: `Event Graph and audit logs updated. Tool execution completed.`,
-        });
-        setSelectedItemForEvidence(null);
-        await Promise.all([fetchQueue(), fetchBrief()]);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        toast.error(data.error || `Failed to process ${decision}`);
+        return;
       }
+      toast.success(`Action [${decision}] Recorded`, {
+        description: 'Decision saved to the event graph and audit log.',
+      });
+      setSelectedItemForEvidence(null);
+      await Promise.all([fetchQueue(), fetchBrief()]);
     } catch {
       toast.error(`Failed to process ${decision}`);
     }
@@ -371,7 +379,7 @@ export default function AgentOpsPage() {
               {tab.label}
               {typeof tab.badge === 'number' && tab.badge > 0 && (
                 <span style={{
-                  background: tab.id === 'queue' ? 'rgba(220, 38, 38, 0.1)' : 'rgba(0, 87, 255, 0.08)',
+                  background: tab.id === 'queue' ? 'rgba(220, 38, 38, 0.1)' : 'rgba(11, 107, 78, 0.08)',
                   color: tab.id === 'queue' ? '#DC2626' : 'var(--brand)',
                   padding: '1px 6px', borderRadius: 999, fontSize: 11, fontWeight: 700
                 }}>
@@ -401,13 +409,13 @@ export default function AgentOpsPage() {
                   Weekly AI Operations Brief
                 </div>
                 <h2 style={{ fontSize: 24, fontWeight: 800, margin: '0 0 8px 0', color: 'var(--text-high)' }}>
-                  {brief?.greeting || 'Good morning. 2,143 active shipments.'}
+                  {brief?.greeting || 'Operations brief'}
                 </h2>
                 <p style={{ color: 'var(--text-mid)', fontSize: 14, maxWidth: 800, margin: 0, lineHeight: 1.6 }}>
-                  <strong style={{ color: '#16A34A' }}>{brief?.summary?.onTrack?.toLocaleString() ?? 1987} shipments</strong> are moving on-schedule.
-                  There are <strong style={{ color: '#D97706' }}>{brief?.summary?.requireAttention ?? 156} tasks</strong> requiring attention and
-                  <strong style={{ color: '#DC2626' }}> {brief?.summary?.severeExceptions ?? 23} critical exceptions</strong>.
-                  ₹{(brief?.summary?.disputedFreightInr ?? 184200).toLocaleString()} freight currently disputed.
+                  <strong style={{ color: '#16A34A' }}>{(brief?.summary?.onTrack ?? 0).toLocaleString('en-IN')} shipments</strong> are moving on-schedule.
+                  There are <strong style={{ color: '#D97706' }}>{brief?.summary?.requireAttention ?? 0} tasks</strong> requiring attention and
+                  <strong style={{ color: '#DC2626' }}> {brief?.summary?.severeExceptions ?? 0} critical exceptions</strong>.
+                  ₹{(brief?.summary?.disputedFreightInr ?? 0).toLocaleString('en-IN')} freight currently disputed.
                 </p>
               </div>
 
@@ -417,10 +425,10 @@ export default function AgentOpsPage() {
                 disabled={executingRoutine}
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 10,
-                  background: 'linear-gradient(135deg, #0057FF 0%, #0040CC 100%)',
+                  background: 'linear-gradient(135deg, #0B6B4E 0%, #07523C 100%)',
                   color: '#FFFFFF', border: 'none', borderRadius: 10,
                   padding: '14px 24px', fontSize: 14, fontWeight: 700, cursor: 'pointer',
-                  boxShadow: '0 4px 14px rgba(0, 87, 255, 0.3)', transition: 'all 0.15s ease',
+                  boxShadow: '0 4px 14px rgba(11, 107, 78, 0.3)', transition: 'all 0.15s ease',
                   opacity: executingRoutine ? 0.7 : 1
                 }}
               >
@@ -437,25 +445,25 @@ export default function AgentOpsPage() {
               <div style={{ background: 'var(--surface-2)', padding: '12px 16px', borderRadius: 8, border: '1px solid var(--border)' }}>
                 <div style={{ fontSize: 12, color: 'var(--text-mid)' }}>Tasks Automated This Week</div>
                 <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--brand)', marginTop: 2 }}>
-                  {(brief?.metrics?.totalAutomatedTasks ?? 142).toLocaleString()} tasks
+                  {(brief?.metrics?.totalAutomatedTasks ?? 0).toLocaleString('en-IN')} tasks
                 </div>
               </div>
               <div style={{ background: 'var(--surface-2)', padding: '12px 16px', borderRadius: 8, border: '1px solid var(--border)' }}>
                 <div style={{ fontSize: 12, color: 'var(--text-mid)' }}>Operational Hours Saved</div>
                 <div style={{ fontSize: 20, fontWeight: 800, color: '#16A34A', marginTop: 2 }}>
-                  {(brief?.metrics?.hoursSaved ?? 48).toLocaleString()} hrs
+                  {(brief?.metrics?.hoursSaved ?? 0).toLocaleString('en-IN')} hrs
                 </div>
               </div>
               <div style={{ background: 'var(--surface-2)', padding: '12px 16px', borderRadius: 8, border: '1px solid var(--border)' }}>
                 <div style={{ fontSize: 12, color: 'var(--text-mid)' }}>Freight Leakage Prevented</div>
                 <div style={{ fontSize: 20, fontWeight: 800, color: '#D97706', marginTop: 2 }}>
-                  ₹{(brief?.metrics?.freightLeakagePreventedInr ?? 184000).toLocaleString()}
+                  ₹{(brief?.metrics?.freightLeakagePreventedInr ?? 0).toLocaleString('en-IN')}
                 </div>
               </div>
               <div style={{ background: 'var(--surface-2)', padding: '12px 16px', borderRadius: 8, border: '1px solid var(--border)' }}>
-                <div style={{ fontSize: 12, color: 'var(--text-mid)' }}>Overdue Receivables Accelerating</div>
+                <div style={{ fontSize: 12, color: 'var(--text-mid)' }}>Receivables Overdue (30+ days)</div>
                 <div style={{ fontSize: 20, fontWeight: 800, color: '#D97706', marginTop: 2 }}>
-                  ₹{(brief?.summary?.overdueReceivablesInr ?? 924500).toLocaleString()}
+                  ₹{(brief?.summary?.overdueReceivablesInr ?? 0).toLocaleString('en-IN')}
                 </div>
               </div>
             </div>
@@ -490,6 +498,11 @@ export default function AgentOpsPage() {
                     </BadgeWithDot>
                   </div>
                 ))}
+                {brief && brief.topRisks.length === 0 && (
+                  <div style={{ fontSize: 13, color: 'var(--text-mid)', padding: '12px 16px', background: 'var(--surface-2)', borderRadius: 8, border: '1px dashed var(--border)' }}>
+                    No open risks right now. Delayed shipments, critical incidents, expiring licences and overdue invoices will appear here as they happen.
+                  </div>
+                )}
               </div>
             </div>
 
@@ -622,7 +635,7 @@ export default function AgentOpsPage() {
                   <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-high)' }}>{item.title}</div>
                   <div style={{ fontSize: 13, color: 'var(--text-mid)', marginTop: 2 }}>{item.description}</div>
                   {item.actionDraft && (
-                    <div style={{ fontSize: 12, color: 'var(--brand)', marginTop: 6, fontFamily: 'var(--font-mono, monospace)', background: 'rgba(0,87,255,0.05)', border: '1px solid rgba(0,87,255,0.15)', padding: '4px 8px', borderRadius: 4 }}>
+                    <div style={{ fontSize: 12, color: 'var(--brand)', marginTop: 6, fontFamily: 'var(--font-mono, monospace)', background: 'rgba(11, 107, 78,0.05)', border: '1px solid rgba(11, 107, 78,0.15)', padding: '4px 8px', borderRadius: 4 }}>
                       Proposed Action: {item.actionDraft}
                     </div>
                   )}
@@ -888,7 +901,7 @@ export default function AgentOpsPage() {
                   background: 'var(--brand)', color: '#FFFFFF', border: 'none', borderRadius: 8,
                   padding: '10px 18px', fontWeight: 700, fontSize: 13, cursor: 'pointer',
                   display: 'inline-flex', alignItems: 'center', gap: 6,
-                  boxShadow: '0 2px 8px rgba(0,87,255,0.3)'
+                  boxShadow: '0 2px 8px rgba(11, 107, 78,0.3)'
                 }}
               >
                 {sendingDriverMsg ? <Spinner size="xs" /> : <Send size={14} />} Send

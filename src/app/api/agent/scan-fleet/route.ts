@@ -2,22 +2,26 @@
 // Runs an autonomous fleet-wide sweep across Exceptions, Billing, Collections, and Compliance.
 
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth, isAuthError } from '@/lib/auth';
+import { requireTenant, isAuthError } from '@/lib/auth';
+import { requirePermission } from '@/lib/permissions';
+import { runAsTenant, withTenant } from '@/lib/tenancy';
 import { agents } from '@/lib/agents/core/registry';
-import { db } from '@/lib/db';
 import { trips } from '@/lib/schema';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import type { LogisticsEvent } from '@/lib/agents/core/types';
 
 export async function POST(req: NextRequest) {
-  const auth = await requireAuth(req);
+  const auth = await requireTenant(req);
   if (isAuthError(auth)) return auth;
+  const denied = requirePermission(auth, 'agent.run');
+  if (denied) return denied;
 
   try {
     const sweepResults: Record<string, unknown> = {};
 
     // 1. Exception Scan: Find in-transit trips with progress issues or deviations
-    const activeTrips = await db.select().from(trips).where(eq(trips.status, 'In Transit'));
+    const activeTrips = await withTenant(auth.tenantId, tx => tx.select().from(trips)
+      .where(and(eq(trips.tenantId, auth.tenantId), eq(trips.status, 'In Transit'))));
     const exceptionEvents: LogisticsEvent[] = [];
 
     for (const trip of activeTrips) {
@@ -42,7 +46,7 @@ export async function POST(req: NextRequest) {
     // Publish exception events
     const exceptionResults = [];
     for (const evt of exceptionEvents) {
-      const res = await agents.publish(evt);
+      const res = await runAsTenant(auth.tenantId, () => agents.publish(evt));
       exceptionResults.push(...res);
     }
     sweepResults.exceptions = {
@@ -52,30 +56,30 @@ export async function POST(req: NextRequest) {
     };
 
     // 2. Billing Freight Audit
-    const freightAuditRes = await agents.publish({
+    const freightAuditRes = await runAsTenant(auth.tenantId, () => agents.publish({
       id: `evt-freight-sweep-${Date.now()}`,
       type: 'FREIGHT_AUDIT_REQUESTED',
       timestamp: new Date().toISOString(),
       payload: {},
-    });
+    }));
     sweepResults.billing = freightAuditRes.find((r) => r.agentId === 'billing-agent')?.data;
 
     // 3. Collections Dunning Sweep
-    const collectionsRes = await agents.publish({
+    const collectionsRes = await runAsTenant(auth.tenantId, () => agents.publish({
       id: `evt-coll-sweep-${Date.now()}`,
       type: 'COLLECTIONS_AUDIT_REQUESTED',
       timestamp: new Date().toISOString(),
       payload: { minOverdueDays: 7 },
-    });
+    }));
     sweepResults.collections = collectionsRes.find((r) => r.agentId === 'collections-agent')?.data;
 
     // 4. Documentation & Compliance Audit
-    const docRes = await agents.publish({
+    const docRes = await runAsTenant(auth.tenantId, () => agents.publish({
       id: `evt-doc-sweep-${Date.now()}`,
       type: 'DOC_AUDIT_REQUESTED',
       timestamp: new Date().toISOString(),
       payload: {},
-    });
+    }));
     sweepResults.compliance = docRes.find((r) => r.agentId === 'documentation-agent')?.data;
 
     return NextResponse.json({
@@ -84,7 +88,7 @@ export async function POST(req: NextRequest) {
       sweepResults,
     });
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-    return NextResponse.json({ success: false, message: msg }, { status: 500 });
+    console.error('[/api/agent/scan-fleet]', err);
+    return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 });
   }
 }

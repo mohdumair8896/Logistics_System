@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-export type BadgeColor = 'brand' | 'success' | 'warning' | 'error' | 'neutral' | 'gray';
+export type BadgeColor = 'brand' | 'info' | 'success' | 'warning' | 'error' | 'neutral' | 'gray';
 export type BadgeSize = 'sm' | 'md' | 'lg';
 
 export interface BadgeWithDotProps {
@@ -16,10 +16,17 @@ export interface BadgeWithDotProps {
 
 const colorStyles: Record<BadgeColor, { bg: string; text: string; border: string; dot: string }> = {
   brand: {
-    bg: 'var(--brand-10, rgba(0, 87, 255, 0.08))',
-    text: 'var(--brand, #0057FF)',
-    border: 'rgba(0, 87, 255, 0.2)',
-    dot: 'var(--brand, #0057FF)',
+    bg: 'var(--brand-10, rgba(11, 107, 78, 0.08))',
+    text: 'var(--brand, #0B6B4E)',
+    border: 'rgba(11, 107, 78, 0.2)',
+    dot: 'var(--brand, #0B6B4E)',
+  },
+  // In transit / informational: blue, so it never reads as "done"
+  info: {
+    bg: 'var(--status-active-bg)',
+    text: 'var(--status-active)',
+    border: 'rgba(29, 95, 184, 0.2)',
+    dot: 'var(--status-active)',
   },
   success: {
     bg: 'var(--status-done-bg, rgba(26, 127, 84, 0.08))',
@@ -72,7 +79,7 @@ export function BadgeWithDot({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full font-medium whitespace-nowrap transition-colors select-none ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-[4px] font-medium whitespace-nowrap transition-colors select-none ${className}`}
       style={{
         padding: s.padding,
         fontSize: s.fontSize,

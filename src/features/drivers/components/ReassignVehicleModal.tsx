@@ -21,7 +21,7 @@ export default function ReassignVehicleModal({ driver, onClose }: Props) {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    await reassignDriverVehicle(driver.id, (fd.get('vehicleId') as string) || null);
+    if (!(await reassignDriverVehicle(driver.id, (fd.get('vehicleId') as string) || null))) return; // error already shown
     onClose();
   };
 

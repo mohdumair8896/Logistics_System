@@ -1,10 +1,11 @@
 #!/usr/bin/env tsx
 // ─── Database Seed Script ─────────────────────────────────────────────────────
-// Run once to populate your Neon DB with initial data.
-// Command: npx tsx scripts/seed.ts
+// Populates an EMPTY database (after `npm run db:migrate`) with a fictional demo workspace.
+// Command: SEED_STAFF_PASSWORD='…' npm run db:seed
+// All rows belong to the "Demo Workspace" tenant; names, companies and emails are fictional.
 //
 // This seeds:
-//   - 3 staff users (with bcrypt hashed passwords)
+//   - 3 staff users (passwords hashed by src/lib/passwords.ts)
 //   - 5 customers
 //   - 6 products
 //   - 6 inventory entries
@@ -17,94 +18,127 @@
 //   - 5 knowledge base entries
 //   - 3 shipper leads
 
-import 'dotenv/config';
-import bcrypt from 'bcryptjs';
+import * as dotenv from 'dotenv';
 import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
+import { PGlite } from '@electric-sql/pglite';
+import { drizzle as drizzlePglite } from 'drizzle-orm/pglite';
+import { sql as rawSql } from 'drizzle-orm';
 import * as schema from '../src/lib/schema';
+import { hashPassword } from '../src/lib/passwords';
+import { lockPgliteDir } from '../src/lib/pglite-lock';
 
-const sql = neon(process.env.DATABASE_URL!);
-const db = drizzle(sql, { schema });
+dotenv.config({ path: '.env.local' });
+
+const tenantId = 'ten_demo_workspace';
+/** Stamp every seeded row with the demo workspace. */
+const inDemo = <T extends object>(rows: T[]) => rows.map(r => ({ ...r, tenantId }));
+
+// DATABASE_URL=pglite:<dir> seeds the local development database (npm run db:local)
+const url = process.env.DATABASE_URL!;
+const remoteDb = () => drizzle(neon(url), { schema });
+const localDir = url.startsWith('pglite:') ? url.slice('pglite:'.length) : null;
+// Refuses while a dev server has the folder open (under db:local this process already holds it)
+if (localDir) lockPgliteDir(localDir);
+const local = localDir ? new PGlite(localDir) : null;
+const db = local ? (drizzlePglite(local, { schema }) as unknown as ReturnType<typeof remoteDb>) : remoteDb();
 
 async function seed() {
   console.log('🌱 Seeding database...\n');
 
+  // ─── Demo workspace (tenant) ────────────────────────────────────────────────
+  console.log('🏗️  Seeding demo workspace...');
+  await db.insert(schema.tenants).values({
+    id: tenantId, name: 'Demo Workspace', slug: 'demo-workspace', archetype: 'FLEET_OWNER',
+    country: 'IN', currency: 'INR', timezone: 'Asia/Kolkata', complexityScore: 25, isConfigured: true,
+  }).onConflictDoNothing();
+  await db.insert(schema.tenantSubscriptions).values({
+    id: 'sub_demo-workspace', tenantId, plan: 'GROWTH', status: 'TRIAL', maxVehicles: 100, maxMonthlyShipments: 2500, maxAiActions: 7500,
+  }).onConflictDoNothing();
+
   // ─── Users ──────────────────────────────────────────────────────────────────
   console.log('👤 Seeding users...');
-  const passwordHash = await bcrypt.hash('Logistics2026!', 12);
-  await db.insert(schema.users).values([
-    { id: 'USR-001', email: 'admin@logisticsedge.io',      passwordHash, name: 'Alex Morgan',    role: 'Operations Director', facility: 'Central Distribution Hub',  avatar: 'AM', isActive: true },
-    { id: 'USR-002', email: 'dispatch@logisticsedge.io',   passwordHash, name: 'Sam Rivera',     role: 'Fleet Dispatcher',    facility: 'North Corridor Terminal',    avatar: 'SR', isActive: true },
-    { id: 'USR-003', email: 'compliance@logisticsedge.io', passwordHash, name: 'Jordan Patel',   role: 'Compliance Officer',  facility: 'West Regional Terminal',     avatar: 'JP', isActive: true },
-  ]).onConflictDoNothing();
+  // Never ship a known password: the seed staff accounts use one supplied at run time.
+  const seedPassword = process.env.SEED_STAFF_PASSWORD;
+  if (!seedPassword || seedPassword.length < 12) {
+    throw new Error('Set SEED_STAFF_PASSWORD (12+ characters) before running the seed script');
+  }
+  const passwordHash = await hashPassword(seedPassword, 12);
+  const staff = [
+    { id: 'USR-001', email: 'admin@demo.logisticsedge.test',      passwordHash, name: 'Alex Morgan',    role: 'Operations Director', facility: 'Central Distribution Hub',  avatar: 'AM', isActive: true },
+    { id: 'USR-002', email: 'dispatch@demo.logisticsedge.test',   passwordHash, name: 'Sam Rivera',     role: 'Fleet Dispatcher',    facility: 'North Corridor Terminal',    avatar: 'SR', isActive: true },
+    { id: 'USR-003', email: 'compliance@demo.logisticsedge.test', passwordHash, name: 'Jordan Patel',   role: 'Compliance Officer',  facility: 'West Regional Terminal',     avatar: 'JP', isActive: true },
+  ];
+  await db.insert(schema.users).values(inDemo(staff)).onConflictDoNothing();
+  await db.insert(schema.memberships).values(staff.map(u => ({ userId: u.id, tenantId, role: u.role }))).onConflictDoNothing();
 
   // ─── Customers ──────────────────────────────────────────────────────────────
   console.log('🏢 Seeding customers...');
-  await db.insert(schema.customers).values([
+  await db.insert(schema.customers).values(inDemo([
     { id: 'C001', name: 'ABC Traders',                 contact: 'Rajesh Kumar',  phone: '+91 99887 76655', address: 'Civil Lines Industrial Area, Kanpur',      gstin: '09ABCDE1234F1Z5' },
     { id: 'C002', name: 'Xin Logistics India',         contact: 'Priya Sharma',  phone: '+91 99776 65544', address: 'Agra Highway Corridor, Agra',             gstin: '09XYZAB5678G2H6' },
     { id: 'C003', name: 'Global Exports Corp',         contact: 'Amit Gupta',    phone: '+91 99665 54433', address: 'Okhla Phase III, Delhi NCR',              gstin: '09DEFCD9012H3I7' },
     { id: 'C004', name: 'Sunrise Agro Mills',          contact: 'Sanjay Patel',  phone: '+91 99554 43322', address: 'Naini Logistics Park, Prayagraj',         gstin: '09SUNAB3456J4K8' },
     { id: 'C005', name: 'GHI Industrial Commodities',  contact: 'Nisha Jain',    phone: '+91 99443 32211', address: 'Ramnagar Industrial Area, Varanasi',      gstin: '09GHICD7890L5M9' },
-  ]).onConflictDoNothing();
+  ])).onConflictDoNothing();
 
   // ─── Products ───────────────────────────────────────────────────────────────
   console.log('📦 Seeding products...');
-  await db.insert(schema.products).values([
+  await db.insert(schema.products).values(inDemo([
     { id: 'P001', name: 'Industrial Grade Steel Rods',          unit: 'kg',  category: 'Metals & Construction', pricePerKg: '65' },
     { id: 'P002', name: 'Raw Material Fasteners & Coils',       unit: 'kg',  category: 'Heavy Hardware',        pricePerKg: '85' },
     { id: 'P003', name: 'Packaged Food Grain (Rice)',           unit: 'kg',  category: 'Agri Commodities',      pricePerKg: '38' },
     { id: 'P004', name: 'Processed Sugar Bulk Bags',            unit: 'kg',  category: 'Food Wholesale',        pricePerKg: '44' },
     { id: 'P005', name: 'Refined Edible Oil Drums',             unit: 'ltr', category: 'Liquid Bulk',           pricePerKg: '125' },
     { id: 'P006', name: 'Heavy Electrical Cables',              unit: 'kg',  category: 'Electrical Equipment',  pricePerKg: '140' },
-  ]).onConflictDoNothing();
+  ])).onConflictDoNothing();
 
   // ─── Inventory ──────────────────────────────────────────────────────────────
   console.log('🏭 Seeding inventory...');
-  await db.insert(schema.inventory).values([
+  await db.insert(schema.inventory).values(inDemo([
     { productId: 'P001', warehouseId: 'W001', quantity: 35000, bay: 'Bay A-12' },
     { productId: 'P002', warehouseId: 'W001', quantity: 22000, bay: 'Bay A-14' },
     { productId: 'P003', warehouseId: 'W001', quantity: 45000, bay: 'Bay B-04' },
     { productId: 'P004', warehouseId: 'W001', quantity: 18000, bay: 'Bay B-08' },
     { productId: 'P005', warehouseId: 'W001', quantity: 12000, bay: 'Bay C-02' },
     { productId: 'P006', warehouseId: 'W001', quantity: 9500,  bay: 'Bay C-06' },
-  ]).onConflictDoNothing();
+  ])).onConflictDoNothing();
 
   // ─── Vehicles ───────────────────────────────────────────────────────────────
   console.log('🚚 Seeding vehicles...');
-  await db.insert(schema.vehicles).values([
-    { id: 'V001', vehicleNo: 'UP32 AB 1234', type: 'Heavy Duty Truck',       capacity: 10000, currentLoad: 0,    status: 'Available',   driverId: 'D001', location: 'Central Distribution Hub',        lastService: '2026-08-15', odometerKm: 48250,  fuelLevel: 88, activityLog: [{ id: 'ACT-1', title: 'Maintenance Completed (Full Inspection)', timestamp: 'Aug 24, 09:00 AM', type: 'maintenance' }, { id: 'ACT-2', title: 'Delivery Logged: ORD-992 (Kanpur)', timestamp: 'Aug 22, 14:30 PM', type: 'delivery' }] },
-    { id: 'V002', vehicleNo: 'UP32 CD 5678', type: 'Medium Truck',            capacity: 7000,  currentLoad: 6200, status: 'In Transit',  driverId: 'D002', location: 'Lucknow-Agra Expressway',        lastService: '2026-07-01', odometerKm: 62100,  fuelLevel: 64, activityLog: [{ id: 'ACT-4', title: 'Dispatched on Trip TRP-1002', timestamp: 'Aug 31, 06:00 AM', type: 'delivery' }] },
-    { id: 'V003', vehicleNo: 'UP32 EF 9012', type: 'Multi-Axle Trailer',      capacity: 20000, currentLoad: 0,    status: 'Available',   driverId: 'D003', location: 'Kanpur Logistics Depot',         lastService: '2026-08-05', odometerKm: 114500, fuelLevel: 92, activityLog: [{ id: 'ACT-6', title: 'Returned to Kanpur Yard', timestamp: 'Aug 25, 15:00 PM', type: 'delivery' }] },
-    { id: 'V004', vehicleNo: 'UP32 GH 3456', type: 'Heavy Duty Truck',        capacity: 15000, currentLoad: 0,    status: 'Available',   driverId: null,   location: 'Central Distribution Hub',        lastService: '2026-08-10', odometerKm: 34100,  fuelLevel: 75, activityLog: [{ id: 'ACT-8', title: 'Scheduled 30,000km Service Done', timestamp: 'Aug 10, 08:30 AM', type: 'maintenance' }] },
-    { id: 'V005', vehicleNo: 'UP32 IJ 7890', type: 'Light Commercial Vehicle', capacity: 5000,  currentLoad: 4800, status: 'In Transit',  driverId: 'D004', location: 'NH-27 En Route',                 lastService: '2026-07-22', odometerKm: 28400,  fuelLevel: 45, activityLog: [{ id: 'ACT-9', title: 'Loaded at Warehouse Bay 2', timestamp: 'Aug 31, 07:30 AM', type: 'delivery' }] },
-    { id: 'V006', vehicleNo: 'UP32 KL 2345', type: 'Multi-Axle Trailer',      capacity: 25000, currentLoad: 0,    status: 'Maintenance', driverId: null,   location: 'Central Distribution Hub Workshop', lastService: '2026-08-28', odometerKm: 185000, fuelLevel: 30, activityLog: [{ id: 'ACT-10', title: 'Engine Diagnostic & Gearbox Overhaul', timestamp: 'Aug 28, 14:00 PM', type: 'maintenance' }] },
-  ]).onConflictDoNothing();
+  await db.insert(schema.vehicles).values(inDemo([
+    { id: 'V001', vehicleNo: 'UP32 AB 1234', type: 'Heavy Duty Truck',       capacity: 10000, currentLoad: 0,    status: 'Available',   driverId: 'D001', location: 'Central Distribution Hub',        lastService: '2026-08-15', odometerKm: 48250,  fuelLevel: 88, activityLog: [{ id: 'ACT-1', title: 'Maintenance Completed (Full Inspection)', timestamp: 'Aug 24, 09:00 AM', type: 'maintenance' as const }, { id: 'ACT-2', title: 'Delivery Logged: ORD-992 (Kanpur)', timestamp: 'Aug 22, 14:30 PM', type: 'delivery' as const }] },
+    { id: 'V002', vehicleNo: 'UP32 CD 5678', type: 'Medium Truck',            capacity: 7000,  currentLoad: 6200, status: 'In Transit',  driverId: 'D002', location: 'Lucknow-Agra Expressway',        lastService: '2026-07-01', odometerKm: 62100,  fuelLevel: 64, activityLog: [{ id: 'ACT-4', title: 'Dispatched on Trip TRP-1002', timestamp: 'Aug 31, 06:00 AM', type: 'delivery' as const }] },
+    { id: 'V003', vehicleNo: 'UP32 EF 9012', type: 'Multi-Axle Trailer',      capacity: 20000, currentLoad: 0,    status: 'Available',   driverId: 'D003', location: 'Kanpur Logistics Depot',         lastService: '2026-08-05', odometerKm: 114500, fuelLevel: 92, activityLog: [{ id: 'ACT-6', title: 'Returned to Kanpur Yard', timestamp: 'Aug 25, 15:00 PM', type: 'delivery' as const }] },
+    { id: 'V004', vehicleNo: 'UP32 GH 3456', type: 'Heavy Duty Truck',        capacity: 15000, currentLoad: 0,    status: 'Available',   driverId: null,   location: 'Central Distribution Hub',        lastService: '2026-08-10', odometerKm: 34100,  fuelLevel: 75, activityLog: [{ id: 'ACT-8', title: 'Scheduled 30,000km Service Done', timestamp: 'Aug 10, 08:30 AM', type: 'maintenance' as const }] },
+    { id: 'V005', vehicleNo: 'UP32 IJ 7890', type: 'Light Commercial Vehicle', capacity: 5000,  currentLoad: 4800, status: 'In Transit',  driverId: 'D004', location: 'NH-27 En Route',                 lastService: '2026-07-22', odometerKm: 28400,  fuelLevel: 45, activityLog: [{ id: 'ACT-9', title: 'Loaded at Warehouse Bay 2', timestamp: 'Aug 31, 07:30 AM', type: 'delivery' as const }] },
+    { id: 'V006', vehicleNo: 'UP32 KL 2345', type: 'Multi-Axle Trailer',      capacity: 25000, currentLoad: 0,    status: 'Maintenance', driverId: null,   location: 'Central Distribution Hub Workshop', lastService: '2026-08-28', odometerKm: 185000, fuelLevel: 30, activityLog: [{ id: 'ACT-10', title: 'Engine Diagnostic & Gearbox Overhaul', timestamp: 'Aug 28, 14:00 PM', type: 'maintenance' as const }] },
+  ])).onConflictDoNothing();
 
   // ─── Drivers ────────────────────────────────────────────────────────────────
   console.log('👨‍✈️ Seeding drivers...');
-  await db.insert(schema.drivers).values([
+  await db.insert(schema.drivers).values(inDemo([
     { id: 'D001', name: 'Ahmed Khan',    phone: '+91 98765 43210', licenseNo: 'DL-982-XYZ', licenseExpiry: '2028-06-15', vehicleId: 'V001', status: 'Available', trips: 142, rating: '4.8', documentVerified: true },
     { id: 'D002', name: 'Ravi Kumar',    phone: '+91 97654 32109', licenseNo: 'DL-834-ABC', licenseExpiry: '2027-03-22', vehicleId: 'V002', status: 'On Trip',   trips: 98,  rating: '4.6', documentVerified: true },
     { id: 'D003', name: 'Imran Ali',     phone: '+91 96543 21098', licenseNo: 'DL-441-PQR', licenseExpiry: '2029-01-10', vehicleId: 'V003', status: 'Available', trips: 215, rating: '4.9', documentVerified: true },
     { id: 'D004', name: 'Suresh Yadav',  phone: '+91 95432 10987', licenseNo: 'DL-672-LMN', licenseExpiry: '2026-11-30', vehicleId: 'V005', status: 'On Trip',   trips: 67,  rating: '4.5', documentVerified: true },
     { id: 'D005', name: 'Mohan Singh',   phone: '+91 94321 09876', licenseNo: 'DL-319-DEF', licenseExpiry: '2027-08-14', vehicleId: null,   status: 'Available', trips: 189, rating: '4.7', documentVerified: true },
     { id: 'D006', name: 'Deepak Verma',  phone: '+91 93210 98765', licenseNo: 'DL-155-GHI', licenseExpiry: '2028-04-20', vehicleId: null,   status: 'Off Duty',  trips: 55,  rating: '4.3', documentVerified: false },
-  ]).onConflictDoNothing();
+  ])).onConflictDoNothing();
 
   // ─── Orders ─────────────────────────────────────────────────────────────────
   console.log('📋 Seeding orders...');
-  await db.insert(schema.orders).values([
+  await db.insert(schema.orders).values(inDemo([
     { id: 'ORD-1001', customerId: 'C001', origin: 'Central Distribution Hub', destination: 'Kanpur Facility',          items: [{ productId: 'P001', quantity: 5000, batchCode: 'ST-2026-88', scanned: false }, { productId: 'P002', quantity: 2500, batchCode: 'FS-2026-42', scanned: false }], totalWeight: 7500, status: 'Pending',    vehicleId: null,   driverId: null,   distance: 82,  freightRate: '2.4', loadingBay: 'Bay 4', deadline: 'Today 18:00' },
     { id: 'ORD-0998', customerId: 'C002', origin: 'Central Distribution Hub', destination: 'Agra Corridor',            items: [{ productId: 'P004', quantity: 4000, batchCode: 'SG-2026-11', scanned: true }],                                                                            totalWeight: 4000, status: 'Allocated',  vehicleId: 'V001', driverId: 'D001', distance: 340, freightRate: '2.2', loadingBay: 'Bay 2', deadline: 'Tomorrow 10:00' },
     { id: 'ORD-0995', customerId: 'C003', origin: 'Central Distribution Hub', destination: 'East Distribution Center', items: [{ productId: 'P001', quantity: 5000, batchCode: 'ST-2026-77', scanned: true }, { productId: 'P005', quantity: 4000, batchCode: 'OL-2026-30', scanned: true }],  totalWeight: 9000, status: 'In Transit', vehicleId: 'V002', driverId: 'D002', distance: 512, freightRate: '2.0', loadingBay: 'Bay 1', deadline: 'Today 22:00' },
     { id: 'ORD-0992', customerId: 'C004', origin: 'Central Distribution Hub', destination: 'Prayagraj Logistics Depot', items: [{ productId: 'P003', quantity: 6000, batchCode: 'RC-2026-09', scanned: true }],                                                                             totalWeight: 6000, status: 'Delivered',  vehicleId: 'V003', driverId: 'D003', distance: 200, freightRate: '2.3', loadingBay: 'Bay 3', deadline: 'Completed' },
     { id: 'ORD-0988', customerId: 'C005', origin: 'Central Distribution Hub', destination: 'Varanasi Industrial Hub',  items: [{ productId: 'P006', quantity: 3000, batchCode: 'CB-2026-55', scanned: true }],                                                                             totalWeight: 3000, status: 'Delivered',  vehicleId: 'V003', driverId: 'D003', distance: 322, freightRate: '2.1', loadingBay: 'Bay 5', deadline: 'Completed' },
-  ]).onConflictDoNothing();
+  ])).onConflictDoNothing();
 
   // ─── Trips ──────────────────────────────────────────────────────────────────
   console.log('🗺️ Seeding trips...');
-  await db.insert(schema.trips).values([
+  await db.insert(schema.trips).values(inDemo([
     {
       id: 'TRP-1001', orderId: 'ORD-0995', vehicleId: 'V002', driverId: 'D002',
       origin: 'Central Distribution Hub', destination: 'East Distribution Center',
@@ -131,18 +165,18 @@ async function seed() {
         { name: 'Prayagraj City Ingate', location: 'Naini Park', passed: true, time: '13:30 PM' },
       ],
     },
-  ]).onConflictDoNothing();
+  ])).onConflictDoNothing();
 
   // ─── Invoices ───────────────────────────────────────────────────────────────
   console.log('🧾 Seeding invoices...');
-  await db.insert(schema.invoices).values([
-    { id: 'INV-1004', orderId: 'ORD-0992', customerId: 'C004', tripId: 'TRP-1002', freight: '13800', loading: '2000', unloading: '1500', damageDeduction: '0', subtotal: '17300', gst: '3114', total: '20414', status: 'Paid',    podSigned: true,  receiverName: 'Sanjay Patel' },
-    { id: 'INV-1005', orderId: 'ORD-0988', customerId: 'C005', tripId: null,       freight: '14322', loading: '2000', unloading: '1500', damageDeduction: '0', subtotal: '17822', gst: '3208', total: '21030', status: 'Pending', podSigned: true,  receiverName: 'Nisha Jain' },
-  ]).onConflictDoNothing();
+  await db.insert(schema.invoices).values(inDemo([
+    { id: 'INV-1004', orderId: 'ORD-0992', customerId: 'C004', tripId: 'TRP-1002', freight: '13800', loading: '2000', unloading: '1500', damageDeduction: '0', subtotal: '17300', gst: '0', gstScheme: 'RCM_5', placeOfSupply: '09', cgst: '432.50', sgst: '432.50', total: '17300', status: 'Paid',    podSigned: true,  receiverName: 'Sanjay Patel' },
+    { id: 'INV-1005', orderId: 'ORD-0988', customerId: 'C005', tripId: null,       freight: '14322', loading: '2000', unloading: '1500', damageDeduction: '0', subtotal: '17822', gst: '0', gstScheme: 'RCM_5', placeOfSupply: '09', cgst: '445.55', sgst: '445.55', total: '17822', status: 'Pending', podSigned: true,  receiverName: 'Nisha Jain' },
+  ])).onConflictDoNothing();
 
   // ─── Driver Messages ────────────────────────────────────────────────────────
   console.log('💬 Seeding driver messages...');
-  await db.insert(schema.driverMessages).values([
+  await db.insert(schema.driverMessages).values(inDemo([
     { driverId: 'D001', sender: 'driver',      text: 'Vehicle UP32 AB 1234 is fueled up and ready at Bay 4.' },
     { driverId: 'D001', sender: 'dispatcher',  text: 'Great Ahmed, we are allocating ORD-1001 for Kanpur delivery today.' },
     { driverId: 'D001', sender: 'driver',      text: 'Understood. Awaiting warehouse loading confirmation.' },
@@ -150,35 +184,50 @@ async function seed() {
     { driverId: 'D002', sender: 'dispatcher',  text: 'Copy that Ravi, keep speed under 70 km/h due to fog advisory.' },
     { driverId: 'D003', sender: 'driver',      text: 'Proof of delivery signed by Mr. Sanjay Patel for ORD-0992.' },
     { driverId: 'D003', sender: 'dispatcher',  text: 'Verified! Returning to Kanpur depot approved.' },
-  ]);
+  ]));
 
   // ─── System Alerts ──────────────────────────────────────────────────────────
   console.log('🔔 Seeding system alerts...');
-  await db.insert(schema.systemAlerts).values([
+  await db.insert(schema.systemAlerts).values(inDemo([
     { title: 'Weather Warning: Fog Alert on Lucknow-Agra Corridor', description: 'Reduced visibility on NH-19 corridor. Speed limit restricted to 50 km/h recommended for heavy vehicles.', severity: 'warning',  category: 'Weather' },
     { title: 'Fleet Scheduled Maintenance: UP32 KL 2345 in Workshop',    description: 'Vehicle V006 is undergoing mandatory 180,000km gearbox inspection. Expected turnaround: 24 hours.',             severity: 'info',     category: 'Fleet' },
     { title: 'Driver Credential: D006 (Deepak Verma) License Renewal Due', description: 'Commercial license expires in under 60 days. Verification upload pending in driver portal.',                    severity: 'critical', category: 'Driver' },
-  ]);
+  ]));
 
   // ─── Knowledge Base ─────────────────────────────────────────────────────────
   console.log('📚 Seeding knowledge base...');
-  await db.insert(schema.knowledgeBase).values([
+  await db.insert(schema.knowledgeBase).values(inDemo([
     { id: 'KB-001', category: 'Hours & Operations', title: 'Central Hub Dispatch Dock Hours & Staging Protocols',     content: 'Lucknow Central Hub operates dispatch bays 1 through 6 continuously from 06:00 to 23:00 daily. Inbound freight staging requires 45 minutes prior check-in. Axle scale calibration occurs at 05:30 daily.', keywords: ['hours', 'dock', 'bays', 'staging', 'operating hours', 'open', 'timing'], lastUpdated: '2026-09-01' },
     { id: 'KB-002', category: 'Lane Rates',         title: 'Standard Freight Corridor Pricing Card (Per KG)',           content: 'Base corridor tariffs: Lucknow ➔ Kanpur (82 km): ₹2.4/kg; Lucknow ➔ Agra (340 km): ₹2.2/kg; Lucknow ➔ Delhi NCR (512 km): ₹2.0/kg; Lucknow ➔ Varanasi (322 km): ₹2.1/kg. Minimum billing weight: 1,000 kg.',   keywords: ['rate', 'pricing', 'quote', 'cost', 'per kg', 'price', 'tariff', 'freight charges'], lastUpdated: '2026-09-02' },
     { id: 'KB-003', category: 'Cold-Chain SLA',     title: 'Reefer Cold-Chain Temperature Compliance & Thresholds',     content: 'Perishable goods require calibrated reefer containers maintaining +2°C to +6°C for dairy/produce and -18°C for frozen cargo. Telematics gateway triggers an audible alarm and SMS alert if temp deviates by >2.5°C for over 15 minutes.', keywords: ['cold chain', 'reefer', 'temperature', 'frozen', 'perishable', 'pharma', 'dairy'], lastUpdated: '2026-08-28' },
     { id: 'KB-004', category: 'Safety & HAZMAT',    title: 'Highway Breakdown, Spillage & Emergency Response SOP',      content: 'In case of tire blowout, mechanical failure, or road incident, drivers must activate hazard lights, place reflective triangles 50m behind vehicle, and call our 24/7 Operations Hotline at 1800-PRE-LMS (ext 9). Recovery dispatch deployed within 40 mins.', keywords: ['emergency', 'breakdown', 'accident', 'spill', 'tire', 'puncture', 'police', 'urgent', 'hotline'], lastUpdated: '2026-08-30' },
-    { id: 'KB-005', category: 'GST & Invoicing',    title: 'GST Tax Invoicing & e-Way Bill Reconciliation Rules',        content: 'All inter-state dispatches are levied with 18% IGST; intra-state shipments are billed with 9% CGST + 9% SGST. Official GST tax invoices require signed electronic Proof of Delivery (e-POD) and valid e-Way bill numbers.', keywords: ['gst', 'tax', 'invoice', 'eway bill', 'billing', 'rates', 'cgst', 'sgst', 'igst'], lastUpdated: '2026-08-25' },
-  ]).onConflictDoNothing();
+    { id: 'KB-005', category: 'GST & Invoicing',    title: 'GST Tax Invoicing & e-Way Bill Reconciliation Rules',        content: 'Freight is billed as a GTA service under reverse charge: the invoice adds no GST, and the customer pays 5% to the government. Customers registered in Uttar Pradesh pay 2.5% CGST + 2.5% SGST; customers in other states pay 5% IGST (the place of supply is the state in the customer\'s GSTIN). Official GST tax invoices require signed electronic Proof of Delivery (e-POD) and valid e-Way bill numbers.', keywords: ['gst', 'tax', 'invoice', 'eway bill', 'billing', 'rates', 'cgst', 'sgst', 'igst', 'reverse charge', 'rcm'], lastUpdated: '2026-10-18' },
+  ])).onConflictDoNothing();
 
   // ─── Shipper Leads ──────────────────────────────────────────────────────────
   console.log('🎯 Seeding shipper leads...');
-  await db.insert(schema.shipperLeads).values([
-    { id: 'LEAD-101', shipperName: 'Ramesh Gupta', companyName: 'Tata Consumer Products Ltd', phone: '+91 98210 44321', email: 'r.gupta@tataconsumer.com', originHub: 'Lucknow Central Hub', destinationHub: 'Delhi NCR Hub',     cargoType: 'Standard Freight', estimatedWeightKg: 12000, freightQuote: '28800', targetDeliveryDate: '2026-09-05', isUrgent: false, status: 'New',       transcriptSnippet: 'Need 12T dry container freight from Lucknow to Delhi. Can we schedule pickup Friday morning?' },
-    { id: 'LEAD-102', shipperName: 'Priya Nair',   companyName: 'Amul Fresh Dairy Logistics',  phone: '+91 94501 88712', email: 'p.nair@amul.coop',           originHub: 'Kanpur Regional Facility', destinationHub: 'Agra Corridor', cargoType: 'Cold-Chain Reefer', estimatedWeightKg: 6500,  freightQuote: '16900', targetDeliveryDate: '2026-09-04', isUrgent: true,  status: 'New',       transcriptSnippet: 'Inquiring regarding reefer container with +4°C setpoint for pasteurized dairy pallets.' },
-    { id: 'LEAD-103', shipperName: 'Anil Mathur',  companyName: 'L&T Heavy Engineering',       phone: '+91 97112 55901', email: 'a.mathur@lnt.com',           originHub: 'Lucknow Central Hub',     destinationHub: 'Varanasi Industrial Hub', cargoType: 'Heavy Industrial', estimatedWeightKg: 9000, freightQuote: '20700', targetDeliveryDate: '2026-09-06', isUrgent: false, status: 'Allocated', transcriptSnippet: 'Machinery components shipment approved. Dispatched under invoice INV-1004.', associatedOrderId: 'ORD-0988' },
-  ]).onConflictDoNothing();
+  await db.insert(schema.shipperLeads).values(inDemo([
+    { id: 'LEAD-101', shipperName: 'Ramesh G.', companyName: 'Northwind Consumer Goods (demo)', phone: '+91 90000 00101', email: 'ramesh@northwind.example', originHub: 'Lucknow Central Hub', destinationHub: 'Delhi NCR Hub',     cargoType: 'Standard Freight', estimatedWeightKg: 12000, freightQuote: '28800', targetDeliveryDate: '2026-09-05', isUrgent: false, status: 'New',       transcriptSnippet: 'Need 12T dry container freight from Lucknow to Delhi. Can we schedule pickup Friday morning?' },
+    { id: 'LEAD-102', shipperName: 'Priya N.',     companyName: 'Greenfield Dairy Co-op (demo)', phone: '+91 90000 00102', email: 'priya@greenfield.example',  originHub: 'Kanpur Regional Facility', destinationHub: 'Agra Corridor', cargoType: 'Cold-Chain Reefer', estimatedWeightKg: 6500,  freightQuote: '16900', targetDeliveryDate: '2026-09-04', isUrgent: true,  status: 'New',       transcriptSnippet: 'Inquiring regarding reefer container with +4°C setpoint for pasteurized dairy pallets.' },
+    { id: 'LEAD-103', shipperName: 'Anil M.',      companyName: 'Ironbridge Engineering (demo)', phone: '+91 90000 00103', email: 'anil@ironbridge.example',   originHub: 'Lucknow Central Hub',     destinationHub: 'Varanasi Industrial Hub', cargoType: 'Heavy Industrial', estimatedWeightKg: 9000, freightQuote: '20700', targetDeliveryDate: '2026-09-06', isUrgent: false, status: 'Allocated', transcriptSnippet: 'Machinery components shipment approved. Dispatched under invoice INV-1004.', associatedOrderId: 'ORD-0988' },
+  ])).onConflictDoNothing();
 
-  console.log('\n✅ Seed complete! Database populated with real initial data.\n');
+  // ─── ID counters: continue numbering after the seeded IDs ────────────────────
+  await db.execute(rawSql`
+    INSERT INTO id_counters (kind, last_value)
+    SELECT 'ORD', coalesce(max(nullif(regexp_replace(id, '[^0-9]', '', 'g'), '')::bigint), 1000) FROM orders
+    UNION ALL SELECT 'TRP', coalesce(max(nullif(regexp_replace(id, '[^0-9]', '', 'g'), '')::bigint), 1000) FROM trips
+    UNION ALL SELECT 'INV', coalesce(max(nullif(regexp_replace(id, '[^0-9]', '', 'g'), '')::bigint), 1000) FROM invoices
+    UNION ALL SELECT 'CUST', coalesce(max(nullif(regexp_replace(id, '[^0-9]', '', 'g'), '')::bigint), 0) FROM customers
+    UNION ALL SELECT 'DRV', coalesce(max(nullif(regexp_replace(id, '[^0-9]', '', 'g'), '')::bigint), 0) FROM drivers
+    UNION ALL SELECT 'VEH', coalesce(max(nullif(regexp_replace(id, '[^0-9]', '', 'g'), '')::bigint), 0) FROM vehicles
+    UNION ALL SELECT 'LEAD', coalesce(max(nullif(regexp_replace(id, '[^0-9]', '', 'g'), '')::bigint), 1000) FROM shipper_leads
+    UNION ALL SELECT 'KB', coalesce(max(nullif(regexp_replace(id, '[^0-9]', '', 'g'), '')::bigint), 100) FROM knowledge_base
+    ON CONFLICT (kind) DO UPDATE SET last_value = greatest(id_counters.last_value, excluded.last_value)
+  `);
+
+  console.log('\n✅ Seed complete! Demo Workspace populated with fictional sample data.\n');
+  await local?.close();
   process.exit(0);
 }
 

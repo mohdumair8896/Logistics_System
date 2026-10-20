@@ -2,8 +2,9 @@
 // Bilingual Hindi / Hinglish / English NLU. Parses driver messages and triggers actions.
 
 import { db } from '@/lib/db';
+import { currentTenantId } from '@/lib/tenancy';
 import { drivers, trips, driverMessages } from '@/lib/schema';
-import { eq, desc } from 'drizzle-orm';
+import { and, eq, desc } from 'drizzle-orm';
 import type { AgentModule, LogisticsEvent, AgentResult, AgentReasoningStep } from '../../core/types';
 import { LogisticsEventGraph } from '../../core/eventGraph';
 
@@ -40,11 +41,11 @@ export class DriverAgent implements AgentModule<DriverMessagePayload> {
     });
 
     // 1. Fetch driver and active trip
-    const [driver] = await db.select().from(drivers).where(eq(drivers.id, driverId)).limit(1);
+    const [driver] = await db.select().from(drivers).where(and(eq(drivers.tenantId, currentTenantId()), eq(drivers.id, driverId))).limit(1);
     const [activeTrip] = await db
       .select()
       .from(trips)
-      .where(eq(trips.driverId, driverId))
+      .where(and(eq(trips.tenantId, currentTenantId()), eq(trips.driverId, driverId)))
       .orderBy(desc(trips.createdAt))
       .limit(1);
 
@@ -61,12 +62,12 @@ export class DriverAgent implements AgentModule<DriverMessagePayload> {
 
     // 3. Persist driver incoming message in DB
     try {
-      await db.insert(driverMessages).values({
+      await db.insert(driverMessages).values({ tenantId: currentTenantId(),
         driverId,
         sender: 'driver',
         text,
       });
-      await db.insert(driverMessages).values({
+      await db.insert(driverMessages).values({ tenantId: currentTenantId(),
         driverId,
         sender: 'dispatcher',
         text: parsedIntent.replyInHindi,

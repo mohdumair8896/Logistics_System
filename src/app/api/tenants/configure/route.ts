@@ -1,54 +1,89 @@
+// POST /api/tenants/configure — save the /setup questionnaire for the signed-in workspace:
+// archetype + score on the tenant, enabled modules (tenant_modules), autonomy level and
+// integrations (tenant_configs). Then re-issue the session with isConfigured: true.
+
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth, isAuthError, createSessionToken, COOKIE_OPTIONS } from '@/lib/auth';
-import { db } from '@/lib/db';
-import { tenants } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
+import { z } from 'zod';
+import { requireTenant, isAuthError, createSessionToken, COOKIE_OPTIONS } from '@/lib/auth';
+import { requirePermission } from '@/lib/permissions';
+import { withTenant } from '@/lib/tenancy';
+import { parseJsonBody } from '@/lib/validation';
+import { tenants, tenantModules, tenantConfigs } from '@/lib/schema';
+
+const moduleCode = z.string().regex(/^[A-Z][A-Z0-9_]{1,49}$/, 'Invalid module code');
+
+const configureSchema = z.object({
+  archetype: z.string().regex(/^[A-Z0-9_]{2,40}$/).optional().default('FLEET_OWNER'),
+  complexityScore: z.number().int().min(0).max(100).optional().default(25),
+  companyName: z.string().trim().min(1).max(150).optional(),
+  enabledModules: z.array(moduleCode).max(50).optional(),
+  autonomyLevel: z.number().int().min(0).max(5).optional(),
+  activeIntegrations: z.array(z.string().trim().min(1).max(50)).max(50).optional(),
+});
 
 export async function POST(request: NextRequest) {
   try {
-    const auth = await requireAuth(request);
+    const auth = await requireTenant(request);
     if (isAuthError(auth)) return auth;
+    const denied = requirePermission(auth, 'tenant.configure');
+    if (denied) return denied;
 
-    const body = await request.json().catch(() => null);
-    if (!body) {
-      return NextResponse.json({ success: false, message: 'Invalid payload' }, { status: 400 });
-    }
+    const parsed = await parseJsonBody(request, configureSchema);
+    if (!parsed.ok) return parsed.response;
+    const { archetype, complexityScore, companyName, enabledModules, autonomyLevel, activeIntegrations } = parsed.data;
+    const tenantId = auth.tenantId;
 
-    const {
-      archetype = 'FLEET_OWNER',
-      complexityScore = 25,
-      companyName,
-    } = body;
+    const tenantName = await withTenant(tenantId, async (tx) => {
+      const [existing] = await tx.select({ name: tenants.name }).from(tenants).where(eq(tenants.id, tenantId));
+      if (!existing) return null;
 
-    const tenantId = auth.tenantId || `ten_custom_${Date.now()}`;
+      await tx.update(tenants).set({
+        archetype,
+        complexityScore,
+        isConfigured: true,
+        name: companyName || existing.name,
+      }).where(eq(tenants.id, tenantId));
 
-    // 1. Update tenant record in database
-    try {
-      const [existing] = await db.select().from(tenants).where(eq(tenants.id, tenantId));
-      if (existing) {
-        await db.update(tenants).set({
-          archetype,
-          complexityScore,
-          isConfigured: true,
-          name: companyName || existing.name,
-        }).where(eq(tenants.id, tenantId));
+      // Module entitlements: replace the set with what the questionnaire recommended
+      if (enabledModules) {
+        await tx.delete(tenantModules).where(eq(tenantModules.tenantId, tenantId));
+        const unique = Array.from(new Set(enabledModules));
+        if (unique.length > 0) {
+          await tx.insert(tenantModules).values(unique.map(code => ({ tenantId, moduleCode: code, isEnabled: true })));
+        }
       }
-    } catch (dbErr) {
-      console.warn('[Configure API] DB update warning:', dbErr);
+
+      if (autonomyLevel !== undefined || activeIntegrations !== undefined) {
+        const values = {
+          ...(autonomyLevel !== undefined ? { autonomyLevel } : {}),
+          ...(activeIntegrations !== undefined ? { activeIntegrations } : {}),
+          updatedAt: new Date(),
+        };
+        await tx.insert(tenantConfigs).values({ tenantId, ...values })
+          .onConflictDoUpdate({ target: tenantConfigs.tenantId, set: values });
+      }
+
+      return companyName || existing.name;
+    });
+
+    if (!tenantName) {
+      return NextResponse.json({ success: false, message: 'Workspace not found' }, { status: 404 });
     }
 
-    // 2. Re-issue updated session token with isConfigured: true
+    // Re-issue the session token with isConfigured: true
     const updatedToken = await createSessionToken({
+      sid: auth.sid, // same server-side session, refreshed claims
       userId: auth.userId,
       email: auth.email,
-      role: auth.role as 'Operations Director' | 'Fleet Dispatcher' | 'Compliance Officer',
+      role: auth.role,
       name: auth.name,
       facility: companyName || auth.facility,
       avatar: auth.avatar,
       tenantId,
       isConfigured: true, // <<-- Now fully unlocked!
       plan: auth.plan || 'GROWTH',
-      companyName: companyName || auth.companyName,
+      companyName: tenantName,
     });
 
     const response = NextResponse.json({

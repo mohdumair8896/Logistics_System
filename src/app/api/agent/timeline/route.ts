@@ -1,9 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { requireTenant, isAuthError } from '@/lib/auth';
+import { runAsTenant } from '@/lib/tenancy';
 import { LogisticsEventGraph } from '@/lib/agents/core/eventGraph';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
+  const auth = await requireTenant(req);
+  if (isAuthError(auth)) return auth;
   try {
     const { searchParams } = new URL(req.url);
     const shipmentId = searchParams.get('shipmentId');
@@ -12,7 +16,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ success: false, error: 'shipmentId query param required' }, { status: 400 });
     }
 
-    const timeline = await LogisticsEventGraph.getShipmentTimeline(shipmentId);
+    const timeline = await runAsTenant(auth.tenantId, () => LogisticsEventGraph.getShipmentTimeline(shipmentId));
 
     return NextResponse.json({
       success: true,

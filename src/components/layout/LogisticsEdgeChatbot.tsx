@@ -19,7 +19,7 @@ import { DotPulse } from '@/components/ui/DotPulse';
 const defaultKnowledgeBase = [
   { keywords: ['rate', 'pricing', 'quote', 'cost', 'per kg', 'price', 'tariff', 'freight charges'], content: 'Base corridor tariffs: Lucknow ➔ Kanpur (82 km): ₹2.4/kg; Lucknow ➔ Agra (340 km): ₹2.2/kg; Lucknow ➔ Delhi NCR (512 km): ₹2.0/kg; Lucknow ➔ Varanasi (322 km): ₹2.1/kg. Minimum billing weight: 1,000 kg.' },
   { keywords: ['cold chain', 'reefer', 'temperature', 'frozen', 'perishable', 'pharma', 'dairy'], content: 'Perishable goods require calibrated reefer containers maintaining +2°C to +6°C for dairy/produce and -18°C for frozen cargo. Telematics gateway triggers an audible alarm and SMS alert if temp deviates by >2.5°C for over 15 minutes.' },
-  { keywords: ['emergency', 'breakdown', 'accident', 'spill', 'tire', 'puncture', 'police', 'urgent', 'hotline'], content: 'In case of tire blowout, mechanical failure, or road incident, drivers must activate hazard lights, place reflective triangles 50m behind vehicle, and call our 24/7 Operations Hotline at 1800-PRE-LMS (ext 9). Recovery dispatch deployed within 40 mins.' },
+  { keywords: ['emergency', 'breakdown', 'accident', 'spill', 'tire', 'puncture', 'police', 'urgent', 'hotline'], content: 'In case of tire blowout, mechanical failure, or road incident, drivers must activate hazard lights, place reflective triangles 50m behind vehicle, and call our 24/7 Operations Hotline. Recovery dispatch deployed within 40 mins.' },
   { keywords: ['gst', 'tax', 'invoice', 'eway bill', 'billing', 'rates', 'cgst', 'sgst', 'igst'], content: 'All inter-state dispatches are levied with 18% IGST; intra-state shipments are billed with 9% CGST + 9% SGST. Official GST tax invoices require signed electronic Proof of Delivery (e-POD) and valid e-Way bill numbers.' },
   { keywords: ['hours', 'dock', 'bays', 'staging', 'operating hours', 'open', 'timing'], content: 'Lucknow Central Hub operates dispatch bays 1 through 6 continuously from 06:00 to 23:00 daily. Inbound freight staging requires 45 minutes prior check-in. Axle scale calibration occurs at 05:30 daily.' },
 ];
@@ -172,7 +172,7 @@ function ChatbotDrawer({ onClose }: { onClose: () => void }) {
         id, sender: 'bot', time,
         text: safetyArticle
           ? `**Emergency Protocol & SOP:**\n${safetyArticle.content}`
-          : 'Drivers must place reflective warning triangles 50m behind vehicle and dial 1800-PRE-LMS (ext 9). Recovery dispatch arrives within 40 mins.',
+          : 'Drivers must place reflective warning triangles 50m behind vehicle and call the Operations Hotline. Recovery dispatch arrives within 40 mins.',
         actionLink: { href: '/drivers', label: 'View Driver Compliance Roster →' }
       };
     }
@@ -263,14 +263,14 @@ function ChatbotDrawer({ onClose }: { onClose: () => void }) {
         borderRadius: 20,
         display: 'flex',
         flexDirection: 'column',
-        boxShadow: '0 20px 50px rgba(0, 0, 0, 0.12), 0 0 20px rgba(0, 87, 255, 0.08)',
+        boxShadow: '0 20px 50px rgba(0, 0, 0, 0.12), 0 0 20px rgba(11, 107, 78, 0.08)',
         overflow: 'hidden',
         animation: 'fadeIn 0.2s ease-out',
       }}
     >
       {/* Header */}
       <div style={{
-        background: 'linear-gradient(135deg, rgba(0, 87, 255, 0.08), rgba(0, 87, 255, 0.02))',
+        background: 'linear-gradient(135deg, rgba(11, 107, 78, 0.08), rgba(11, 107, 78, 0.02))',
         padding: '16px 18px',
         borderBottom: '1px solid var(--border)',
         display: 'flex',
@@ -282,7 +282,7 @@ function ChatbotDrawer({ onClose }: { onClose: () => void }) {
             width: 36,
             height: 36,
             borderRadius: 10,
-            background: 'linear-gradient(135deg, #0057FF, #0040CC)',
+            background: 'linear-gradient(135deg, #0B6B4E, #07523C)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -523,22 +523,22 @@ export default function LogisticsEdgeChatbot() {
           gap: 10,
           padding: '12px 20px',
           borderRadius: 99,
-          background: 'linear-gradient(135deg, #0057FF, #0040CC)',
+          background: 'linear-gradient(135deg, #0B6B4E, #07523C)',
           color: '#fff',
           fontWeight: 800,
           fontSize: 13,
           border: '1px solid rgba(255,255,255,0.25)',
-          boxShadow: '0 8px 25px rgba(0, 87, 255, 0.35)',
+          boxShadow: '0 8px 25px rgba(11, 107, 78, 0.35)',
           cursor: 'pointer',
           transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease',
         }}
         onMouseEnter={e => {
           e.currentTarget.style.transform = 'translateY(-2px) scale(1.03)';
-          e.currentTarget.style.boxShadow = '0 12px 35px rgba(0, 87, 255, 0.45)';
+          e.currentTarget.style.boxShadow = '0 12px 35px rgba(11, 107, 78, 0.45)';
         }}
         onMouseLeave={e => {
           e.currentTarget.style.transform = 'translateY(0) scale(1)';
-          e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 87, 255, 0.35)';
+          e.currentTarget.style.boxShadow = '0 8px 25px rgba(11, 107, 78, 0.35)';
         }}
       >
         <div style={{

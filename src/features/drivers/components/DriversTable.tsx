@@ -9,6 +9,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { BadgeWithDot } from '@/components/ui/BadgeWithDot';
 import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/HoverCard';
 import { Empty, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/Empty';
+import { maskLicence } from '@/lib/masking';
 import type { Driver } from '../types';
 import type { Vehicle } from '@/features/vehicles/types';
 
@@ -65,7 +66,7 @@ export default function DriversTable({ drivers, vehicles, selectedId, onSelect }
               {filtered.map(d => {
                 const veh = vehicles.find(v => v.id === d.vehicleId);
                 return (
-                  <tr key={d.id} onClick={() => onSelect(d.id)} style={{ background: selectedId === d.id ? 'var(--brand-10, rgba(0,87,255,0.08))' : '', cursor: 'pointer' }}>
+                  <tr key={d.id} onClick={() => onSelect(d.id)} style={{ background: selectedId === d.id ? 'var(--brand-10, rgba(11, 107, 78,0.08))' : '', cursor: 'pointer' }}>
                     <td>
                       <HoverCard openDelay={150}>
                         <HoverCardTrigger render={
@@ -83,7 +84,7 @@ export default function DriversTable({ drivers, vehicles, selectedId, onSelect }
                             <Avatar name={d.name} size="sm" status={d.status === 'Available' ? 'online' : 'busy'} />
                             <div>
                               <div className="font-bold text-xs text-[var(--text-high)]">{d.name}</div>
-                              <div className="text-[10px] text-[var(--text-low)]">{d.licenseNo || 'Commercial HMV'}</div>
+                              <div className="text-[10px] text-[var(--text-low)]">{d.licenseNo ? `Licence ${maskLicence(d.licenseNo)}` : 'Commercial HMV'}</div>
                             </div>
                           </div>
                           <div className="text-[11px] text-[var(--text-mid)] space-y-1">

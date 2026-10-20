@@ -129,8 +129,8 @@ export function PinInput({
                   transition: 'border-color 0.15s, box-shadow 0.15s',
                 }}
                 onFocus={(e) => {
-                  e.target.style.borderColor = 'var(--brand, #0057FF)';
-                  e.target.style.boxShadow = '0 0 0 3px var(--brand-10, rgba(0,87,255,0.1))';
+                  e.target.style.borderColor = 'var(--brand, #0B6B4E)';
+                  e.target.style.boxShadow = '0 0 0 3px var(--brand-10, rgba(11, 107, 78,0.1))';
                 }}
                 onBlur={(e) => {
                   e.target.style.borderColor = 'var(--border, #E6E4DF)';

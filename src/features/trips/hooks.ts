@@ -4,6 +4,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import type { Trip } from './types';
+import { apiMutate } from '@/lib/apiClient';
 
 function mapTrip(r: Record<string, unknown>): Trip {
   return {
@@ -20,9 +21,9 @@ function mapTrip(r: Record<string, unknown>): Trip {
     startedAt: ((r.startedAt ?? r.started_at) as string) ?? '',
     eta: (r.eta ?? null) as string | null,
     completedAt: (r.completedAt ?? r.completed_at ?? null) as string | null,
-    speedKmH: (r.speedKmH ?? r.speed_kmh) !== undefined ? Number(r.speedKmH ?? r.speed_kmh) : undefined,
-    fuelPercent: (r.fuelPercent ?? r.fuel_percent) !== undefined ? Number(r.fuelPercent ?? r.fuel_percent) : undefined,
-    cargoTemp: (r.cargoTemp ?? r.cargo_temp) as string | undefined,
+    speedKmH: (r.speedKmH ?? r.speed_kmh) != null ? Number(r.speedKmH ?? r.speed_kmh) : undefined,
+    fuelPercent: (r.fuelPercent ?? r.fuel_percent) != null ? Number(r.fuelPercent ?? r.fuel_percent) : undefined,
+    cargoTemp: ((r.cargoTemp ?? r.cargo_temp) as string | null | undefined) ?? undefined,
     geofenceStatus: (r.geofenceStatus ?? r.geofence_status) as Trip['geofenceStatus'] | undefined,
     checkpoints: (r.checkpoints as Trip['checkpoints']) ?? [],
     lat: r.lat as string | null | undefined,
@@ -49,33 +50,24 @@ export function useTrips() {
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
-  const addTrip = useCallback(async (orderId: string): Promise<string> => {
-    const res = await fetch('/api/trips', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderId }),
-    });
-    const data = await res.json();
+  /** Creates a trip for an allocated order. Returns the trip ID, or null if the server refused. */
+  const addTrip = useCallback(async (orderId: string): Promise<string | null> => {
+    const result = await apiMutate<{ id: string }>('/api/trips', 'POST', { orderId });
     await fetchAll();
-    return data.id ?? '';
+    return result.ok ? result.data.id : null;
   }, [fetchAll]);
 
-  const updateTrip = useCallback(async (id: string, updates: Partial<Trip>) => {
-    await fetch(`/api/trips/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updates),
-    });
-    setTrips(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
+  const updateTrip = useCallback(async (id: string, updates: Partial<Trip>): Promise<boolean> => {
+    const result = await apiMutate(`/api/trips/${id}`, 'PATCH', updates);
+    if (result.ok) setTrips(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
+    return result.ok;
   }, []);
 
-  const completeDelivery = useCallback(async (tripId: string) => {
-    await fetch(`/api/trips/${tripId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ _action: 'complete' }),
-    });
+  /** Marks a trip delivered (frees the vehicle and driver). Returns false if the server refused. */
+  const completeDelivery = useCallback(async (tripId: string): Promise<boolean> => {
+    const result = await apiMutate(`/api/trips/${tripId}`, 'PATCH', { _action: 'complete' });
     await fetchAll();
+    return result.ok;
   }, [fetchAll]);
 
   return { trips, loading, addTrip, updateTrip, completeDelivery, refetch: fetchAll };

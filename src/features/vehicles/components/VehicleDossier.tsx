@@ -22,7 +22,7 @@ export default function VehicleDossier({ vehicle, assignedDriver, onChatDriver }
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 46, height: 46, background: 'var(--brand-10, rgba(0,87,255,0.08))', border: '1px solid var(--brand-20, rgba(0,87,255,0.18))', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 46, height: 46, background: 'var(--brand-10, rgba(11, 107, 78,0.08))', border: '1px solid var(--brand-20, rgba(11, 107, 78,0.18))', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Truck size={24} color="var(--brand)" />
           </div>
           <div>
@@ -49,7 +49,7 @@ export default function VehicleDossier({ vehicle, assignedDriver, onChatDriver }
             <span className="hud-gauge-label">Fuel Level</span>
             <Fuel size={13} color="var(--brand)" />
           </div>
-          <div className="hud-gauge-value" style={{ color: 'var(--brand)' }}>{vehicle.fuelLevel ?? 88}%</div>
+          <div className="hud-gauge-value" style={{ color: 'var(--brand)' }}>{vehicle.fuelLevel != null ? `${vehicle.fuelLevel}%` : '—'}</div>
         </div>
         <div className="hud-gauge">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

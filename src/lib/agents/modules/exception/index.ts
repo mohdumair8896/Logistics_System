@@ -3,8 +3,9 @@
 // Automatically executes multi-step corrective workflows and logs auditable incidents.
 
 import { db } from '@/lib/db';
+import { currentTenantId } from '@/lib/tenancy';
 import { trips, orders, systemAlerts } from '@/lib/schema';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import type { AgentModule, LogisticsEvent, AgentResult, AgentReasoningStep, ExceptionCode } from '../../core/types';
 import { PlaybookEngine } from '../../core/playbookEngine';
 
@@ -52,10 +53,10 @@ export class ExceptionAgent implements AgentModule<ExceptionPayload> {
     let trip = null;
     let order = null;
     if (tripId) {
-      const [t] = await db.select().from(trips).where(eq(trips.id, tripId)).limit(1);
+      const [t] = await db.select().from(trips).where(and(eq(trips.tenantId, currentTenantId()), eq(trips.id, tripId))).limit(1);
       trip = t;
       if (trip?.orderId) {
-        const [o] = await db.select().from(orders).where(eq(orders.id, trip.orderId)).limit(1);
+        const [o] = await db.select().from(orders).where(and(eq(orders.tenantId, currentTenantId()), eq(orders.id, trip.orderId))).limit(1);
         order = o;
       }
     }
@@ -82,11 +83,11 @@ export class ExceptionAgent implements AgentModule<ExceptionPayload> {
     // Action A: Calculate revised ETA and update Order / Trip
     const revisedEta = this.calculateRevisedEta(delayMinutes);
     if (order) {
-      await db.update(orders).set({ deadline: revisedEta }).where(eq(orders.id, order.id));
+      await db.update(orders).set({ deadline: revisedEta }).where(and(eq(orders.tenantId, currentTenantId()), eq(orders.id, order.id)));
       automatedActions.push(`Updated order ${order.id} SLA deadline to ${revisedEta}`);
     }
     if (trip) {
-      await db.update(trips).set({ eta: revisedEta }).where(eq(trips.id, trip.id));
+      await db.update(trips).set({ eta: revisedEta }).where(and(eq(trips.tenantId, currentTenantId()), eq(trips.id, trip.id)));
       automatedActions.push(`Re-synced vehicle route corridor telemetry with revised ETA (${revisedEta})`);
     }
 
@@ -97,7 +98,7 @@ export class ExceptionAgent implements AgentModule<ExceptionPayload> {
 
     // Action C: Push system alert to dispatch dashboard
     const alertTitle = `${exceptionType}: ${order?.id || tripId || 'Fleet Disruption'} (+${delayMinutes}m delay)`;
-    await db.insert(systemAlerts).values({
+    await db.insert(systemAlerts).values({ tenantId: currentTenantId(),
       title: alertTitle,
       description: payload.reason || payload.reportedText || `Autonomous agent resolved operational delay for ${tripId}`,
       severity: severity === 'CRITICAL' ? 'critical' : 'warning',

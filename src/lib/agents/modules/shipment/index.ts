@@ -2,8 +2,11 @@
 // Completely isolated module: parses unformatted shipment orders and schedules them.
 
 import { db } from '@/lib/db';
+import { currentTenantId } from '@/lib/tenancy';
 import { orders, customers, vehicles } from '@/lib/schema';
-import { eq, desc } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
+import { nextId } from '@/lib/ids';
+import { roadDistanceKm } from '@/lib/pricing/indicativeQuote';
 import type { AgentModule, LogisticsEvent, AgentResult, AgentReasoningStep } from '../../core/types';
 
 export interface ShipmentIngestPayload {
@@ -34,11 +37,11 @@ export class ShipmentAgent implements AgentModule<ShipmentIngestPayload> {
       timestamp: new Date().toISOString(),
     });
 
-    // 1. Resolve or extract details
-    const origin = payload.origin || 'Central Hub, Delhi';
-    let destination = payload.destination || 'Kanpur Warehouse';
-    let weight = payload.totalWeight || 8500;
-    let customerId = payload.customerId || 'CUST-001';
+    // 1. Resolve or extract details (nothing is invented: missing facts stop the ingest)
+    const origin = payload.origin?.trim() || '';
+    let destination = payload.destination?.trim() || '';
+    let weight = payload.totalWeight || 0;
+    let customerId: string | null = payload.customerId || null;
 
     // If raw text provided (e.g. WhatsApp/Email dump), perform heuristics
     if (payload.rawText) {
@@ -56,6 +59,17 @@ export class ShipmentAgent implements AgentModule<ShipmentIngestPayload> {
       }
     }
 
+    if (!origin || !destination || !(weight > 0)) {
+      const missing = [!origin && 'origin', !destination && 'destination', !(weight > 0) && 'weight'].filter(Boolean).join(', ');
+      return {
+        success: false,
+        agentId: this.id,
+        actionSummary: `Could not create an order: missing ${missing}`,
+        reasoningSteps: steps,
+        error: `Missing ${missing}`,
+      };
+    }
+
     steps.push({
       step: 2,
       title: 'Entity Extraction & Normalization',
@@ -64,20 +78,17 @@ export class ShipmentAgent implements AgentModule<ShipmentIngestPayload> {
       timestamp: new Date().toISOString(),
     });
 
-    // 2. Look up customer or fall back
-    const [cust] = await db.select().from(customers).where(eq(customers.id, customerId)).limit(1);
-    if (!cust) {
-      const [firstCust] = await db.select().from(customers).limit(1);
-      customerId = firstCust ? firstCust.id : 'CUST-001';
+    // 2. The customer must exist in this workspace; otherwise the order is left unassigned
+    if (customerId) {
+      const [cust] = await db.select().from(customers).where(and(eq(customers.tenantId, currentTenantId()), eq(customers.id, customerId))).limit(1);
+      if (!cust) customerId = null;
     }
 
-    // 3. Generate sequential order ID
-    const [latest] = await db.select({ id: orders.id }).from(orders).orderBy(desc(orders.id)).limit(1);
-    const nextNum = latest ? parseInt(latest.id.replace(/\D/g, ''), 10) + 1 : 1001;
-    const newOrderId = `ORD-${String(nextNum).padStart(4, '0')}`;
+    // 3. Order ID from the shared atomic counter (globally unique)
+    const newOrderId = await nextId(db, 'ORD');
 
     // 4. Check available fleet for preliminary fit
-    const availableTrucks = await db.select().from(vehicles).where(eq(vehicles.status, 'Available'));
+    const availableTrucks = await db.select().from(vehicles).where(and(eq(vehicles.tenantId, currentTenantId()), eq(vehicles.status, 'Available')));
     const matchedTruck = availableTrucks.find((v) => v.capacity >= weight);
 
     steps.push({
@@ -91,16 +102,16 @@ export class ShipmentAgent implements AgentModule<ShipmentIngestPayload> {
     });
 
     // 5. Persist order
-    await db.insert(orders).values({
+    await db.insert(orders).values({ tenantId: currentTenantId(),
       id: newOrderId,
       customerId,
       origin,
       destination,
       totalWeight: weight,
       status: 'Pending',
-      distance: 450,
-      freightRate: '2.50',
-      deadline: payload.deadline || 'Tomorrow 18:00',
+      distance: roadDistanceKm(origin, destination),
+      freightRate: null,
+      deadline: payload.deadline || null,
     });
 
     steps.push({

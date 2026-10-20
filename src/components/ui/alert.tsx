@@ -32,8 +32,8 @@ const variantStyles: Record<AlertVariant, {
     defaultIcon: <CheckCircle2 className="size-4 shrink-0 text-[#059669] mt-0.5" />,
   },
   info: {
-    container: 'bg-[rgba(0,87,255,0.06)] text-[#0057FF] border-[rgba(0,87,255,0.2)]',
-    defaultIcon: <Info className="size-4 shrink-0 text-[#0057FF] mt-0.5" />,
+    container: 'bg-[rgba(11, 107, 78,0.06)] text-[#0B6B4E] border-[rgba(11, 107, 78,0.2)]',
+    defaultIcon: <Info className="size-4 shrink-0 text-[#0B6B4E] mt-0.5" />,
   },
 };
 

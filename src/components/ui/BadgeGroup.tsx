@@ -18,8 +18,15 @@ const colorMap: Record<BadgeColor, { bg: string; text: string; border: string; a
     bg: 'var(--surface-1, #FFFFFF)',
     text: 'var(--text-high, #141414)',
     border: 'var(--border, #E6E4DF)',
-    addonBg: 'var(--brand-10, rgba(0, 87, 255, 0.08))',
-    addonText: 'var(--brand, #0057FF)',
+    addonBg: 'var(--brand-10, rgba(11, 107, 78, 0.08))',
+    addonText: 'var(--brand, #0B6B4E)',
+  },
+  info: {
+    bg: 'var(--surface-1, #FFFFFF)',
+    text: 'var(--text-high, #141414)',
+    border: 'rgba(29, 95, 184, 0.25)',
+    addonBg: 'var(--status-active-bg)',
+    addonText: 'var(--status-active)',
   },
   success: {
     bg: 'var(--surface-1, #FFFFFF)',

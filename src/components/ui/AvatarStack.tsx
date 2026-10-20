@@ -38,7 +38,7 @@ export const AvatarStack: FC<AvatarStackProps> = ({
       .toUpperCase();
 
   const getBgColor = (idx: number) => {
-    const palette = ['#0057FF', '#2563EB', '#3B82F6', '#60A5FA', '#1D4ED8'];
+    const palette = ['#0B6B4E', '#2563EB', '#3B82F6', '#60A5FA', '#1D4ED8'];
     return palette[idx % palette.length];
   };
 

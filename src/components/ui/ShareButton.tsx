@@ -182,7 +182,7 @@ export function ShareButton({
                 textAlign: 'left',
               }}
             >
-              {copied ? <Check size={14} color="#10b981" /> : <Link2 size={14} color="var(--brand, #0057FF)" />}
+              {copied ? <Check size={14} color="#10b981" /> : <Link2 size={14} color="var(--brand, #0B6B4E)" />}
               <span>{copied ? 'Link Copied!' : 'Copy Public Link'}</span>
             </motion.button>
 

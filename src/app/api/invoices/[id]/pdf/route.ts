@@ -5,55 +5,49 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { renderToBuffer, type DocumentProps } from '@react-pdf/renderer';
 import { createElement, type ReactElement } from 'react';
-import { db } from '@/lib/db';
 import { invoices, orders, customers, drivers, vehicles, products } from '@/lib/schema';
-import { eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { InvoicePdf } from '@/features/invoices/InvoicePdf';
-import { requireAuth, isAuthError } from '@/lib/auth';
+import { requireTenant, isAuthError } from '@/lib/auth';
+import { withTenant } from '@/lib/tenancy';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const auth = await requireAuth(request);
+  const auth = await requireTenant(request);
   if (isAuthError(auth)) return auth;
   try {
     const { id } = await params;
 
-    // Fetch invoice first
-    const [invRow] = await db.select().from(invoices).where(eq(invoices.id, id));
-    if (!invRow) return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
+    // Load the invoice and everything it references, within this workspace only
+    const loaded = await withTenant(auth.tenantId, async (tx) => {
+      const [invRow] = await tx.select().from(invoices).where(and(eq(invoices.tenantId, auth.tenantId), eq(invoices.id, id)));
+      if (!invRow) return null;
 
-    // Fetch order and customer in parallel
-    const [[orderRow], [customerRow]] = await Promise.all([
-      invRow.orderId ? db.select().from(orders).where(eq(orders.id, invRow.orderId)) : Promise.resolve([null]),
-      invRow.customerId ? db.select().from(customers).where(eq(customers.id, invRow.customerId)) : Promise.resolve([null]),
-    ]);
+      const [[orderRow], [customerRow]] = await Promise.all([
+        invRow.orderId ? tx.select().from(orders).where(and(eq(orders.tenantId, auth.tenantId), eq(orders.id, invRow.orderId))) : Promise.resolve([null]),
+        invRow.customerId ? tx.select().from(customers).where(and(eq(customers.tenantId, auth.tenantId), eq(customers.id, invRow.customerId))) : Promise.resolve([null]),
+      ]);
+      if (!orderRow || !customerRow) return { invRow, orderRow: null, customerRow: null, driverRow: null, vehicleRow: null, productRows: [] };
 
+      // Extract product IDs needed specifically for this invoice's order items
+      const itemProductIds = ((orderRow.items as { productId?: string }[]) || [])
+        .map(i => i.productId)
+        .filter((pid): pid is string => typeof pid === 'string' && pid.length > 0);
+
+      const [[driverRow], [vehicleRow], productRows] = await Promise.all([
+        orderRow.driverId ? tx.select().from(drivers).where(and(eq(drivers.tenantId, auth.tenantId), eq(drivers.id, orderRow.driverId))) : Promise.resolve([null]),
+        orderRow.vehicleId ? tx.select().from(vehicles).where(and(eq(vehicles.tenantId, auth.tenantId), eq(vehicles.id, orderRow.vehicleId))) : Promise.resolve([null]),
+        itemProductIds.length > 0
+          ? tx.select().from(products).where(and(eq(products.tenantId, auth.tenantId), inArray(products.id, itemProductIds)))
+          : Promise.resolve([]),
+      ]);
+      return { invRow, orderRow, customerRow, driverRow, vehicleRow, productRows };
+    });
+
+    if (!loaded) return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
+    const { invRow, orderRow, customerRow, driverRow, vehicleRow, productRows } = loaded;
     if (!orderRow || !customerRow) {
       return NextResponse.json({ error: 'Related data not found' }, { status: 404 });
     }
-
-    // Extract product IDs needed specifically for this invoice's order items
-    const itemProductIds = ((orderRow.items as { productId?: string }[]) || [])
-      .map(i => i.productId)
-      .filter((pid): pid is string => typeof pid === 'string' && pid.length > 0);
-
-    // Fetch driver, vehicle, and targeted products in parallel
-    const [[driverRow], [vehicleRow], productRows] = await Promise.all([
-      orderRow.driverId ? db.select().from(drivers).where(eq(drivers.id, orderRow.driverId)) : Promise.resolve([null]),
-      orderRow.vehicleId ? db.select().from(vehicles).where(eq(vehicles.id, orderRow.vehicleId)) : Promise.resolve([null]),
-      itemProductIds.length > 0
-        ? db.select().from(products).where(inArray(products.id, itemProductIds))
-        : Promise.resolve([]),
-    ]);
-
-    // Determine if inter-state shipment (origin ≠ destination state)
-    // Simple heuristic: same state if both contain same state abbreviation
-    const originLower = (orderRow.origin ?? '').toLowerCase();
-    const destLower = (orderRow.destination ?? '').toLowerCase();
-    const isInterState = !(
-      (originLower.includes('lucknow') || originLower.includes('kanpur') || originLower.includes('up')) &&
-      (destLower.includes('lucknow') || destLower.includes('kanpur') || destLower.includes('up') ||
-       destLower.includes('agra') || destLower.includes('prayagraj') || destLower.includes('varanasi'))
-    );
 
     const data = {
       invoice: {
@@ -68,6 +62,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         damageDeduction: parseFloat(invRow.damageDeduction ?? '0'),
         subtotal: parseFloat(invRow.subtotal ?? '0'),
         gst: parseFloat(invRow.gst ?? '0'),
+        gstScheme: invRow.gstScheme,
+        placeOfSupply: invRow.placeOfSupply,
+        cgst: invRow.cgst == null ? null : parseFloat(invRow.cgst),
+        sgst: invRow.sgst == null ? null : parseFloat(invRow.sgst),
+        igst: invRow.igst == null ? null : parseFloat(invRow.igst),
         total: parseFloat(invRow.total ?? '0'),
         podSigned: invRow.podSigned ?? false,
         receiverName: invRow.receiverName ?? 'Authorized Representative',
@@ -92,7 +91,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       driver: driverRow ? { name: driverRow.name ?? '', phone: driverRow.phone ?? '' } : undefined,
       vehicle: vehicleRow ? { vehicleNo: vehicleRow.vehicleNo ?? '', type: vehicleRow.type ?? '' } : undefined,
       products: productRows.map(p => ({ id: p.id, name: p.name ?? '' })),
-      isInterState,
     };
 
     // Server-side render PDF to buffer

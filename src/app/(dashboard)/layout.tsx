@@ -11,7 +11,7 @@ import { getCurrentUser } from '@/lib/useCurrentUser';
 const emptySubscribe = () => () => {};
 
 const pageTitles: Record<string, { title: string; subtitle: string }> = {
-  '/dashboard': { title: 'Fleet Operations Dashboard', subtitle: 'Live logistics intelligence & hub status' },
+  '/dashboard': { title: 'Today', subtitle: 'What needs attention across your fleet' },
   '/agent-ops': { title: 'AI Operations Command Center', subtitle: 'Autonomous Multi-Agent Workforce, Monday Brief & Operational Event Graph' },
   '/vehicles': { title: 'Fleet Roster & Telematics', subtitle: 'Master vehicle status, maintenance & live load' },
   '/drivers': { title: 'Driver Management & Credentials', subtitle: 'Personnel roster, licensing & verification' },
@@ -24,6 +24,8 @@ const pageTitles: Record<string, { title: string; subtitle: string }> = {
   '/invoices': { title: 'Automated GST Billing & Invoicing', subtitle: 'Freight settlement & tax invoice generation' },
   '/leads': { title: 'Shipper Leads & CRM', subtitle: 'Inbound enquiries, freight quotes & lead conversion' },
   '/knowledge-base': { title: 'Knowledge Base & Config', subtitle: 'Dispatcher training data & bot response library' },
+  '/settings/team': { title: 'Team & Roles', subtitle: 'Invite teammates and control what each role can do' },
+  '/settings/account': { title: 'Account', subtitle: 'Your password and sign-in' },
 };
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {

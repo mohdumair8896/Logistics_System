@@ -1,23 +1,31 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { IBM_Plex_Sans, IBM_Plex_Mono, Barlow_Condensed } from "next/font/google";
 import { Toaster } from "sonner";
 import CookieConsent from "@/components/ui/CookieConsent";
+import { AnalyticsLoader } from "@/components/AnalyticsLoader";
 import "./globals.css";
 import "leaflet/dist/leaflet.css";
 
 
-// Only load fonts that are actually referenced in globals.css
-const inter = Inter({
+// "Highway" type (docs/DESIGN_SYSTEM.md): Plex for the interface, Barlow Condensed for figures, Plex Mono for IDs
+const plexSans = IBM_Plex_Sans({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-inter",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-plex",
   display: "swap",
 });
 
-const jetbrainsMono = JetBrains_Mono({
+const plexMono = IBM_Plex_Mono({
   subsets: ["latin"],
   weight: ["400", "500"],
-  variable: "--font-mono",
+  variable: "--font-plex-mono",
+  display: "swap",
+});
+
+const barlowCondensed = Barlow_Condensed({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-barlow",
   display: "swap",
 });
 
@@ -27,41 +35,41 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
     default: "LogisticsEdge — Freight & Fleet Logistics Management Platform",
-    template: "%s | LogisticsEdge Logistics",
+    template: "%s | LogisticsEdge",
   },
-  description: "Enterprise logistics platform for freight dispatch, fleet telematics, GPS shipment tracking, e-POD, GST invoicing, and warehouse management.",
+  description: "Software for road freight in India: take bookings, allocate trucks and drivers, track trips from the driver's phone, close deliveries with proof and raise GST invoices.",
   keywords: [
-    "autonomous logistics",
-    "fleet telematics",
-    "freight management system",
-    "supply chain software",
-    "real-time GPS shipment tracking",
-    "cross-dock dispatch",
-    "cold chain monitoring",
-    "proof of delivery",
+    "transport management software India",
+    "fleet management software",
+    "truck tracking without GPS device",
+    "trip tracking link",
+    "proof of delivery app",
+    "GST invoice for transporters",
+    "freight booking software",
     "LogisticsEdge"
   ],
-  authors: [{ name: "LogisticsEdge Technologies Inc." }],
-  creator: "LogisticsEdge Technologies",
-  publisher: "LogisticsEdge Logistics",
+  authors: [{ name: "LogisticsEdge Technologies Pvt. Ltd." }],
+  creator: "LogisticsEdge Technologies Pvt. Ltd.",
+  publisher: "LogisticsEdge Technologies Pvt. Ltd.",
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
   openGraph: {
-    title: "LogisticsEdge — Freight Dispatch & Fleet Telematics Platform",
-    description: "Manage freight orders, live vehicle tracking, driver dispatch, warehouse staging, e-POD capture, and GST invoicing from one dashboard.",
+    title: "LogisticsEdge — Run your trucks from one screen",
+    description: "Bookings, free trucks, trip tracking from the driver's phone, proof of delivery and GST invoices for transporters, fleet owners and 3PLs in India.",
     url: siteUrl,
-    siteName: "LogisticsEdge Logistics",
-    locale: "en_US",
+    siteName: "LogisticsEdge",
+    locale: "en_IN",
     type: "website",
+    images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "LogisticsEdge: road freight software for India" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "LogisticsEdge — Fleet Logistics & Shipment Tracking",
-    description: "Freight dispatch, live GPS tracking, driver management, warehouse staging, e-POD, and GST billing — built for logistics operations teams.",
-    creator: "@LogisticsEdgeAI",
+    title: "LogisticsEdge — Run your trucks from one screen",
+    description: "Bookings, free trucks, trip tracking from the driver's phone, proof of delivery and GST invoices for road freight in India.",
+    images: ["/og.jpg"],
   },
   robots: {
     index: true,
@@ -84,20 +92,19 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  themeColor: "#0057FF",
+  themeColor: "#0B6B4E",
 };
 
-// JSON-LD: Organization + LocalBusiness schema for Google Knowledge Panel
+// JSON-LD: Organization and WebSite. Only facts the company has confirmed: name, address and phone
+// (the same as on the legal pages). No founding date, ratings or languages until they are confirmed.
 const organizationSchema = {
   "@context": "https://schema.org",
-  "@type": ["Organization", "LocalBusiness"],
+  "@type": "Organization",
   "name": "LogisticsEdge Technologies Pvt. Ltd.",
   "alternateName": "LogisticsEdge",
   "url": siteUrl,
-  "description": "Enterprise logistics infrastructure connecting industrial shippers, cross-docks, dispatch, real-time GPS tracking, and fleet routing across India and global supply chains.",
-  "foundingDate": "2024",
+  "description": "Software for road freight in India: bookings, truck and driver allocation, trip tracking from the driver's phone, proof of delivery and GST invoices.",
   "areaServed": "IN",
-  "serviceType": "Freight & Logistics Management",
   "address": {
     "@type": "PostalAddress",
     "addressCountry": "IN",
@@ -108,26 +115,34 @@ const organizationSchema = {
   },
   "contactPoint": {
     "@type": "ContactPoint",
-    "contactType": "customer support",
-    "email": "support@logisticsedge.io",
-    "availableLanguage": ["English", "Hindi"]
-  },
-  "sameAs": []
+    "contactType": "customer service",
+    "telephone": "+91-522-400-1200",
+    "areaServed": "IN"
+  }
+};
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "LogisticsEdge",
+  "url": siteUrl,
+  "inLanguage": "en-IN"
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${jetbrainsMono.variable}`}
+      className={`${plexSans.variable} ${plexMono.variable} ${barlowCondensed.variable}`}
     >
       <body className="antialiased">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify([organizationSchema, websiteSchema]) }}
         />
         {children}
         <CookieConsent />
+        <AnalyticsLoader />
         <Toaster
           position="top-right"
           theme="light"

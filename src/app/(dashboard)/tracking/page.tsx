@@ -55,6 +55,29 @@ export default function TrackingPage() {
   const activeTrips = trips.filter(t => t.status === 'In Transit');
   const trip = trips.find(t => t.id === selectedTrip) || activeTrips[0] || null;
 
+  // Signed, expiring GPS link for the selected trip's driver (issued server-side)
+  const tripId = trip?.id;
+  const [driverLink, setDriverLink] = useState<{ tripId: string; url: string; expiresAt: string } | null>(null);
+  const [driverLinkError, setDriverLinkError] = useState<string | null>(null);
+  useEffect(() => {
+    if (!tripId) return;
+    let cancelled = false;
+    fetch(`/api/trips/${encodeURIComponent(tripId)}/driver-link`)
+      .then(async res => {
+        const data = await res.json().catch(() => ({}));
+        if (cancelled) return;
+        if (!res.ok) {
+          setDriverLinkError(data.error || 'Could not create the driver GPS link');
+          return;
+        }
+        setDriverLinkError(null);
+        setDriverLink({ tripId, url: `${window.location.origin}${data.path}`, expiresAt: data.expiresAt });
+      })
+      .catch(() => { if (!cancelled) setDriverLinkError('Could not create the driver GPS link'); });
+    return () => { cancelled = true; };
+  }, [tripId]);
+  const currentDriverLink = driverLink && driverLink.tripId === tripId ? driverLink : null;
+
   // Derived data
   const vehicle  = trip ? vehicles.find(v => v.id === trip.vehicleId) ?? null : null;
   const driver   = trip ? drivers.find(d => d.id === trip.driverId) ?? null : null;
@@ -68,7 +91,7 @@ export default function TrackingPage() {
   // Checkpoints
   const defaultCheckpoints = [
     { name: `${trip?.origin?.split(',')[0] || 'Origin'} Dispatch Gate`, location: 'Terminal', passed: true, time: trip?.startedAt ?? undefined },
-    { name: 'Highway Checkpoint', location: 'Corridor', passed: (trip?.progress ?? 0) > 40, time: (trip?.progress ?? 0) > 40 ? '10:15' : undefined },
+    { name: 'Highway Checkpoint', location: 'Corridor', passed: (trip?.progress ?? 0) > 40, time: undefined },
     { name: `${trip?.destination?.split(',')[0] || 'Destination'} Ingate`, location: 'Delivery', passed: (trip?.progress ?? 0) >= 100, time: (trip?.progress ?? 0) >= 100 ? 'Arrived' : undefined },
   ];
   const displayCheckpoints = (trip?.checkpoints && trip.checkpoints.length > 0) ? trip.checkpoints : defaultCheckpoints;
@@ -363,35 +386,42 @@ export default function TrackingPage() {
             </div>
           )}
 
-          {/* Corridor team avatars */}
-          <div className="card" style={{ padding: 14 }}>
-            <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>
-              Corridor Operations Team
+          {/* Assigned driver */}
+          {driver && (
+            <div className="card" style={{ padding: 14 }}>
+              <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>
+                Assigned Driver
+              </div>
+              <AvatarStack
+                avatars={[{ id: driver.id, name: driver.name, role: 'Driver', status: driver.status === 'On Trip' ? 'online' : 'busy' }]}
+                label="Driver on this trip"
+              />
             </div>
-            <AvatarStack
-              avatars={[
-                { id: driver?.id || 'd1', name: driver?.name || 'Primary Driver', role: 'Driver', status: 'online' },
-                { id: 'disp1', name: 'Sam Rivera', role: 'Fleet Dispatcher', status: 'online' },
-                { id: 'comp1', name: 'Jordan Patel', role: 'Compliance Officer', status: 'busy' },
-              ]}
-              label="Active Dispatchers & Crew"
-            />
-          </div>
+          )}
 
           {/* QR for driver GPS app link */}
           <div className="card" style={{ padding: 14, display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-low)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Driver GPS App</div>
-              <div style={{ fontSize: 10, color: 'var(--text-low)', fontFamily: 'var(--font-mono)', wordBreak: 'break-all' }}>
-                /driver-app?v={trip.vehicleId}&t={trip.id}
-              </div>
-              <div style={{ fontSize: 10, color: 'var(--text-low)', marginTop: 4 }}>Scan to open on driver&apos;s phone</div>
+              {currentDriverLink ? (
+                <>
+                  <div style={{ fontSize: 10, color: 'var(--text-low)' }}>Scan to open on the driver&apos;s phone</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-low)', marginTop: 4 }}>
+                    Valid until {new Date(currentDriverLink.expiresAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
+                  </div>
+                  <div style={{ marginTop: 6 }}>
+                    <CopyButton text={currentDriverLink.url} label="Driver GPS link" variant="button" buttonText="Copy link" />
+                  </div>
+                </>
+              ) : (
+                <div style={{ fontSize: 10, color: driverLinkError ? 'var(--danger, #DC2626)' : 'var(--text-low)' }}>
+                  {driverLinkError ?? 'Creating secure link…'}
+                </div>
+              )}
             </div>
-            <ShipmentQR
-              value={`${typeof window !== 'undefined' ? window.location.origin : ''}/driver-app?v=${trip.vehicleId}&t=${trip.id}`}
-              label="GPS App"
-              size={120}
-            />
+            {currentDriverLink && (
+              <ShipmentQR value={currentDriverLink.url} label="GPS App" size={120} />
+            )}
           </div>
         </div>
 

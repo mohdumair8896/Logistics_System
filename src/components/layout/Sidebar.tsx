@@ -4,13 +4,15 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
-  Truck, LogOut, X, PanelLeftClose, PanelLeftOpen
+  LogOut, X, PanelLeftClose, PanelLeftOpen, UserCog
 } from 'lucide-react';
-import { invalidateUserCache } from '@/lib/useCurrentUser';
+import { invalidateUserCache, useCurrentUser } from '@/lib/useCurrentUser';
+import { can } from '@/lib/permissions';
+import { BrandMark } from '@/components/ui/BrandMark';
 import { toast } from 'sonner';
 import { Tooltip } from '@/components/ui/Tooltip';
 
-import { getActiveTenant, getTenantNavigation, TenantProfile } from '@/lib/entitlements';
+import { DEFAULT_TENANT, getTenantNavigation, TenantProfile, type NavSection } from '@/lib/entitlements';
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -27,17 +29,20 @@ export default function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const [activeTenant, setActiveTenantState] = useState<TenantProfile>(getActiveTenant());
+  const [activeTenant, setActiveTenant] = useState<TenantProfile>(DEFAULT_TENANT);
   const [navCounts, setNavCounts] = useState({ pendingOrders: 0, activeTrips: 0, newLeads: 0 });
 
+  // Module entitlements come from the server for the signed-in workspace
   useEffect(() => {
-    const handleTenantChange = (e: Event) => {
-      const customEvent = e as CustomEvent<TenantProfile>;
-      if (customEvent.detail) setActiveTenantState(customEvent.detail);
-      else setActiveTenantState(getActiveTenant());
-    };
-    window.addEventListener('logisticsedge_tenant_changed', handleTenantChange);
-    return () => window.removeEventListener('logisticsedge_tenant_changed', handleTenantChange);
+    let cancelled = false;
+    fetch('/api/tenant/entitlements')
+      .then(res => (res.ok ? res.json() : null))
+      .then((profile: Partial<TenantProfile> | null) => {
+        if (!cancelled && profile) setActiveTenant(prev => ({ ...prev, ...profile }));
+      })
+      .catch(() => {});
+    try { localStorage.removeItem('logisticsedge_active_tenant'); } catch {}
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
@@ -84,7 +89,11 @@ export default function Sidebar({
     return 0;
   };
 
-  const navSections = getTenantNavigation(activeTenant);
+  const { user } = useCurrentUser();
+  const workspaceSection: NavSection[] = can(user.role, 'team.manage')
+    ? [{ label: 'Workspace', items: [{ href: '/settings/team', icon: UserCog, label: 'Team & Roles' }] }]
+    : [];
+  const navSections = [...getTenantNavigation(activeTenant), ...workspaceSection];
 
   return (
     <>
@@ -116,9 +125,7 @@ export default function Sidebar({
         {/* Logo */}
         <div className="sidebar-logo">
           <Link href="/dashboard" className="logo-mark flex items-center gap-2.5 text-inherit no-underline">
-            <div className="logo-icon">
-              <Truck size={18} color="#fff" />
-            </div>
+            <BrandMark size={32} />
             {!isCollapsed && (
               <div className="logo-text">
                 <div className="name truncate max-w-[130px]">{activeTenant.name || 'LogisticsEdge'}</div>
@@ -135,7 +142,7 @@ export default function Sidebar({
             style={{
               position: 'absolute', top: 16, right: 14,
               background: 'none', border: 'none', cursor: 'pointer',
-              color: 'var(--text-low)', display: 'flex', padding: 4,
+              color: 'var(--asphalt-text)', display: 'flex', padding: 4,
             }}
           >
             <X size={18} />
@@ -147,7 +154,7 @@ export default function Sidebar({
           {navSections.map(section => (
             <div key={section.label} className="nav-section">
               {!isCollapsed && <div className="nav-section-label">{section.label}</div>}
-              {isCollapsed && <div className="my-2 mx-auto w-7 h-px bg-[var(--border,#E6E4DF)]" />}
+              {isCollapsed && <div className="my-2 mx-auto w-7 h-px bg-[var(--asphalt-3)]" />}
               {section.items.map(item => {
                 const Icon = item.icon;
                 const isActive = pathname === item.href;
@@ -199,22 +206,7 @@ export default function Sidebar({
               <Tooltip placement="right" title="Sign Out" description="End active session">
                 <button
                   onClick={handleLogout}
-                  style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    width: '44px', height: '44px', borderRadius: 10,
-                    background: 'none', border: '1px solid var(--border)',
-                    color: 'var(--text-mid)', cursor: 'pointer', transition: 'all 0.13s',
-                  }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLButtonElement).style.background = 'var(--brand-10)';
-                    (e.currentTarget as HTMLButtonElement).style.color = 'var(--brand)';
-                    (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--brand)';
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLButtonElement).style.background = 'none';
-                    (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-mid)';
-                    (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border)';
-                  }}
+                  className="sidebar-signout"
                   aria-label="Sign Out"
                 >
                   <LogOut size={16} />
@@ -222,25 +214,7 @@ export default function Sidebar({
               </Tooltip>
             </div>
           ) : (
-            <button
-              onClick={handleLogout}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 9,
-                width: '100%', padding: '9px 12px', borderRadius: 8,
-                background: 'none', border: '1px solid var(--border)',
-                color: 'var(--text-mid)', fontSize: 13, fontWeight: 500,
-                cursor: 'pointer', transition: 'all 0.13s',
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLButtonElement).style.background = 'var(--brand-10)';
-                (e.currentTarget as HTMLButtonElement).style.color = 'var(--brand)';
-                (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--brand)';
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLButtonElement).style.background = 'none';
-                (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-mid)';
-                (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border)';
-              }}
+            <button onClick={handleLogout} className="sidebar-signout"
             >
               <LogOut size={15} />
               <span>Sign Out</span>

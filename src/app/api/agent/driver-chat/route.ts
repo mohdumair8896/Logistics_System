@@ -2,16 +2,19 @@
 // Dedicated endpoint for driver communications in Hindi / Hinglish / English.
 
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth, isAuthError } from '@/lib/auth';
+import { requireTenant, isAuthError } from '@/lib/auth';
+import { requirePermission } from '@/lib/permissions';
+import { runAsTenant, withTenant } from '@/lib/tenancy';
 import { agents } from '@/lib/agents/core/registry';
-import { db } from '@/lib/db';
 import { driverMessages } from '@/lib/schema';
-import { eq, desc } from 'drizzle-orm';
+import { and, eq, desc } from 'drizzle-orm';
 import type { LogisticsEvent } from '@/lib/agents/core/types';
 
 export async function POST(req: NextRequest) {
-  const auth = await requireAuth(req);
+  const auth = await requireTenant(req);
   if (isAuthError(auth)) return auth;
+  const denied = requirePermission(auth, 'agent.run');
+  if (denied) return denied;
 
   try {
     const body = await req.json();
@@ -38,7 +41,7 @@ export async function POST(req: NextRequest) {
       payload: { driverId, text: sanitizedText || String(text).trim(), channel },
     };
 
-    const results = await agents.publish(event);
+    const results = await runAsTenant(auth.tenantId, () => agents.publish(event));
     const driverResult = results.find((r) => r.agentId === 'driver-agent');
 
     return NextResponse.json({
@@ -47,27 +50,29 @@ export async function POST(req: NextRequest) {
       allResults: results,
     });
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-    return NextResponse.json({ success: false, message: msg }, { status: 500 });
+    console.error('[/api/agent/driver-chat]', err);
+    return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 });
   }
 }
 
 export async function GET(req: NextRequest) {
-  const auth = await requireAuth(req);
+  const auth = await requireTenant(req);
   if (isAuthError(auth)) return auth;
 
   const { searchParams } = new URL(req.url);
   const driverId = searchParams.get('driverId');
 
   try {
-    const query = db.select().from(driverMessages);
-    const messages = driverId
-      ? await query.where(eq(driverMessages.driverId, driverId)).orderBy(desc(driverMessages.createdAt)).limit(50)
-      : await query.orderBy(desc(driverMessages.createdAt)).limit(50);
+    const messages = await withTenant(auth.tenantId, tx => tx.select().from(driverMessages)
+      .where(driverId
+        ? and(eq(driverMessages.tenantId, auth.tenantId), eq(driverMessages.driverId, driverId))
+        : eq(driverMessages.tenantId, auth.tenantId))
+      .orderBy(desc(driverMessages.createdAt))
+      .limit(50));
 
     return NextResponse.json({ success: true, messages: messages.reverse() });
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-    return NextResponse.json({ success: false, message: msg }, { status: 500 });
+    console.error('[/api/agent/driver-chat]', err);
+    return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 });
   }
 }

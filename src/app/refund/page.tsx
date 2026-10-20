@@ -49,12 +49,12 @@ export default function RefundPolicyPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
             <div style={{
               width: 36, height: 36, borderRadius: 10,
-              background: 'rgba(0, 87, 255, 0.08)', border: '1px solid rgba(0, 87, 255, 0.2)',
+              background: 'rgba(11, 107, 78, 0.08)', border: '1px solid rgba(11, 107, 78, 0.2)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <RefreshCw style={{ width: 20, height: 20, color: 'var(--brand, #0057FF)' }} />
+              <RefreshCw style={{ width: 20, height: 20, color: 'var(--brand, #0B6B4E)' }} />
             </div>
-            <span style={{ fontSize: 12, fontFamily: 'var(--font-mono, monospace)', textTransform: 'uppercase', letterSpacing: 2, color: 'var(--brand, #0057FF)', fontWeight: 700 }}>
+            <span style={{ fontSize: 12, fontFamily: 'var(--font-mono, monospace)', textTransform: 'uppercase', letterSpacing: 2, color: 'var(--brand, #0B6B4E)', fontWeight: 700 }}>
               Legal &amp; Compliance
             </span>
           </div>
@@ -71,7 +71,7 @@ export default function RefundPolicyPage() {
 
           <section style={section}>
             <h2 style={h2style}>
-              <Clock style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
+              <Clock style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
               1. Cancellation Window
             </h2>
             <p>
@@ -89,7 +89,7 @@ export default function RefundPolicyPage() {
 
           <section style={section}>
             <h2 style={h2style}>
-              <FileText style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
+              <FileText style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
               2. Refund Eligibility
             </h2>
             <p>Refunds are issued under the following circumstances:</p>
@@ -103,7 +103,7 @@ export default function RefundPolicyPage() {
 
           <section style={section}>
             <h2 style={h2style}>
-              <XCircle style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
+              <XCircle style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
               3. Non-Refundable Situations
             </h2>
             <ul style={{ paddingLeft: 24, display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -117,7 +117,7 @@ export default function RefundPolicyPage() {
 
           <section style={section}>
             <h2 style={h2style}>
-              <RefreshCw style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
+              <RefreshCw style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
               4. Refund Processing Timeline
             </h2>
             <div style={{
@@ -134,7 +134,7 @@ export default function RefundPolicyPage() {
                   borderRadius: 12, padding: '14px 18px',
                 }}>
                   <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-high, #141414)', margin: '0 0 4px' }}>{r.method}</p>
-                  <p style={{ fontSize: 12, color: 'var(--brand, #0057FF)', fontWeight: 600, margin: 0 }}>{r.timeline}</p>
+                  <p style={{ fontSize: 12, color: 'var(--brand, #0B6B4E)', fontWeight: 600, margin: 0 }}>{r.timeline}</p>
                 </div>
               ))}
             </div>
@@ -145,7 +145,7 @@ export default function RefundPolicyPage() {
 
           <section style={section}>
             <h2 style={h2style}>
-              <FileText style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
+              <FileText style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
               5. Dispute Resolution — Consumer Protection Act 2019 (India)
             </h2>
             <p>
@@ -161,22 +161,22 @@ export default function RefundPolicyPage() {
               background: 'var(--surface-2, #F3F2EF)', border: '1px solid var(--border, #E6E4DF)',
               borderRadius: 14, padding: '20px 24px', marginTop: 12, fontFamily: 'var(--font-mono, monospace)', fontSize: 13,
             }}>
-              <strong style={{ color: 'var(--brand, #0057FF)', display: 'block', marginBottom: 8 }}>Nodal / Grievance Officer (CPA 2019):</strong>
+              <strong style={{ color: 'var(--brand, #0B6B4E)', display: 'block', marginBottom: 8 }}>Nodal / Grievance Officer (CPA 2019):</strong>
               Grievance Redressal Officer<br />
               LogisticsEdge Technologies Pvt. Ltd.<br />
               Plot No. 12, Vibhuti Khand, Gomti Nagar, Lucknow — 226010, Uttar Pradesh, India<br />
-              Email: <a href="mailto:grievance@logisticsedge.io" style={{ color: 'var(--brand, #0057FF)' }}>grievance@logisticsedge.io</a><br />
+              Email: <a href="mailto:grievance@logisticsedge.io" style={{ color: 'var(--brand, #0B6B4E)' }}>grievance@logisticsedge.io</a><br />
               Phone: +91 522 400 1200 &bull; Available Mon–Fri, 9 AM – 6 PM IST
             </div>
           </section>
 
           <section style={section}>
             <h2 style={h2style}>
-              <Phone style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
+              <Phone style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
               6. Global Customers (EU &amp; US)
             </h2>
             <p>
-              For customers in the <strong style={{ color: 'var(--text-high, #141414)' }}>European Union</strong>, disputes may also be submitted via the EU Online Dispute Resolution platform at <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--brand, #0057FF)' }}>ec.europa.eu/consumers/odr</a>.
+              For customers in the <strong style={{ color: 'var(--text-high, #141414)' }}>European Union</strong>, disputes may also be submitted via the EU Online Dispute Resolution platform at <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--brand, #0B6B4E)' }}>ec.europa.eu/consumers/odr</a>.
             </p>
             <p>
               For <strong style={{ color: 'var(--text-high, #141414)' }}>United States</strong> customers, disputes are governed by commercial arbitration rules under applicable bilateral trade frameworks.
@@ -185,7 +185,7 @@ export default function RefundPolicyPage() {
 
           <section style={section}>
             <h2 style={h2style}>
-              <Mail style={{ width: 18, height: 18, color: 'var(--brand, #0057FF)' }} />
+              <Mail style={{ width: 18, height: 18, color: 'var(--brand, #0B6B4E)' }} />
               7. How to Raise a Refund Request
             </h2>
             <p>Contact us through any of the following channels, quoting your Order ID and invoice number:</p>
@@ -193,9 +193,8 @@ export default function RefundPolicyPage() {
               background: 'var(--surface-2, #F3F2EF)', border: '1px solid var(--border, #E6E4DF)',
               borderRadius: 14, padding: '20px 24px', fontFamily: 'var(--font-mono, monospace)', fontSize: 13,
             }}>
-              Email: <a href="mailto:billing@logisticsedge.io" style={{ color: 'var(--brand, #0057FF)' }}>billing@logisticsedge.io</a><br />
+              Email: <a href="mailto:billing@logisticsedge.io" style={{ color: 'var(--brand, #0B6B4E)' }}>billing@logisticsedge.io</a><br />
               Support Portal: Dashboard → Help &amp; Support → Raise Ticket<br />
-              Phone: 1800-PRE-LMS (Toll Free) &bull; Mon–Fri, 9 AM – 6 PM IST<br />
               Response SLA: 48 hours on business days
             </div>
           </section>
@@ -207,9 +206,9 @@ export default function RefundPolicyPage() {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between' }}>
             <p style={{ margin: 0 }}>&copy; 2026 LogisticsEdge Technologies Pvt. Ltd. All rights reserved.</p>
             <div style={{ display: 'flex', gap: 16 }}>
-              <Link href="/privacy" style={{ color: 'var(--brand, #0057FF)', textDecoration: 'none' }}>Privacy Policy</Link>
-              <Link href="/terms" style={{ color: 'var(--brand, #0057FF)', textDecoration: 'none' }}>Terms of Service</Link>
-              <Link href="/cookies" style={{ color: 'var(--brand, #0057FF)', textDecoration: 'none' }}>Cookie Policy</Link>
+              <Link href="/privacy" style={{ color: 'var(--brand, #0B6B4E)', textDecoration: 'none' }}>Privacy Policy</Link>
+              <Link href="/terms" style={{ color: 'var(--brand, #0B6B4E)', textDecoration: 'none' }}>Terms of Service</Link>
+              <Link href="/cookies" style={{ color: 'var(--brand, #0B6B4E)', textDecoration: 'none' }}>Cookie Policy</Link>
             </div>
           </div>
         </div>
