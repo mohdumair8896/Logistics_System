@@ -4,8 +4,8 @@
 |---|---|
 | **Date** | 2026-10-17 |
 | **Applies to** | The production Neon database (`ap-southeast-1`), currently built with `drizzle-kit push` |
-| **Migrations** | `drizzle/0000_baseline` → `0001_tenancy_expand` → `0002_tenancy_backfill` → `0003_tenancy_contract` → `0004_tenancy_rls` → `0005_sessions_invitations` → `0006_sessions_invitations_rls` → `0007_password_resets` → `0008_password_resets_rls` |
-| **Status** | 0000–0006 **applied to production on 2026-10-18**, 0007–0008 (password reset links) **on 2026-10-19**. 0009 onwards **not applied yet**. Next: deploy the code (step 4), then turn on RLS (step 6). |
+| **Migrations** | `drizzle/0000_baseline` → `0001_tenancy_expand` → `0002_tenancy_backfill` → `0003_tenancy_contract` → `0004_tenancy_rls` → `0005_sessions_invitations` → `0006_sessions_invitations_rls` → `0007_password_resets` → `0008_password_resets_rls` → `0009_gst_options` → `0010_gst_options_rls` → `0011_pod_records` → `0012_pod_records_rls` |
+| **Status** | 0000–0006 **applied to production on 2026-10-18**, 0007–0008 (password reset links) **on 2026-10-19**, 0009–0012 (GST options, e-POD records) **on 2026-10-20**. Every migration in `drizzle/` is now applied. Next: deploy the code (step 4; the code was merged into `main` on 2026-10-20), then turn on RLS (step 6). |
 
 ## Applied 2026-10-18: results
 
@@ -58,7 +58,7 @@ Both migrations only add tables, so the deployment running today is unaffected. 
 
 Rollback: redeploy the previous build. The two tables can stay; nothing else reads them.
 
-## 0009–0010: GST options and invoice tax columns (apply before deploying)
+## 0009–0010: GST options and invoice tax columns (applied 2026-10-20)
 
 GTA forward charge needs to know each workspace's Annexure V option, and each invoice needs to keep the GST it was raised with.
 
@@ -73,6 +73,45 @@ GTA forward charge needs to know each workspace's Annexure V option, and each in
 2. Then deploy the code. **If the code is deployed first, every invoice read fails** ("column gst_scheme does not exist"). That covers the invoices and tracking pages, the PDF, and the billing, collections and documentation agents.
 
 Both migrations only add things, so the deployment running today is unaffected by them. Rollback: redeploy the previous build. The new table and columns can stay.
+
+## 0011–0012: e-POD records and GPS ping times (applied 2026-10-20)
+
+| Migration | What it does |
+|---|---|
+| `0011_pod_records` | Creates `pod_records`: one hashed proof-of-delivery record per trip (receiver, confirmation, quantities, deduction, signature, the canonical record and its SHA-256). Adds a nullable `recorded_at` to `gps_pings`, the time a queued ping was taken on the driver's phone. |
+| `0012_pod_records_rls` | Forces RLS on `pod_records` with the same `tenant_isolation` policy as the other business tables, and makes it append-only for every role: a trigger refuses UPDATE and DELETE. |
+
+Apply before deploying: the driver's GPS pings (`/api/gps/ping`) write `recorded_at`, and closing a trip at handover (`/api/trips/[id]/pod`, `/api/pod`) writes `pod_records`. Both migrations only add things. Rollback: redeploy the previous build; the table and column can stay.
+
+## Applied 2026-10-20: 0009–0012
+
+**Applied to the production branch (`ep-morning-smoke-…`), as `neondb_owner`, with `npm run db:migrate`.** Point-in-time marker taken just before: 2026-10-20 17:24:37 UTC. No Neon branch was created; restore to that time if needed.
+
+Checked beforehand (read-only):
+- 9 migrations were recorded, each matching its journal entry and the SHA-256 of its SQL file;
+- the migrator would apply exactly 0009–0012;
+- `gst_options`, `pod_records`, the 5 invoice tax columns and `gps_pings.recorded_at` didn't exist;
+- `app_current_tenant()` and the `app_rls` role existed.
+
+Checked afterwards:
+- 13 migrations are recorded, all matching their files, and nothing is pending;
+- both tables exist and are empty; the 6 new columns exist and are nullable;
+- RLS is enabled and forced on both tables, each with `tenant_isolation` on `app_current_tenant()`;
+- the `pod_records_append_only` trigger is enabled;
+- primary keys, foreign keys (`tenants`, `trips`, `users`), `uq_pod_records_tenant_trip` and `idx_pod_records_tenant_captured` match the schema;
+- `app_rls` can read and insert both tables, subject to RLS, like the other business tables;
+- row counts are unchanged (4 workspaces, 6 users; no invoices, trips or GPS pings yet).
+
+The live rolled-back isolation probe used for earlier migrations wasn't run this time. The session's safety check refused writes to production, even inside a transaction that is rolled back. The same behaviour is covered by `npm test` (`tests/gst-options.test.ts`, `tests/driver-link-pod.test.ts`), which replays every migration under `app_rls`.
+
+Checks, for reference:
+```sql
+SELECT count(*) FROM drizzle.__drizzle_migrations;                          -- 13
+SELECT relname, relrowsecurity, relforcerowsecurity FROM pg_class
+ WHERE relname IN ('gst_options', 'pod_records');                           -- t, t for both
+SELECT tgname FROM pg_trigger WHERE tgrelid = 'pod_records'::regclass
+   AND NOT tgisinternal;                                                    -- pod_records_append_only
+```
 
 ## 0007–0008: password reset links (applied 2026-10-19)
 
