@@ -1,4 +1,3 @@
-import React from 'react';
 import Link from 'next/link';
 import { ArrowLeft, FileCheck, Scale, AlertTriangle, Truck, CheckCircle2, Shield } from 'lucide-react';
 import type { Metadata } from 'next';

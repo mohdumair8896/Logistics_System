@@ -85,15 +85,3 @@ export function EmptyDescription({
     </p>
   );
 }
-
-export function EmptyContent({
-  className,
-  children,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div className={cn('mt-4 flex items-center justify-center gap-2', className)} {...props}>
-      {children}
-    </div>
-  );
-}

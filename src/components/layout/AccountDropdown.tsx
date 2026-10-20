@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronDown, LogOut, Radio, BookOpen, UserCog, KeyRound } from 'lucide-react';
 import { can } from '@/lib/permissions';

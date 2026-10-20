@@ -51,33 +51,3 @@ export function BubbleContent({
     </div>
   );
 }
-
-export function BubbleGroup({
-  className,
-  children,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div className={cn('flex flex-col gap-1.5 w-full', className)} {...props}>
-      {children}
-    </div>
-  );
-}
-
-export function BubbleReactions({
-  className,
-  children,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={cn(
-        'inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-[var(--surface-1,#FFFFFF)] border border-[var(--border,#E6E4DF)] text-[var(--text-mid)] shadow-xs select-none',
-        className
-      )}
-      {...props}
-    >
-      {children}
-    </div>
-  );
-}

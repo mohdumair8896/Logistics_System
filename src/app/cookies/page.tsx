@@ -1,4 +1,3 @@
-import React from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Cookie, ShieldCheck, BarChart2, Settings, Globe } from 'lucide-react';
 import type { Metadata } from 'next';

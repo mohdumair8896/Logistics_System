@@ -66,10 +66,4 @@ export async function revokeAllUserSessions(userId: string, exec: Pick<typeof db
   return revoked.length;
 }
 
-/** For tests: forget cached checks. */
-export function clearSessionCache(ids?: string[]): void {
-  if (!ids) cache.clear();
-  else for (const id of ids) cache.delete(id);
-}
-
 

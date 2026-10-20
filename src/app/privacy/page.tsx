@@ -1,4 +1,3 @@
-import React from 'react';
 import Link from 'next/link';
 import { ArrowLeft, ShieldCheck, Lock, Eye, FileText, Database, Server, Globe, Scale } from 'lucide-react';
 import type { Metadata } from 'next';

@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { ChevronRight, MoreHorizontal } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function Breadcrumb({
@@ -114,22 +114,5 @@ export function BreadcrumbSeparator({
     >
       {children ?? <ChevronRight className="size-3.5" />}
     </li>
-  );
-}
-
-export function BreadcrumbEllipsis({
-  className,
-  ...props
-}: React.ComponentProps<'span'>) {
-  return (
-    <span
-      role="presentation"
-      aria-hidden="true"
-      className={cn('flex size-6 items-center justify-center text-[var(--text-low)]', className)}
-      {...props}
-    >
-      <MoreHorizontal className="size-3.5" />
-      <span className="sr-only">More</span>
-    </span>
   );
 }

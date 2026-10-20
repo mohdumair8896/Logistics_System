@@ -13,11 +13,6 @@ export interface Product {
   price_per_kg: string | null; // decimal comes as string from Neon
 }
 
-// Convenience getter for numeric price
-export function getPrice(p: Product): number {
-  return parseFloat(p.price_per_kg ?? '0');
-}
-
 export function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);

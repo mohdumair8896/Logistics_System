@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ModalPortal } from './ModalPortal';
 
@@ -227,79 +226,4 @@ export function ContextMenuShortcut({
 
 export function ContextMenuSeparator({ className }: { className?: string }) {
   return <div className={cn('my-1 h-px bg-[var(--border,#E6E4DF)]', className)} />;
-}
-
-export function ContextMenuLabel({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={cn('px-2.5 py-1 text-[10px] font-bold text-[var(--text-low)] uppercase tracking-wider', className)}>
-      {children}
-    </div>
-  );
-}
-
-export function ContextMenuSub({ children }: { children: React.ReactNode }) {
-  const [isOpen, setIsOpen] = React.useState(false);
-
-  return (
-    <div
-      className="relative"
-      onMouseEnter={() => setIsOpen(true)}
-      onMouseLeave={() => setIsOpen(false)}
-    >
-      {React.Children.map(children, (child) => {
-        if (!React.isValidElement(child)) return child;
-        return React.cloneElement(child, { isOpen, setIsOpen } as Record<string, unknown>);
-      })}
-    </div>
-  );
-}
-
-export function ContextMenuSubTrigger({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  isOpen?: boolean;
-}) {
-  return (
-    <div
-      className={cn(
-        'flex w-full cursor-pointer items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium hover:bg-[var(--surface-2)] text-[var(--text-high)]',
-        className
-      )}
-    >
-      <span>{children}</span>
-      <ChevronRight className="size-3.5 text-[var(--icon,#6B7280)] ml-2" />
-    </div>
-  );
-}
-
-export function ContextMenuSubContent({
-  children,
-  className,
-  isOpen,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  isOpen?: boolean;
-}) {
-  if (!isOpen) return null;
-
-  return (
-    <div
-      className={cn(
-        'absolute left-full top-0 min-w-[160px] -ml-1 rounded-xl border border-[var(--border)] bg-[var(--surface-1)] p-1.5 shadow-xl',
-        className
-      )}
-    >
-      {children}
-    </div>
-  );
 }

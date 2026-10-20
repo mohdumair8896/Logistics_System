@@ -1,4 +1,3 @@
-import React from 'react';
 import Link from 'next/link';
 import { Home, Search, Truck, Radio } from 'lucide-react';
 import type { Metadata } from 'next';

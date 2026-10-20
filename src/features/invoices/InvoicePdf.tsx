@@ -11,7 +11,6 @@
 //   - e-Way Bill number field
 //   - QR code equivalent (text-based for now)
 
-import React from 'react';
 import {
   Document, Page, Text, View, StyleSheet,
 } from '@react-pdf/renderer';

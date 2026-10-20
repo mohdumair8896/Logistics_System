@@ -60,5 +60,3 @@ function createDb(): Db {
 
 export const db = globalForDb.lmsDb ?? createDb();
 if (process.env.NODE_ENV !== 'production') globalForDb.lmsDb = db;
-
-export type DbClient = typeof db;

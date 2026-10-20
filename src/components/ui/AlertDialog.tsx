@@ -259,24 +259,6 @@ export function AlertDialogHeader({
   );
 }
 
-export function AlertDialogMedia({
-  className,
-  children,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={cn(
-        'flex size-11 items-center justify-center rounded-xl bg-red-500/10 text-red-600 mb-2',
-        className
-      )}
-      {...props}
-    >
-      {children}
-    </div>
-  );
-}
-
 export function AlertDialogTitle({
   className,
   children,

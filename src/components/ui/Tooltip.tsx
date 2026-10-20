@@ -15,18 +15,6 @@ export interface TooltipProps {
   delay?: number;
 }
 
-export function TooltipTrigger({
-  children,
-  className = '',
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div className={`inline-flex items-center ${className}`} {...props}>
-      {children}
-    </div>
-  );
-}
-
 export function Tooltip({
   title,
   description,

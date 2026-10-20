@@ -46,11 +46,6 @@ export const DEFAULT_TENANT: TenantProfile = {
   geography: 'NATIONAL',
 };
 
-export const PRESET_TENANTS: Record<string, TenantProfile> = {
-  DEFAULT: DEFAULT_TENANT,
-  ABC_TRANSPORT: DEFAULT_TENANT,
-};
-
 // ─── Full Master Navigation Taxonomy ─────────────────────────────────────────
 const MASTER_NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
   {
@@ -108,28 +103,4 @@ export function getTenantNavigation(tenant: TenantProfile): NavSection[] {
       return enabled.has(item.requiredModule);
     }),
   })).filter((sec) => sec.items.length > 0);
-}
-
-// ─── Route Entitlement Guard ─────────────────────────────────────────────────
-export function isRouteAllowed(pathname: string, tenant: TenantProfile): boolean {
-  const enabled = new Set(tenant.enabledModules || []);
-
-  const routeModuleMap: Record<string, string> = {
-    '/orders': 'TMS',
-    '/allocation': 'ALLOCATION',
-    '/warehouse': 'WAREHOUSE',
-    '/trips': 'TRIPS',
-    '/tracking': 'CORRIDOR_TRACKING',
-    '/track': 'CUSTOMER_PORTAL',
-    '/delivery': 'DELIVERY_POD',
-    '/invoices': 'INVOICING',
-    '/vehicles': 'FLEET',
-    '/drivers': 'FLEET',
-    '/leads': 'LEADS_CRM',
-    '/agent-ops': 'EXCEPTION_AGENT',
-  };
-
-  const required = routeModuleMap[pathname];
-  if (!required) return true;
-  return enabled.has(required);
 }

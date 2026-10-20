@@ -52,10 +52,6 @@ export const PERMISSIONS = {
 
 export type Permission = keyof typeof PERMISSIONS;
 
-export function isStaffRole(role: string): role is StaffRole {
-  return (STAFF_ROLES as readonly string[]).includes(role);
-}
-
 /** True if `role` may perform `permission`. Unknown roles may do nothing. */
 export function can(role: string | undefined | null, permission: Permission): boolean {
   return !!role && (PERMISSIONS[permission] as readonly string[]).includes(role);

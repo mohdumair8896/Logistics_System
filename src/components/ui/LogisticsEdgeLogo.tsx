@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface LogisticsEdgeLogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
   variant?: 'icon-only' | 'wordmark' | 'full';

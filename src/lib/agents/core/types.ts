@@ -9,13 +9,6 @@ export type AutonomyLevel = 0 | 1 | 2 | 3 | 4 | 5;
 // Level 4: Execute medium-risk (reschedule dock within window, reassign vehicle)
 // Level 5: High-value with Approval (freight adjustments, claims, credit notes, payments)
 
-export type ExceptionCategory =
-  | 'TRANSPORTATION'
-  | 'WAREHOUSE'
-  | 'DOCUMENTATION'
-  | 'FINANCIAL'
-  | 'CUSTOMER';
-
 export type ExceptionCode =
   // Transportation
   | 'DEPARTURE_DELAY'
